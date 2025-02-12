@@ -1,0 +1,23 @@
+.options-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border: none;
+  border-radius: 5px;
+  background-color: transparent;
+  transition: all .1s ease-in-out;
+}
+
+.options-btn:hover {
+  background-color: var(--background-transparent-1);
+}
+
+.options-btn .dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background-color: var(--background-1);
+}

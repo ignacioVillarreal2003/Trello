@@ -1,0 +1,531 @@
+/* Base button */
+.btn-base {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px 15px;
+  transition-duration: .15s;
+  transition-property: background-color, border-color, box-shadow, color;
+  transition-timing-function: ease-in;
+}
+
+  /* Size */
+.btn-base.size-tiny {
+  font-size: .75rem;
+  line-height: 1rem;
+}
+
+.btn-base.size-small {
+  font-size: .9rem;
+  line-height: 1.2rem;
+}
+
+.btn-base.size-medium {
+  font-size: 1.1rem;
+  line-height: 1.4rem;
+}
+
+.btn-base.size-large {
+  font-size: 1.4rem;
+  line-height: 1.5rem;
+}
+
+/* Radius */
+.btn-base.radius-small {
+  border-radius: 5px;
+}
+
+.btn-base.radius-medium {
+  border-radius: 10px;
+}
+
+.btn-base.radius-large {
+  border-radius: 15px;
+}
+
+/* Aspect */
+.btn-base.aspect-free {
+  width: 100%;
+}
+
+/* Color */
+/* SOLID */
+.btn-base.appearance-solid {}
+
+.btn-base.appearance-solid:focus {
+  position: relative;
+  outline: none;
+}
+
+.btn-base.appearance-solid.blue {
+  background-color: var(--color-blue-500);
+  color: white;
+  border-color: var(--color-blue-500);
+}
+
+.btn-base.appearance-solid.blue:hover {
+  background-color: var(--color-blue-400);
+}
+
+.btn-base.appearance-solid.blue:focus {
+  box-shadow: 0 0 0 .375rem var(--color-blue-transparent-300)
+}
+
+.btn-base.appearance-solid.grey {
+  background-color: var(--color-grey-500);
+  color: black;
+  border-color: var(--color-grey-500);
+}
+
+.btn-base.appearance-solid.grey:hover {
+  background-color: var(--color-grey-400);
+}
+
+.btn-base.appearance-solid.grey:focus {
+  box-shadow: 0 0 0 .375rem var(--color-grey-transparent-300)
+}
+
+.btn-base.appearance-solid.green {
+  background-color: var(--color-green-500);
+  color: white;
+  border-color: var(--color-green-500);
+}
+
+.btn-base.appearance-solid.green:hover {
+  background-color: var(--color-green-400);
+}
+
+.btn-base.appearance-solid.green:focus {
+  box-shadow: 0 0 0 .375rem var(--color-green-transparent-300)
+}
+
+.btn-base.appearance-solid.skyblue {
+  background-color: var(--color-skyblue-500);
+  color: white;
+  border-color: var(--color-skyblue-500);
+}
+
+.btn-base.appearance-solid.skyblue:hover {
+  background-color: var(--color-skyblue-400);
+}
+
+.btn-base.appearance-solid.skyblue:focus {
+  box-shadow: 0 0 0 .375rem var(--color-skyblue-transparent-300)
+}
+
+.btn-base.appearance-solid.red {
+  background-color: var(--color-red-500);
+  color: white;
+  border-color: var(--color-red-500);
+}
+
+.btn-base.appearance-solid.red:hover {
+  background-color: var(--color-red-400);
+}
+
+.btn-base.appearance-solid.red:focus {
+  box-shadow: 0 0 0 .375rem var(--color-red-transparent-300)
+}
+
+.btn-base.appearance-solid.yellow {
+  background-color: var(--color-yellow-500);
+  color: white;
+  border-color: var(--color-yellow-500);
+}
+
+.btn-base.appearance-solid.yellow:hover {
+  background-color: var(--color-yellow-400);
+}
+
+.btn-base.appearance-solid.yellow:focus {
+  box-shadow: 0 0 0 .375rem var(--color-yellow-transparent-300)
+}
+
+.btn-base.appearance-solid.orange {
+  background-color: var(--color-orange-500);
+  color: white;
+  border-color: var(--color-orange-500);
+}
+
+.btn-base.appearance-solid.orange:hover {
+  background-color: var(--color-orange-400);
+}
+
+.btn-base.appearance-solid.orange:focus {
+  box-shadow: 0 0 0 .375rem var(--color-orange-transparent-300)
+}
+
+/* OUTLINE */
+.btn-base.appearance-outline {
+  border-style: solid;
+  border-width: .0625rem;
+}
+
+.btn-base.appearance-outline.blue {
+  background-color: var(--color-blue-200);
+  border-color: var(--color-blue-500);
+  color: var(--color-blue-500);
+}
+
+.btn-base.appearance-outline.blue:hover {
+  background-color: var(--color-blue-transparent-200);
+}
+
+.btn-base.appearance-outline.blue:focus {
+  box-shadow: 0 0 0 .375rem var(--color-blue-transparent-300)
+}
+
+.btn-base.appearance-outline.grey {
+  background-color: var(--color-grey-200);
+  border-color: var(--color-grey-500);
+  color: var(--color-grey-500);
+}
+
+.btn-base.appearance-outline.grey:hover {
+  background-color: var(--color-grey-transparent-200);
+}
+
+.btn-base.appearance-outline.grey:focus {
+  box-shadow: 0 0 0 .375rem var(--color-grey-transparent-300)
+}
+
+.btn-base.appearance-outline.green {
+  background-color: var(--color-green-200);
+  border-color: var(--color-green-500);
+  color: var(--color-green-500);
+}
+
+.btn-base.appearance-outline.green:hover {
+  background-color: var(--color-green-transparent-200);
+}
+
+.btn-base.appearance-outline.green:focus {
+  box-shadow: 0 0 0 .375rem var(--color-green-transparent-300)
+}
+
+.btn-base.appearance-outline.skyblue {
+  background-color: var(--color-skyblue-200);
+  border-color: var(--color-skyblue-500);
+  color: var(--color-skyblue-500);
+}
+
+.btn-base.appearance-outline.skyblue:hover {
+  background-color: var(--color-skyblue-transparent-200);
+}
+
+.btn-base.appearance-outline.skyblue:focus {
+  box-shadow: 0 0 0 .375rem var(--color-skyblue-transparent-300)
+}
+
+.btn-base.appearance-outline.red {
+  background-color: var(--color-red-200);
+  border-color: var(--color-red-500);
+  color: var(--color-red-500);
+}
+
+.btn-base.appearance-outline.red:hover {
+  background-color: var(--color-red-transparent-200);
+}
+
+.btn-base.appearance-outline.red:focus {
+  box-shadow: 0 0 0 .375rem var(--color-red-transparent-300)
+}
+
+.btn-base.appearance-outline.yellow {
+  background-color: var(--color-yellow-200);
+  border-color: var(--color-yellow-500);
+  color: var(--color-yellow-500);
+}
+
+.btn-base.appearance-outline.yellow:hover {
+  background-color: var(--color-yellow-transparent-200);
+}
+
+.btn-base.appearance-outline.yellow:focus {
+  box-shadow: 0 0 0 .375rem var(--color-yellow-transparent-300)
+}
+
+.btn-base.appearance-outline.orange {
+  background-color: var(--color-orange-200);
+  border-color: var(--color-orange-500);
+  color: var(--color-orange-500);
+}
+
+.btn-base.appearance-outline.orange:hover {
+  background-color: var(--color-orange-transparent-200);
+}
+
+.btn-base.appearance-outline.orange:focus {
+  box-shadow: 0 0 0 .375rem var(--color-orange-transparent-300)
+}
+
+/* LIGHT */
+.btn-base.appearance-light {}
+
+.btn-base.appearance-light.blue {
+  color: var(--color-blue-500);
+}
+
+.btn-base.appearance-light.blue:hover {
+  background-color: var(--color-blue-transparent-200);
+}
+
+.btn-base.appearance-light.grey {
+  color: var(--color-grey-500);
+}
+
+.btn-base.appearance-light.grey:hover {
+  background-color: var(--color-grey-transparent-400);
+}
+
+.btn-base.appearance-light.green {
+  color: var(--color-green-500);
+}
+
+.btn-base.appearance-light.green:hover {
+  background-color: var(--color-green-transparent-400);
+}
+
+.btn-base.appearance-light.skyblue {
+  color: var(--color-skyblue-500);
+}
+
+.btn-base.appearance-light.skyblue:hover {
+  background-color: var(--color-skyblue-transparent-400);
+}
+
+.btn-base.appearance-light.red {
+  color: var(--color-red-500);
+}
+
+.btn-base.appearance-light.red:hover {
+  background-color: var(--color-red-transparent-400);
+}
+
+.btn-base.appearance-light.yellow {
+  color: var(--color-yellow-500);
+}
+
+.btn-base.appearance-light.yellow:hover {
+  background-color: var(--color-yellow-transparent-400);
+}
+
+.btn-base.appearance-light.orange {
+  color: var(--color-orange-500);
+}
+
+.btn-base.appearance-light.orange:hover {
+  background-color: var(--color-orange-transparent-400);
+}
+
+/* BORDERED */
+.btn-base.appearance-bordered {
+  border-style: solid;
+  border-width: 2px;
+}
+
+.btn-base.appearance-bordered:hover {
+  opacity: 0.8;
+}
+
+.btn-base.appearance-bordered.blue {
+  color: var(--color-blue-500);
+  border-color: var(--color-blue-600);
+}
+
+.btn-base.appearance-bordered.grey {
+  color: var(--color-grey-500);
+  border-color: var(--color-grey-600);
+}
+
+.btn-base.appearance-bordered.green {
+  color: var(--color-green-500);
+  border-color: var(--color-green-600);
+}
+
+.btn-base.appearance-bordered.skyblue {
+  color: var(--color-skyblue-500);
+  border-color: var(--color-skyblue-600);
+}
+
+.btn-base.appearance-bordered.red {
+  color: var(--color-red-500);
+  border-color: var(--color-red-600);
+}
+
+.btn-base.appearance-bordered.yellow {
+  color: var(--color-yellow-500);
+  border-color: var(--color-yellow-600);
+}
+
+.btn-base.appearance-bordered.orange {
+  color: var(--color-orange-500);
+  border-color: var(--color-orange-600);
+}
+
+/* FLAT */
+.btn-base.appearance-flat {}
+
+.btn-base.appearance-flat:hover {
+  opacity: 0.8;
+}
+
+.btn-base.appearance-flat.blue {
+  color: var(--color-blue-500);
+  background-color: var(--color-blue-transparent-400);
+}
+
+.btn-base.appearance-flat.grey {
+  color: var(--color-grey-500);
+  background-color: var(--color-grey-transparent-400);
+}
+
+.btn-base.appearance-flat.green {
+  color: var(--color-green-500);
+  background-color: var(--color-green-transparent-400);
+}
+
+.btn-base.appearance-flat.skyblue {
+  color: var(--color-skyblue-500);
+  background-color: var(--color-skyblue-transparent-400);
+}
+
+.btn-base.appearance-flat.red {
+  color: var(--color-red-500);
+  background-color: var(--color-red-transparent-400);
+}
+
+.btn-base.appearance-flat.yellow {
+  color: var(--color-yellow-500);
+  background-color: var(--color-yellow-transparent-400);
+}
+
+.btn-base.appearance-flat.orange {
+  color: var(--color-orange-500);
+  background-color: var(--color-orange-transparent-400);
+}
+
+/* GHOST */
+.btn-base.appearance-ghost {
+  border-style: solid;
+  border-width: 2px;
+}
+
+.btn-base.appearance-ghost.blue {
+  color: var(--color-blue-500);
+  border-color: var(--color-blue-600);
+}
+
+.btn-base.appearance-ghost.blue:hover {
+  color: white;
+  background-color: var(--color-blue-600);
+}
+
+.btn-base.appearance-ghost.grey {
+  color: var(--color-grey-500);
+  border-color: var(--color-grey-600);
+}
+
+.btn-base.appearance-ghost.grey:hover {
+  color: white;
+  background-color: var(--color-grey-600);
+}
+
+.btn-base.appearance-ghost.green {
+  color: var(--color-green-500);
+  border-color: var(--color-green-600);
+}
+
+.btn-base.appearance-ghost.green:hover {
+  color: white;
+  background-color: var(--color-green-600);
+}
+
+.btn-base.appearance-ghost.skyblue {
+  color: var(--color-skyblue-500);
+  border-color: var(--color-skyblue-600);
+}
+
+.btn-base.appearance-ghost.skyblue:hover {
+  color: white;
+  background-color: var(--color-skyblue-600);
+}
+
+.btn-base.appearance-ghost.red {
+  color: var(--color-red-500);
+  border-color: var(--color-red-600);
+}
+
+.btn-base.appearance-ghost.red:hover {
+  color: white;
+  background-color: var(--color-red-600);
+}
+
+.btn-base.appearance-ghost.yellow {
+  color: var(--color-yellow-500);
+  border-color: var(--color-yellow-600);
+}
+
+.btn-base.appearance-ghost.yellow:hover {
+  color: white;
+  background-color: var(--color-yellow-600);
+}
+
+.btn-base.appearance-ghost.orange {
+  color: var(--color-orange-500);
+  border-color: var(--color-orange-600);
+}
+
+.btn-base.appearance-ghost.orange:hover {
+  color: white;
+  background-color: var(--color-orange-600);
+}
+
+/* SHADOW */
+.btn-base.appearance-shadow {}
+
+.btn-base.appearance-shadow:hover {
+  opacity: 0.9;
+}
+
+.btn-base.appearance-shadow.blue {
+  color: white;
+  background-color: var(--color-blue-500);
+  box-shadow: 0 10px 15px -3px var(--color-blue-300), 0 4px 6px -4px var(--color-blue-300);
+}
+
+.btn-base.appearance-shadow.grey {
+  color: white;
+  background-color: var(--color-grey-500);
+  box-shadow: 0 10px 15px -3px var(--color-grey-300), 0 4px 6px -4px var(--color-grey-300);
+}
+
+.btn-base.appearance-shadow.green {
+  color: white;
+  background-color: var(--color-green-500);
+  box-shadow: 0 10px 15px -3px var(--color-green-300), 0 4px 6px -4px var(--color-green-300);
+}
+
+.btn-base.appearance-shadow.skyblue {
+  color: white;
+  background-color: var(--color-skyblue-500);
+  box-shadow: 0 10px 15px -3px var(--color-skyblue-300), 0 4px 6px -4px var(--color-skyblue-300);
+}
+
+.btn-base.appearance-shadow.red {
+  color: white;
+  background-color: var(--color-red-500);
+  box-shadow: 0 10px 15px -3px var(--color-red-300), 0 4px 6px -4px var(--color-red-300);
+}
+
+.btn-base.appearance-shadow.yellow {
+  color: white;
+  background-color: var(--color-yellow-500);
+  box-shadow: 0 10px 15px -3px var(--color-yellow-300), 0 4px 6px -4px var(--color-yellow-300);
+}
+
+.btn-base.appearance-shadow.orange {
+  color: white;
+  background-color: var(--color-orange-500);
+  box-shadow: 0 10px 15px -3px var(--color-orange-300), 0 4px 6px -4px var(--color-orange-300);
+}

@@ -1,0 +1,56 @@
+<section class="create-board-modal">
+  <form class="create-board-modal__form" [formGroup]="createBoardForm" (ngSubmit)="onSubmitCreateBoard()">
+    <fieldset class="create-board-modal__field">
+      <legend class="create-board-modal__label">Select a title</legend>
+      <input
+        formControlName="title"
+        class="input-base appearance-outline aspect-free size-small radius-small blue"
+        placeholder="Enter board title"
+      />
+    </fieldset>
+
+    <fieldset class="create-board-modal__field">
+      <legend class="create-board-modal__label">Choose a theme color</legend>
+      <ul class="create-board-modal__color-list">
+        <li class="create-board-modal__color-item" *ngFor="let color of colors; let i = index">
+          <button
+            type="button"
+            class="color-btn"
+            (click)="selectColor(i)"
+            [ngStyle]="{'background-color': color}"
+            [class.btn-color-selected]="i === selectedColor">
+          </button>
+        </li>
+      </ul>
+    </fieldset>
+
+    <fieldset class="create-board-modal__field">
+      <legend class="create-board-modal__label">Choose an icon</legend>
+      <ul class="create-board-modal__icon-list">
+        <li class="create-board-modal__icon-item" *ngFor="let icon of icons; let i = index">
+          <button
+            type="button"
+            class="icon-btn"
+            (click)="selectIcon(i)"
+            [class.btn-icon-selected]="i === selectedIcon">
+            <img class="icon-btn__image" [src]="iconPath + icon" [alt]="icon" />
+          </button>
+        </li>
+      </ul>
+    </fieldset>
+
+    <footer class="create-board-modal__actions">
+      <button
+        type="submit"
+        class="btn-base appearance-solid aspect-free size-medium radius-small blue">
+        Create board
+      </button>
+      <button
+        type="button"
+        (click)="onClose()"
+        class="btn-base appearance-light aspect-free size-medium radius-small red">
+        Close
+      </button>
+    </footer>
+  </form>
+</section>

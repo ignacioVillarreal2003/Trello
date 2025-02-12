@@ -1,0 +1,9 @@
+<header class="{{type}}">
+  <a class="link-wrapper" routerLink="/board-dashboard">
+    <img class="logo" *ngIf="type == 'normal'" src="/icons/trello-icon-light.svg" alt="Trello">
+    <img class="logo" *ngIf="type == 'opaque'" src="/icons/trello-icon-dark.svg" alt="Trello">
+    <h2 class="title">Trello</h2>
+  </a>
+  <button class="btn-configuration" (click)="switchUserMenu()">{{username?.charAt(0)}}</button>
+</header>
+<app-user-menu-modal (close)="switchUserMenu()" *ngIf="isOpenUserMenu"></app-user-menu-modal>

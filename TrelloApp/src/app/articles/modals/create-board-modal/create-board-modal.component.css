@@ -1,0 +1,95 @@
+.create-board-modal {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--background-transparent-1);
+  position: fixed;
+  top: 0;
+  left: 0;
+  backdrop-filter: blur(5px);
+  padding: 10px;
+}
+
+.create-board-modal__form {
+  width: 100%;
+  max-width: 600px;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  background-color: var(--background-1);
+  padding: 30px;
+  gap: 30px;
+  border-radius: 5px;
+}
+
+.create-board-modal__field {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: none;
+}
+
+.create-board-modal__label {
+  width: 100%;
+  font-size: clamp(16px, 5vw, 22px);
+  margin-bottom: 10px;
+  color: var(--text-1);
+}
+
+.create-board-modal__color-list, .create-board-modal__icon-list {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  padding: 0;
+  gap: 20px;
+}
+
+.create-board-modal__color-item, .create-board-modal__icon-item {
+  width: 60px;
+  height: 60px;
+}
+
+.color-btn, .icon-btn {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: transparent;
+}
+
+.color-btn {
+  border-radius: 50%;
+}
+
+.color-btn:hover, .icon-btn:hover {
+  opacity: 0.8;
+}
+
+.btn-color-selected, .btn-icon-selected {
+  opacity: 0.6;
+}
+
+.icon-btn__image {
+  width: 100%;
+  height: 100%;
+}
+
+.create-board-modal__actions {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+@media (max-width: 900px) {
+  .create-board-modal__color-list, .create-board-modal__icon-list {
+    gap: 10px;
+  }
+
+  .create-board-modal__color-item, .create-board-modal__icon-item {
+    width: 40px;
+    height: 40px;
+  }
+}

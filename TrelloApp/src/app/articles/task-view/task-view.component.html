@@ -1,0 +1,84 @@
+<div class="task-view">
+  <nav class="task-options">
+    <button class="btn-option" (click)="mode = 'details'">Details</button>
+    <button class="btn-option" (click)="mode = 'comments'">Comments</button>
+    <button class="btn-option" (click)="mode = 'labels'">Labels</button>
+    <button class="btn-option" (click)="mode = 'assignations'">Assignations</button>
+  </nav>
+
+  <section class="task-details" *ngIf="mode == 'details'">
+    <form class="details-form" [formGroup]="updateTaskForm">
+      <input
+        formControlName="title"
+        class="title-task"
+        placeholder="Task Title">
+      <textarea
+        formControlName="description"
+        class="description-task"
+        placeholder="Task Description"></textarea>
+    </form>
+  </section>
+
+  <section class="task-comments" *ngIf="mode == 'comments'">
+    <form class="comment-form">
+      <input
+        class="input-base appearance-outline aspect-free size-small radius-none blue"
+        placeholder="Add a comment">
+      <button class="btn-base appearance-outline size-small radius-small blue">Send</button>
+    </form>
+    <ul class="comment-list">
+      <li class="comment-item">
+        <button class="btn-delete-comment">
+          <h3 class="title-comment">Comment title Lorem ipsum dolor sit amet, consectetur adipisicing elit. Adipisci aperiam at atque culpa cum cumque delectus deleniti dolores doloribus ducimus earum eius esse facere iste iure laboriosam laborum laudantium magni maiores modi mollitia nemo officia omnis optio pariatur, perspiciatis placeat quos similique sit temporibus totam ullam unde vero. Aliquam, fugiat.</h3>
+          <p class="date-comment">{{Date().slice(0,16)}}</p>
+        </button>
+      </li>
+    </ul>
+  </section>
+
+  <section class="task-labels" *ngIf="mode == 'labels'">
+    <form class="label-form">
+      <input
+        class="input-base appearance-outline aspect-free size-small radius-none blue"
+        placeholder="Add a label">
+      <ul class="label-color-list">
+        <li class="label-color-item" *ngFor="let color of colors">
+          <button [class]="['btn-label-color', color]" [ngStyle]="{'background-color': color}"></button>
+        </li>
+      </ul>
+      <button class="btn-base appearance-outline size-small radius-small blue aspect-free">Send</button>
+    </form>
+    <ul class="label-list">
+      <li *ngFor="let color of colors">
+        <button class="btn-base aspect-free size-small radius-small" [ngStyle]="{'background-color': color, 'color': 'white'}">Title 1</button>
+      </li>
+    </ul>
+  </section>
+
+  <section class="task-assignations" *ngIf="mode == 'assignations'">
+    <form class="assignation-form">
+      <input
+        class="input-base appearance-outline aspect-free size-small radius-none blue"
+        placeholder="Assign a user">
+      <button class="btn-base appearance-outline size-small radius-none blue">Send</button>
+    </form>
+    <ul class="assignation-list">
+      <li class="assignation-item">
+        <button class="btn-base appearance-light aspect-free size-medium radius-small red">Sample User</button>
+      </li>
+    </ul>
+  </section>
+
+  <footer class="task-actions">
+    <button
+      type="button"
+      class="btn-base appearance-solid aspect-free size-medium radius-small red">
+      Delete Task
+    </button>
+    <button
+      type="button"
+      class="btn-base appearance-light aspect-free size-medium radius-small red">
+      Close
+    </button>
+  </footer>
+</div>

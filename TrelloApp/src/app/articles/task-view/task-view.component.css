@@ -1,0 +1,156 @@
+.task-view {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 10px;
+}
+
+.task-options {
+  width: 100%;
+  display: flex;
+  gap: 5px;
+}
+
+.btn-option {
+  width: 100%;
+  border-radius: 5px;
+  padding: 10px;
+  background-color: var(--color-blue-500);
+  color: white;
+  transition: all .2s ease-in-out;
+  border: none;
+}
+
+.btn-option:hover {
+  background-color: var(--color-blue-400);
+}
+
+.btn-option:focus {
+  box-shadow: 0 0 0 3px var(--color-blue-transparent-300)
+}
+
+.task-details, .task-comments, .task-labels, .task-assignations {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
+.details-form, .comment-form, .label-form, .assignation-form {
+  display: flex;
+  width: 100%;
+  gap: 20px;
+}
+
+.label-form {
+  flex-direction: column;
+}
+
+.details-form {
+  flex-direction: column;
+  height: 100%;
+}
+
+.comment-list, .label-list, .assignation-list {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  gap: 10px;
+}
+
+.comment-list::-webkit-scrollbar, .label-list::-webkit-scrollbar, .assignation-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.comment-list::-webkit-scrollbar-thumb, .label-list::-webkit-scrollbar-thumb, .assignation-list::-webkit-scrollbar-thumb {
+  background-color: #cfcfcf;
+  border-radius: 10px;
+}
+
+.comment-list::-webkit-scrollbar-thumb:hover, .label-list::-webkit-scrollbar-thumb:hover, .assignation-list::-webkit-scrollbar-thumb:hover {
+  background-color: #aeaeae;
+}
+
+.title-task, .description-task {
+  width: 100%;
+  padding: 10px;
+  font-size: 20px;
+  border-radius: 5px;
+  border: none;
+  background-color: transparent;
+}
+
+.title-task:hover, .description-task:hover {
+  background-color: var(--color-blue-100);
+}
+
+.title-task:focus-within, .description-task:focus-within {
+  outline: 2px solid var(--color-blue-500);
+}
+
+.description-task {
+  height: 100%;
+  font-size: 16px;
+}
+
+.task-actions {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+}
+
+.comment-item {
+  width: 100%;
+}
+
+.btn-delete-comment {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: none;
+  background: none;
+  padding: 10px;
+  gap: 5px;
+}
+
+.btn-delete-comment:hover {
+  background-color: var(--color-red-transparent-400);
+}
+
+.title-comment {
+  font-size: 16px;
+  text-align: start;
+  color: var(--text-1);
+}
+
+.date-comment {
+  font-size: 12px;
+  color: var(--text-1);
+}
+
+.label-color-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  justify-content: space-between;
+}
+
+.label-color-item {
+  flex: 1;
+  max-width: 80px;
+  aspect-ratio: 1 / 1;
+}
+
+.btn-label-color {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 5px;
+}

@@ -1,0 +1,27 @@
+<div class="auth">
+  <div class="container">
+    <header>
+      <img class="logo" src="./icons/trello-icon-light.svg" alt="Trello Icon">
+      <h1 class="title">Trello</h1>
+    </header>
+
+    <h2 class="subtitle" *ngIf="isLogin">Log in to continue</h2>
+    <h2 class="subtitle" *ngIf="!isLogin">Sign up to continue</h2>
+
+    <form class="form-wrapper" *ngIf="isLogin" [formGroup]="formLogin" (ngSubmit)="onSubmitLogin()">
+      <input class="input-base appearance-outline aspect-free blue radius-small size-small" formControlName="email" placeholder="Enter your email">
+      <input class="input-base appearance-outline aspect-free blue radius-small size-small" formControlName="password" type="password" placeholder="Enter your password">
+      <button class="btn-base aspect-free appearance-solid radius-small size-small blue">Continue</button>
+    </form>
+
+    <form class="form-wrapper" *ngIf="!isLogin" [formGroup]="formRegister" (ngSubmit)="onSubmitRegister()">
+      <input class="input-base appearance-outline aspect-free blue radius-small size-small" formControlName="email" placeholder="Enter your email">
+      <input class="input-base appearance-outline aspect-free blue radius-small size-small" formControlName="password" type="password" placeholder="Enter your password">
+      <input class="input-base appearance-outline aspect-free blue radius-small size-small" formControlName="username" placeholder="Enter your username">
+      <button class="btn-base aspect-free appearance-solid radius-small size-small blue" type="submit">Sign up</button>
+    </form>
+
+    <a *ngIf="isLogin" (click)="isLogin=!isLogin">Create an account</a>
+    <a *ngIf="!isLogin" (click)="isLogin=!isLogin">Log in</a>
+  </div>
+</div>

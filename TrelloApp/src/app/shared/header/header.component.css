@@ -1,0 +1,44 @@
+header {
+  width: 100%;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--background-1);
+}
+
+.link-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+}
+
+.title {
+  font-size: clamp(20px, 5vw, 28px);
+  color: var(--color-blue-500);
+}
+
+.btn-configuration {
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-blue-500);
+  font-size: 26px;
+  border-radius: 50%;
+  border: none;
+  color: white;
+}
+
+.opaque {
+  background-color: var(--background-transparent-3);
+}
+
+.opaque h2 {
+  color: white;
+}

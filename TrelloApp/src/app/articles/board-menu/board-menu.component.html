@@ -1,0 +1,24 @@
+<div class="board-menu">
+  <section class="board-menu-backgrounds">
+    <ul class="background-list">
+      <li class="background-item" *ngFor="let background of backgrounds">
+        <button class="btn-board-background">
+          <img src="{{background}}" alt="{{background}}">
+        </button>
+      </li>
+    </ul>
+  </section>
+
+  <footer class="board-menu-actions">
+    <button
+      type="button"
+      class="btn-base appearance-solid aspect-free size-medium radius-small red">
+      Delete Board
+    </button>
+    <button
+      type="button"
+      class="btn-base appearance-light aspect-free size-medium radius-small red">
+      Close
+    </button>
+  </footer>
+</div>

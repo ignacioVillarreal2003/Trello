@@ -1,0 +1,17 @@
+<app-header></app-header>
+<div class="board-dashboard">
+  <button class="btn-base appearance-solid aspect-free radius-small blue size-large" (click)="switchCreateBoard()">Create board</button>
+  <ul class="board-list">
+    <li class="board-item" *ngFor="let board of boards">
+      <button class="board-button" (click)="openBoard(board.id)">
+        <div class="icon-wrapper" [ngStyle]="{ 'background-color': board.theme }">
+          <img class="board-icon" src="./icons/{{board.icon}}" alt="Board icon">
+        </div>
+        <div class="title-wrapper">
+          <h3 class="board-title">{{board.title}}</h3>
+        </div>
+      </button>
+    </li>
+  </ul>
+</div>
+<app-create-board-modal *ngIf="isOpenCreateBoard" (close)="switchCreateBoard()"></app-create-board-modal>

@@ -1,0 +1,21 @@
+.close-btn {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: transparent;
+  border: none;
+  transition: all .1s ease-in-out;
+  border-radius: 5px;
+}
+
+.close-btn:hover {
+  background-color: var(--background-transparent-3);
+}
+
+.close-btn img {
+  width: 80%;
+  height: 80%;
+}
+

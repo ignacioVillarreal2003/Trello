@@ -1,0 +1,242 @@
+/* Base button */
+.input-base {
+  background-color: transparent;
+  border: none;
+  padding: 10px;
+  transition-duration: .15s;
+  transition-property: background-color, border-color, box-shadow, color;
+  transition-timing-function: ease-in;
+  outline: none;
+}
+
+/* Base textarea */
+.textarea-base {
+  resize: none;
+  background-color: transparent;
+  border: none;
+  padding: 10px;
+  transition-duration: .15s;
+  transition-property: background-color, border-color, box-shadow, color;
+  transition-timing-function: ease-in;
+  outline: none;
+}
+
+/* Size */
+.input-base.size-tiny, .textarea-base.size-tiny {
+  font-size: .6rem;
+  line-height: .85rem;
+}
+
+.input-base.size-small, .textarea-base.size-small {
+  font-size: 0.85rem;
+  line-height: 1rem;
+}
+
+.input-base.size-medium, .textarea-base.size-medium {
+  font-size: 1rem;
+  line-height: 1.2rem;
+}
+
+.input-base.size-large, .textarea-base.size-large {
+  font-size: 1.2rem;
+  line-height: 1.3rem;
+}
+
+/* Radius */
+.input-base.radius-small, .textarea-base.radius-small {
+  border-radius: 3px;
+}
+
+.input-base.radius-medium, .textarea-base.radius-medium {
+  border-radius: 5px;
+}
+
+.input-base.radius-large, .textarea-base.radius-large {
+  border-radius: 8px;
+}
+
+/* Aspect */
+.input-base.aspect-free, .textarea-base.aspect-free {
+  width: 100%;
+}
+
+/* Color */
+/* SOLID */
+.input-base.appearance-solid, .textarea-base.appearance-solid {
+  border-style: solid;
+  border-width: 2px;
+}
+
+.input-base.appearance-solid.blue, .textarea-base.appearance-solid.blue {
+  border-color: var(--color-blue-500);
+}
+
+.input-base.appearance-solid.blue:hover, .textarea-base.appearance-solid.blue:hover {
+  background-color: var(--color-blue-transparent-100);
+}
+
+.input-base.appearance-solid.blue:focus-within, .textarea-base.appearance-solid.blue:focus-within {
+  border-color: var(--color-blue-300);
+}
+
+.input-base.appearance-solid.red, .textarea-base.appearance-solid.red {
+  border-color: var(--color-red-500);
+}
+
+.input-base.appearance-solid.red:hover, .textarea-base.appearance-solid.red:hover {
+  background-color: var(--color-red-transparent-100);
+}
+
+.input-base.appearance-solid.red:focus-within, .textarea-base.appearance-solid.red:focus-within {
+  border-color: var(--color-red-300);
+}
+
+.input-base.appearance-solid.green, .textarea-base.appearance-solid.green {
+  border-color: var(--color-green-500);
+}
+
+.input-base.appearance-solid.green:hover, .textarea-base.appearance-solid.green:hover {
+  background-color: var(--color-green-transparent-100);
+}
+
+.input-base.appearance-solid.green:focus-within, .textarea-base.appearance-solid.green:focus-within {
+  border-color: var(--color-green-300);
+}
+
+.input-base.appearance-solid.orange, .textarea-base.appearance-solid.orange {
+  border-color: var(--color-orange-500);
+}
+
+.input-base.appearance-solid.orange:hover, .textarea-base.appearance-solid.orange:hover {
+  background-color: var(--color-orange-transparent-100);
+}
+
+.input-base.appearance-solid.orange:focus-within, .textarea-base.appearance-solid.orange:focus-within {
+  border-color: var(--color-orange-300);
+}
+
+.input-base.appearance-solid.yellow, .textarea-base.appearance-solid.yellow {
+  border-color: var(--color-yellow-500);
+}
+
+.input-base.appearance-solid.yellow:hover, .textarea-base.appearance-solid.yellow:hover {
+  background-color: var(--color-yellow-transparent-100);
+}
+
+.input-base.appearance-solid.yellow:focus-within, .textarea-base.appearance-solid.yellow:hover {
+  border-color: var(--color-yellow-300);
+}
+
+.input-base.appearance-solid.skyblue, .textarea-base.appearance-solid.skyblue {
+  border-color: var(--color-skyblue-500);
+}
+
+.input-base.appearance-solid.skyblue:hover, .textarea-base.appearance-solid.skyblue:hover {
+  background-color: var(--color-skyblue-transparent-100);
+}
+
+.input-base.appearance-solid.skyblue:focus-within, .textarea-base.appearance-solid.skyblue:focus-within {
+  border-color: var(--color-skyblue-300);
+}
+
+.input-base.appearance-solid.grey, .textarea-base.appearance-solid.grey {
+  border-color: var(--color-grey-500);
+}
+
+.input-base.appearance-solid.grey:hover, .textarea-base.appearance-solid.grey:hover {
+  background-color: var(--color-grey-transparent-100);
+}
+
+.input-base.appearance-solid.grey:focus-within, .textarea-base.appearance-solid.grey:focus-within {
+  border-color: var(--color-grey-300);
+}
+
+/* OUTLINE */
+.input-base.appearance-outline, .textarea-base.appearance-outline {
+  border-style: solid;
+  border-width: 2px;
+}
+
+.input-base.appearance-outline.blue, .textarea-base.appearance-outline.blue {
+  border-color: var(--color-blue-500);
+}
+
+.input-base.appearance-outline.blue:hover, .textarea-base.appearance-outline.blue:hover {
+  outline: 5px solid var(--color-blue-200);
+}
+
+.input-base.appearance-outline.blue:focus-within, .textarea-base.appearance-outline.blue:focus-within {
+  background-color: var(--color-blue-50);
+}
+
+.input-base.appearance-outline.red, .textarea-base.appearance-outline.red {
+  border-color: var(--color-red-500);
+}
+
+.input-base.appearance-outline.red:hover, .textarea-base.appearance-outline.red:hover {
+  outline: 5px solid var(--color-red-200);
+}
+
+.input-base.appearance-outline.red:focus-within, .textarea-base.appearance-outline.red:focus-within {
+  background-color: var(--color-red-50);
+}
+
+.input-base.appearance-outline.green, .textarea-base.appearance-outline.green {
+  border-color: var(--color-green-500);
+}
+
+.input-base.appearance-outline.green:hover, .textarea-base.appearance-outline.green:hover {
+  outline: 5px solid var(--color-green-200);
+}
+
+.input-base.appearance-outline.green:focus-within, .textarea-base.appearance-outline.green:focus-within {
+  background-color: var(--color-green-50);
+}
+
+.input-base.appearance-outline.skyblue, .textarea-base.appearance-outline.skyblue {
+  border-color: var(--color-skyblue-500);
+}
+
+.input-base.appearance-outline.skyblue:hover, .textarea-base.appearance-outline.skyblue:hover {
+  outline: 5px solid var(--color-skyblue-200);
+}
+
+.input-base.appearance-outline.skyblue:focus-within, .textarea-base.appearance-outline.skyblue:focus-within {
+  background-color: var(--color-skyblue-50);
+}
+
+.input-base.appearance-outline.yellow, .textarea-base.appearance-outline.yellow {
+  border-color: var(--color-yellow-500);
+}
+
+.input-base.appearance-outline.yellow:hover, .textarea-base.appearance-outline.yellow:hover {
+  outline: 5px solid var(--color-yellow-200);
+}
+
+.input-base.appearance-outline.yellow:focus-within, .textarea-base.appearance-outline.yellow:hover {
+  background-color: var(--color-yellow-50);
+}
+
+.input-base.appearance-outline.orange, .textarea-base.appearance-outline.orange {
+  border-color: var(--color-orange-500);
+}
+
+.input-base.appearance-outline.orange:hover, .textarea-base.appearance-outline.orange:hover {
+  outline: 5px solid var(--color-orange-200);
+}
+
+.input-base.appearance-outline.orange:focus-within, .textarea-base.appearance-outline.orange:focus-within {
+  background-color: var(--color-orange-50);
+}
+
+.input-base.appearance-outline.grey, .textarea-base.appearance-outline.grey {
+  border-color: var(--color-grey-500);
+}
+
+.input-base.appearance-outline.grey:hover, .textarea-base.appearance-outline.grey:hover {
+  outline: 5px solid var(--color-grey-200);
+}
+
+.input-base.appearance-outline.grey:focus-within, .textarea-base.appearance-outline.grey:focus-within {
+  background-color: var(--color-grey-50);
+}
