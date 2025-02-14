@@ -1,29 +1,49 @@
-<div class="board-view" [ngStyle]="{'background-image': 'url(./backgrounds/background-7.svg)'}">
-  <app-header type="opaque"></app-header>
-  <div class="content">
-    <div class="board-header">
-      <input class="input-board-title" value="Board's title" placeholder="Board's title">
+<div class="board-view">
+  <app-header></app-header>
+
+  <main class="board-content background-1">
+    <header class="board-header">
+      <input
+        class="board-title-input"
+        type="text"
+        value="Board's title"
+        placeholder="Board's title"
+      />
       <app-options-btn (click)="switchBoardMenu()"></app-options-btn>
-    </div>
-    <ul class="list-list">
-      <li class="list-item" *ngFor="let list of lists">
-        <div class="list-header">
-          <input class="input-list-title" [value]="list.title">
-          <app-close-btn></app-close-btn>
-        </div>
-        <ul class="task-list scrollable">
-          <li>
-            <button class="btn-task" (click)="switchTaskView(1)">Task 1</button>
-          </li>
-        </ul>
-        <button class="btn-base aspect-free appearance-solid radius-small size-small blue" (click)="switchCreateTask(1)">Add task</button>
-      </li>
-      <li class="add-list">
-        <button class="btn-add-list" (click)="switchCreateList()">+ Add list</button>
-      </li>
-    </ul>
-  </div>
+    </header>
+
+    <section class="lists-section">
+      <ul class="lists-container">
+        <li class="board-list">
+          <header class="list-header">
+            <input
+              class="list-title-input"
+              type="text"
+              value="list title"
+              placeholder="List title"
+            />
+            <app-close-btn></app-close-btn>
+          </header>
+
+          <ul class="task-list">
+            <li>
+              <button class="task-button">
+                task name
+              </button>
+            </li>
+          </ul>
+
+          <button class="add-task-button">
+            Add Task
+          </button>
+        </li>
+
+        <li class="board-list-add">
+          <button class="add-list-button">
+            + Add List
+          </button>
+        </li>
+      </ul>
+    </section>
+  </main>
 </div>
-<app-create-list-modal [boardId]=boardId *ngIf="isOpenCreateList" (close)="switchCreateList()"></app-create-list-modal>
-<app-create-task-modal [listId]="listId" *ngIf="isOpenCreateTask" (close)="switchCreateTask(undefined)"></app-create-task-modal>
-<app-board-menu [boardId]=boardId *ngIf="isOpenBoardMenu" (close)="switchBoardMenu()"></app-board-menu>

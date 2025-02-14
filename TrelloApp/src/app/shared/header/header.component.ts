@@ -17,7 +17,6 @@ import {Subscription} from 'rxjs';
   styleUrl: './header.component.css'
 })
 export class HeaderComponent {
-  @Input() type: 'normal' | 'opaque' = 'normal';
   isOpenUserMenu: boolean = false;
   username: string = 'unnamed';
   private subscription!: Subscription;
