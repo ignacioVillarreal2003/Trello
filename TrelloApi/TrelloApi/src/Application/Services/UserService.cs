@@ -1,10 +1,9 @@
 using AutoMapper;
-using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Application.Utils;
-using TrelloApi.Domain.Entities.User;
+using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
 using TrelloApi.Domain.Interfaces.Services;
-using TrelloApi.Domain.User.DTO;
 
 namespace TrelloApi.Application.Services;
 
@@ -36,7 +35,7 @@ public class UserService: BaseService, IUserService
         }
     }
 
-    public async Task<List<OutputUserDto>> GetUsersByUsername(int userId, string username)
+    public async Task<List<OutputUserDto>> GetUsersByUsername(string username, int uid)
     {
         try
         {
@@ -50,33 +49,18 @@ public class UserService: BaseService, IUserService
             throw;
         }
     }
-    
-    public async Task<List<OutputUserDto>> GetUsersByBoardId(int userId, int boardId)
-    {
-        try
-        {
-            List<User> users = await _userRepository.GetUsersByBoardId(boardId);
-            _logger.LogDebug("Retrieved {Count} users for board {BoardId}", users.Count, boardId);
-            return _mapper.Map<List<OutputUserDto>>(users);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving users for board {BoardId}", boardId);
-            throw;
-        }
-    }
 
-    public async Task<List<OutputUserDto>> GetUsersByTaskId(int userId, int taskId)
+    public async Task<List<OutputUserDto>> GetUsersByCardId(int cardId, int uid)
     {
         try
         {
-            List<User> users = await _userRepository.GetUsersByTaskId(taskId);
-            _logger.LogDebug("Retrieved {Count} users for task {TaskId}", users.Count, taskId);
+            List<User> users = await _userRepository.GetUsersByCardId(cardId);
+            _logger.LogDebug("Retrieved {Count} users for card {CardId}", users.Count, cardId);
             return _mapper.Map<List<OutputUserDto>>(users);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving users for task {TaskId}", taskId);
+            _logger.LogError(ex, "Error retrieving users for card {CardId}", cardId);
             throw;
         }
     }
@@ -130,14 +114,14 @@ public class UserService: BaseService, IUserService
         }
     }
 
-    public async Task<OutputUserDto?> UpdateUser(int userId, UpdateUserDto updateUserDto)
+    public async Task<OutputUserDto?> UpdateUser(UpdateUserDto updateUserDto, int uid)
     {
         try
         {
-            User? user = await _userRepository.GetUserById(userId);
+            User? user = await _userRepository.GetUserById(uid);
             if (user == null)
             {
-                _logger.LogWarning("User {UserId} not found for update", userId);
+                _logger.LogWarning("User {UserId} not found for update", uid);
                 return null;
             }
             
@@ -153,7 +137,7 @@ public class UserService: BaseService, IUserService
             {
                 if (!_encrypt.ComparePassword(updateUserDto.OldPassword, user.Password))
                 {
-                    _logger.LogWarning("User {UserId} password not found for update", userId);
+                    _logger.LogWarning("User {UserId} password not found for update", uid);
                     throw new UnauthorizedAccessException("Invalid user credentials.");
                 }
                 user.Password = _encrypt.HashPassword(updateUserDto.NewPassword);
@@ -162,44 +146,44 @@ public class UserService: BaseService, IUserService
             User? updatedUser = await _userRepository.UpdateUser(user);
             if (updatedUser == null)
             {
-                _logger.LogError("Failed to update user {UserId}", userId);
+                _logger.LogError("Failed to update user {UserId}", uid);
                 return null;
             }
             
-            _logger.LogInformation("User {UserId} updated", userId);
+            _logger.LogInformation("User {UserId} updated", uid);
             return _mapper.Map<OutputUserDto>(updatedUser);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating user {UserId}", userId);
+            _logger.LogError(ex, "Error updating user {UserId}", uid);
             throw;
         }
     }
 
-    public async Task<OutputUserDto?> DeleteUser(int userId)
+    public async Task<OutputUserDto?> DeleteUser(int uid)
     {
         try
         {
-            User? user = await _userRepository.GetUserById(userId);
+            User? user = await _userRepository.GetUserById(uid);
             if (user == null)
             {
-                _logger.LogWarning("User {UserId} not found for deletion", userId);
+                _logger.LogWarning("User {UserId} not found for deletion", uid);
                 return null;
             }
 
             User? deletedUser = await _userRepository.DeleteUser(user);
             if (deletedUser == null)
             {
-                _logger.LogError("Failed to delete user {UserId}", userId);
+                _logger.LogError("Failed to delete user {UserId}", uid);
                 return null;
             }
             
-            _logger.LogInformation("User {UserId} deleted", userId);
+            _logger.LogInformation("User {UserId} deleted", uid);
             return _mapper.Map<OutputUserDto>(deletedUser);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting user {UserId}", userId);
+            _logger.LogError(ex, "Error deleting user {UserId}", uid);
             throw;
         }
     }

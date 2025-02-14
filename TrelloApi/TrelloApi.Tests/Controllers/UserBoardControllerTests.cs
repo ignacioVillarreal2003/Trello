@@ -4,7 +4,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
 using TrelloApi.Domain.Interfaces.Services;
-using TrelloApi.Domain.UserBoard.DTO;
 
 namespace TrelloApi.Tests.Controllers;
 
@@ -35,13 +34,13 @@ public class UserBoardControllerTests
     {
         var userId = 1;
         var boardId = 1;
-        var outputUserBoardDto = new OutputUserBoardDto { UserId = 1, BoardId = 1};
+        var outputUserBoardDto = new AddUserBoardDto { UserId = 1, BoardId = 1};
 
         _mockUserBoardService.Setup(s => s.GetUserBoardById(userId, boardId)).ReturnsAsync(outputUserBoardDto);
 
         var result = await _controller.GetUserBoardById(boardId);
         var objectResult = Assert.IsType<OkObjectResult>(result);
-        var value = Assert.IsType<OutputUserBoardDto>(objectResult.Value);
+        var value = Assert.IsType<AddUserBoardDto>(objectResult.Value);
         
         Assert.Equal(200, objectResult.StatusCode);
         Assert.Equal(outputUserBoardDto.UserId, value.UserId);
@@ -53,7 +52,7 @@ public class UserBoardControllerTests
     {
         var userId = 1;
         var boardId = 1;
-        var outputUserBoardDto = (OutputUserBoardDto?)null;
+        var outputUserBoardDto = (AddUserBoardDto?)null;
         
         _mockUserBoardService.Setup(s => s.GetUserBoardById(boardId, userId)).ReturnsAsync(outputUserBoardDto);
 
@@ -67,13 +66,13 @@ public class UserBoardControllerTests
     public async Task AddUserBoard_ReturnsOk_WithElementCreated()
     {
         int userId = 1, userToAddId = 1, boardId = 1;
-        var outputUserBoardDto = new OutputUserBoardDto { UserId = 1, BoardId = 1};
+        var outputUserBoardDto = new AddUserBoardDto { UserId = 1, BoardId = 1};
         
         _mockUserBoardService.Setup(s => s.AddUserBoard(userToAddId, boardId, userId)).ReturnsAsync(outputUserBoardDto);
 
         var result = await _controller.AddUserBoard(userToAddId, boardId);
         var objectResult = Assert.IsType<CreatedAtActionResult>(result);
-        var value = Assert.IsType<OutputUserBoardDto>(objectResult.Value);
+        var value = Assert.IsType<AddUserBoardDto>(objectResult.Value);
         
         Assert.Equal(201, objectResult.StatusCode);
         Assert.Equal(outputUserBoardDto.UserId, value.UserId);
@@ -84,7 +83,7 @@ public class UserBoardControllerTests
     public async Task AddUserBoard_ReturnsBadRequest_WithElementNotCreated()
     {
         int userId = 1, userToAddId = 1, boardId = 1;
-        var outputUserBoardDto = (OutputUserBoardDto?)null;
+        var outputUserBoardDto = (AddUserBoardDto?)null;
         
         _mockUserBoardService.Setup(s => s.AddUserBoard(userToAddId, boardId, userId)).ReturnsAsync(outputUserBoardDto);
 
@@ -100,13 +99,13 @@ public class UserBoardControllerTests
         var userId = 1;
         var userToDeleteId = 1;
         var boardId = 1;
-        var outputUserBoardDto = new OutputUserBoardDto { UserId = 1, BoardId = 1};
+        var outputUserBoardDto = new AddUserBoardDto { UserId = 1, BoardId = 1};
         
         _mockUserBoardService.Setup(s => s.DeleteUserBoard(userToDeleteId, boardId, userId)).ReturnsAsync(outputUserBoardDto);
 
         var result = await _controller.DeleteUserBoard(userToDeleteId, boardId);
         var objectResult = Assert.IsType<OkObjectResult>(result);
-        var value = Assert.IsType<OutputUserBoardDto>(objectResult.Value);
+        var value = Assert.IsType<AddUserBoardDto>(objectResult.Value);
         
         Assert.Equal(200, objectResult.StatusCode);
         Assert.Equal(outputUserBoardDto.UserId, value.UserId);
@@ -119,7 +118,7 @@ public class UserBoardControllerTests
         var userId = 1;
         var userToDeleteId = 1;
         var boardId = 1;
-        var outputUserBoardDto = (OutputUserBoardDto?)null;
+        var outputUserBoardDto = (AddUserBoardDto?)null;
         
         _mockUserBoardService.Setup(s => s.DeleteUserBoard(userToDeleteId, boardId, userId)).ReturnsAsync(outputUserBoardDto);
 

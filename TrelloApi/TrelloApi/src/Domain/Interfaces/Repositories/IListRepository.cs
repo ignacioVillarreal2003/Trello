@@ -1,4 +1,4 @@
-using TrelloApi.Domain.Entities.List;
+using TrelloApi.Domain.Entities;
 
 namespace TrelloApi.Domain.Interfaces.Repositories;
 

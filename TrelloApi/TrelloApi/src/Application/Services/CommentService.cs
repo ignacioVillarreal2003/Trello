@@ -1,8 +1,6 @@
 using AutoMapper;
-using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.Comment;
-using TrelloApi.Domain.Comment.DTO;
-using TrelloApi.Domain.Entities.Comment;
+using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
 using TrelloApi.Domain.Interfaces.Services;
 
@@ -19,7 +17,7 @@ public class CommentService: BaseService, ICommentService
         _commentRepository = commentRepository;
     }
     
-    public async Task<OutputCommentDto?> GetCommentById(int commentId, int userId)
+    public async Task<OutputCommentDetailsDto?> GetCommentById(int commentId, int uid)
     {
         try
         {
@@ -31,7 +29,7 @@ public class CommentService: BaseService, ICommentService
             }
 
             _logger.LogDebug("Comment {CommentId} retrieved", commentId);
-            return _mapper.Map<OutputCommentDto>(comment);
+            return _mapper.Map<OutputCommentDetailsDto>(comment);
         }
         catch (Exception ex)
         {
@@ -40,44 +38,44 @@ public class CommentService: BaseService, ICommentService
         }
     }
     
-    public async Task<List<OutputCommentDto>> GetCommentsByTaskId(int taskId, int userId)
+    public async Task<List<OutputCommentDetailsDto>> GetCommentsByCardId(int cardId, int uid)
     {
         try
         {
-            List<Comment> comments = await _commentRepository.GetCommentsByTaskId(taskId);
-            _logger.LogDebug("Retrieved {Count} comments for task {TaskId}", comments.Count, taskId);
-            return _mapper.Map<List<OutputCommentDto>>(comments);
+            List<Comment> comments = await _commentRepository.GetCommentsByCardId(cardId);
+            _logger.LogDebug("Retrieved {Count} comments for card {CardId}", comments.Count, cardId);
+            return _mapper.Map<List<OutputCommentDetailsDto>>(comments);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving comments for task {TaskId}", taskId);
+            _logger.LogError(ex, "Error retrieving comments for card {CardId}", cardId);
             throw;
         }
     }
 
-    public async Task<OutputCommentDto?> AddComment(int taskId, AddCommentDto addCommentDto, int userId)
+    public async Task<OutputCommentDetailsDto?> AddComment(int cardId, AddCommentDto addCommentDto, int uid)
     {
         try
         {
-            Comment comment = new Comment(addCommentDto.Text, taskId, addCommentDto.AuthorId);
+            Comment comment = new Comment(addCommentDto.Text, cardId, addCommentDto.AuthorId);
             Comment? newComment = await _commentRepository.AddComment(comment);
             if (newComment == null)
             {
-                _logger.LogError("Failed to add comment to task {TaskId}", taskId);
+                _logger.LogError("Failed to add comment to card {CardId}", cardId);
                 return null;
             }
 
-            _logger.LogInformation("Comment added to task {TaskId}", taskId);
-            return _mapper.Map<OutputCommentDto>(newComment);
+            _logger.LogInformation("Comment added to card {CardId}", cardId);
+            return _mapper.Map<OutputCommentDetailsDto>(newComment);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding comment to task {TaskId}", taskId);
+            _logger.LogError(ex, "Error adding comment to card {CardId}", cardId);
             throw;
         }
     }
 
-    public async Task<OutputCommentDto?> UpdateComment(int commentId, UpdateCommentDto updateCommentDto, int userId)
+    public async Task<OutputCommentDetailsDto?> UpdateComment(int commentId, UpdateCommentDto updateCommentDto, int uid)
     {
         try
         {
@@ -101,7 +99,7 @@ public class CommentService: BaseService, ICommentService
             }
             
             _logger.LogInformation("Comment {CommentId} updated", commentId);
-            return _mapper.Map<OutputCommentDto>(updatedComment);
+            return _mapper.Map<OutputCommentDetailsDto>(updatedComment);
         }
         catch (Exception ex)
         {
@@ -110,7 +108,7 @@ public class CommentService: BaseService, ICommentService
         }
     }
 
-    public async Task<OutputCommentDto?> DeleteComment(int commentId, int userId)
+    public async Task<Boolean> DeleteComment(int commentId, int uid)
     {
         try
         {
@@ -118,18 +116,18 @@ public class CommentService: BaseService, ICommentService
             if (comment == null)
             {
                 _logger.LogWarning("Comment {CommentId} not found for deletion", commentId);
-                return null;
+                return false;
             }
 
             Comment? deletedComment = await _commentRepository.DeleteComment(comment);
             if (deletedComment == null)
             {
                 _logger.LogError("Failed to delete comment {CommentId}", commentId);
-                return null;
+                return false;
             }
 
             _logger.LogInformation("Comment {CommentId} deleted", commentId);
-            return _mapper.Map<OutputCommentDto>(deletedComment);
+            return true;
         }
         catch (Exception ex)
         {

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using TrelloApi.Application.Extensions;
 using TrelloApi.Application.Utils;
 
 namespace TrelloApi.Application.Filters;

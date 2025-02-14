@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TrelloApi.Application.Filters;
-using TrelloApi.Domain.Entities.User;
+using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.Interfaces.Services;
-using TrelloApi.Domain.User.DTO;
 using TrelloApi.Infrastructure.Authentication;
 
 namespace TrelloApi.Application.Controllers;
@@ -45,7 +44,7 @@ public class UserController : BaseController
     {
         try
         {
-            List<OutputUserDto> users = await _userService.GetUsersByUsername(UserId, username);
+            List<OutputUserDto> users = await _userService.GetUsersByUsername(username, UserId);
             _logger.LogDebug("Retrieved {Count} users for username {Username}", users.Count, username);
             return Ok(users);
         }
@@ -55,31 +54,14 @@ public class UserController : BaseController
             return StatusCode(500, new { message = "An unexpected error occurred." });
         }
     }
-
-    [HttpGet("board/{boardId:int}")]
-    [RequireAuthentication]
-    public async Task<IActionResult> GetUsersByBoardId(int boardId)
-    {
-        try
-        {
-            List<OutputUserDto> users = await _userService.GetUsersByBoardId(UserId, boardId);
-            _logger.LogDebug("Retrieved {Count} users.", users.Count);
-            return Ok(users);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving users.");
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
-    }
     
-    [HttpGet("task/{taskId:int}")]
+    [HttpGet("card/{cardId:int}")]
     [RequireAuthentication]
-    public async Task<IActionResult> GetUsersByTaskId(int taskId)
+    public async Task<IActionResult> GetUsersByCardId(int cardId)
     {
         try
         {
-            List<OutputUserDto> users = await _userService.GetUsersByTaskId(UserId, taskId);
+            List<OutputUserDto> users = await _userService.GetUsersByCardId(cardId, UserId);
             _logger.LogDebug("Retrieved {Count} users.", users.Count);
             return Ok(users);
         }
@@ -144,7 +126,7 @@ public class UserController : BaseController
     {
         try
         {
-            OutputUserDto? user = await _userService.UpdateUser(UserId, updateUserDto);
+            OutputUserDto? user = await _userService.UpdateUser(updateUserDto, UserId);
             if (user == null)
             {
                 _logger.LogDebug("User {UserId} not found for update", UserId);

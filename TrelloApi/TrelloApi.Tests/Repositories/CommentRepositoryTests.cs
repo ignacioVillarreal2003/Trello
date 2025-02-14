@@ -3,7 +3,9 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.app;
 using TrelloApi.Domain.Comment;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Persistence;
+using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Repositories;
 

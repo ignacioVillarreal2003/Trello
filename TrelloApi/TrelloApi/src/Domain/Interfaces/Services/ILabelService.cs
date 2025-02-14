@@ -1,13 +1,12 @@
-using TrelloApi.Domain.Entities.Label;
-using TrelloApi.Domain.Label.DTO;
+using TrelloApi.Domain.DTOs;
 
 namespace TrelloApi.Domain.Interfaces.Services;
 
 public interface ILabelService
 {
-    Task<OutputLabelDto?> GetLabelById(int labelId, int userId);
-    Task<List<OutputLabelDto>> GetLabelsByTaskId(int taskId, int userId);
-    Task<OutputLabelDto?> AddLabel(int boardId, AddLabelDto addLabelDto, int userId);
-    Task<OutputLabelDto?> UpdateLabel(int labelId, UpdateLabelDto updateLabelDto, int userId);
-    Task<OutputLabelDto?> DeleteLabel(int labelId, int userId);
+    Task<OutputLabelDetailsDto?> GetLabelById(int labelId, int uid);
+    Task<List<OutputLabelDetailsDto>> GetLabelsByBoardId(int boardId, int uid);
+    Task<OutputLabelDetailsDto?> AddLabel(int boardId, AddLabelDto dto, int uid);
+    Task<OutputLabelDetailsDto?> UpdateLabel(int labelId, UpdateLabelDto dto, int uid);
+    Task<bool> DeleteLabel(int labelId, int uid);
 }

@@ -1,4 +1,4 @@
-namespace TrelloApi.Application.Utils;
+namespace TrelloApi.Application.Extensions;
 
 public static class HttpContextExtensions
 {

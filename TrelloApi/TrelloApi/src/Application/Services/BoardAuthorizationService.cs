@@ -1,6 +1,6 @@
-using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.UserBoard;
+using TrelloApi.Domain.Interfaces.Services;
 
 namespace TrelloApi.Application.Services;
 

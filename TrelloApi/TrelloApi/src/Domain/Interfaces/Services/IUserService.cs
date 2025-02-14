@@ -1,17 +1,14 @@
-using TrelloApi.Domain.Entities.User;
-using TrelloApi.Domain.User.DTO;
+using TrelloApi.Domain.DTOs;
 
 namespace TrelloApi.Domain.Interfaces.Services;
 
 public interface IUserService
 {
-    Task<List<OutputUserDto>> GetUsers(int userId);
-    Task<List<OutputUserDto>> GetUsersByUsername(int userId, string username);
-    Task<List<OutputUserDto>> GetUsersByBoardId(int userId, int boardId);
-    Task<List<OutputUserDto>> GetUsersByTaskId(int userId, int taskId);
+    Task<List<OutputUserDto>> GetUsers(int uid);
+    Task<List<OutputUserDto>> GetUsersByUsername(string username, int uid);
+    Task<List<OutputUserDto>> GetUsersByCardId(int taskId, int uid);
     Task<OutputUserDto?> RegisterUser(RegisterUserDto registerUserDto);
     Task<OutputUserDto?> LoginUser(LoginUserDto loginUserDto);
-
-    Task<OutputUserDto?> UpdateUser(int userId, UpdateUserDto updateUserDto);
-    Task<OutputUserDto?> DeleteUser(int userId);
+    Task<OutputUserDto?> UpdateUser(UpdateUserDto updateUserDto, int uid);
+    Task<OutputUserDto?> DeleteUser(int uid);
 }

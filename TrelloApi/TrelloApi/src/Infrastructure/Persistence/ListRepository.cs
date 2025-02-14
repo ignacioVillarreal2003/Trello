@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TrelloApi.app;
-using TrelloApi.Domain.Entities.List;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
 
 namespace TrelloApi.Infrastructure.Persistence;

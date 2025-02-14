@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using TrelloApi.Application.Extensions;
 using TrelloApi.Application.Utils;
 
 namespace TrelloApi.Application.Controllers;

@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TrelloApi.Application.Filters;
 using TrelloApi.Application.Services;
-using TrelloApi.Domain.Entities.List;
+using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.Interfaces.Services;
 
 namespace TrelloApi.Application.Controllers;

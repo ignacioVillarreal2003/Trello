@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TrelloApi.Application.Filters;
-using TrelloApi.Application.Services;
-using TrelloApi.Domain.Board;
-using TrelloApi.Domain.Entities.Board;
+using TrelloApi.Domain.Constants;
+using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.Interfaces.Services;
 
 namespace TrelloApi.Application.Controllers;
@@ -26,7 +25,7 @@ public class BoardController : BaseController
     {
         try
         {
-            OutputBoardDto? board = await _boardService.GetBoardById(boardId, UserId);
+            OutputBoardDetailsDto? board = await _boardService.GetBoardById(boardId, UserId);
             if (board == null)
             {
                 _logger.LogDebug("Board {BoardId} not found", boardId);
@@ -44,11 +43,11 @@ public class BoardController : BaseController
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetBoards()
+    public async Task<IActionResult> GetBoardsByUserId()
     {
         try
         {
-            List<OutputBoardDto> boards = await _boardService.GetBoards(UserId);
+            List<OutputBoardListDto> boards = await _boardService.GetBoardsByUserId(UserId);
             _logger.LogDebug("Retrieved {Count} boards for user {UserId}", boards.Count, UserId);
             return Ok(boards);
         }
@@ -59,40 +58,56 @@ public class BoardController : BaseController
         }
     }
 
-    [HttpPost]
-    public async Task<IActionResult> AddBoard([FromBody] AddBoardDto addBoardDto)
+    [HttpGet("colors")]
+    public Task<IActionResult> GetBoardColors()
     {
         try
         {
-            OutputBoardDto? board = await _boardService.AddBoard(addBoardDto, UserId);
+            List<string> boardColorsAllowed = BoardColorValues.BoardColorsAllowed;
+            _logger.LogDebug("Retrieved {Count} colors for board", boardColorsAllowed.Count);
+            return Task.FromResult<IActionResult>(Ok(boardColorsAllowed));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving colors for board");
+            return Task.FromResult<IActionResult>(StatusCode(500, new { message = "An unexpected error occurred." }));
+        }
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> AddBoard([FromBody] AddBoardDto dto)
+    {
+        try
+        {
+            OutputBoardDetailsDto? board = await _boardService.AddBoard(dto, UserId);
             if (board == null)
             {
-                _logger.LogError("Failed to add board to user {UserId}", UserId);
+                _logger.LogError("Failed to add board for user {UserId}", UserId);
                 return BadRequest(new { message = "Failed to add board." });
             }
 
-            _logger.LogInformation("Board added to user {UserId}", UserId);
+            _logger.LogInformation("Board added for user {UserId}", UserId);
             return CreatedAtAction(nameof(GetBoardById), new { boardId = board.Id }, board);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding board to user {UserId}", UserId);
+            _logger.LogError(ex, "Error adding board for user {UserId}", UserId);
             return StatusCode(500, new { message = "An unexpected error occurred." });
         }
     }
 
     [HttpPut("{boardId:int}")]
-    public async Task<IActionResult> UpdateBoard(int boardId, [FromBody] UpdateBoardDto updateBoardDto)
+    public async Task<IActionResult> UpdateBoard(int boardId, [FromBody] UpdateBoardDto dto)
     {
         try
         {
-            OutputBoardDto? board = await _boardService.UpdateBoard(boardId, updateBoardDto, UserId);
+            OutputBoardDetailsDto? board = await _boardService.UpdateBoard(boardId, dto, UserId);
             if (board == null)
             {
                 _logger.LogDebug("Board {BoardId} not found for update", boardId);
                 return NotFound(new { message = "Board not found." });
             }
-            
+        
             _logger.LogInformation("Board {BoardId} updated", boardId);
             return Ok(board);
         }
@@ -102,21 +117,21 @@ public class BoardController : BaseController
             return StatusCode(500, new { message = "An unexpected error occurred." });
         }
     }
-
+    
     [HttpDelete("{boardId:int}")]
     public async Task<IActionResult> DeleteBoard(int boardId)
     {
         try
         {
-            OutputBoardDto? board = await _boardService.DeleteBoard(boardId, UserId);
-            if (board == null)
+            bool isDeleted = await _boardService.DeleteBoard(boardId, UserId);
+            if (!isDeleted)
             {
                 _logger.LogDebug("Board {BoardId} not found for deletion", boardId);
                 return NotFound(new { message = "Board not found." });
             }
 
             _logger.LogInformation("Board {BoardId} deleted", boardId);
-            return Ok(board);
+            return NoContent();
         }
         catch (Exception ex)
         {

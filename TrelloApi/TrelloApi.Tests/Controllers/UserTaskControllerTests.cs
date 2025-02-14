@@ -3,21 +3,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
-using TrelloApi.Domain.Entities.UserTask;
 using TrelloApi.Domain.Interfaces.Services;
-using TrelloApi.Domain.UserTask.Dto;
 
 namespace TrelloApi.Tests.Controllers;
 
 public class UserTaskControllerTests
 {
-    private readonly Mock<IUserTaskService> _mockUserTaskService;
+    private readonly Mock<IUserCardService> _mockUserTaskService;
     private readonly Mock<ILogger<UserTaskController>> _mockLogger;
     private readonly UserTaskController _controller;
 
     public UserTaskControllerTests()
     {
-        _mockUserTaskService = new Mock<IUserTaskService>();
+        _mockUserTaskService = new Mock<IUserCardService>();
         _mockLogger = new Mock<ILogger<UserTaskController>>();
 
         _controller = new UserTaskController(_mockLogger.Object, _mockUserTaskService.Object);

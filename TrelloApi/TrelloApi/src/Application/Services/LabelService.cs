@@ -1,10 +1,8 @@
 using AutoMapper;
-using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.Entities.Label;
+using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
 using TrelloApi.Domain.Interfaces.Services;
-using TrelloApi.Domain.Label;
-using TrelloApi.Domain.Label.DTO;
 
 namespace TrelloApi.Application.Services;
 
@@ -19,7 +17,7 @@ public class LabelService: BaseService, ILabelService
         _labelRepository = labelRepository;
     }
     
-    public async Task<OutputLabelDto?> GetLabelById(int labelId, int userId)
+    public async Task<OutputLabelDetailsDto?> GetLabelById(int labelId, int uid)
     {
         try
         {
@@ -31,7 +29,7 @@ public class LabelService: BaseService, ILabelService
             }
 
             _logger.LogDebug("Label {LabelId} retrieved", labelId);
-            return _mapper.Map<OutputLabelDto>(label);
+            return _mapper.Map<OutputLabelDetailsDto>(label);
         }
         catch (Exception ex)
         {
@@ -39,27 +37,27 @@ public class LabelService: BaseService, ILabelService
             throw;
         }
     }
-
-    public async Task<List<OutputLabelDto>> GetLabelsByTaskId(int taskId, int userId)
+    
+    public async Task<List<OutputLabelDetailsDto>> GetLabelsByBoardId(int boardId, int uid)
     {
         try
         {
-            List<Label> labels = await _labelRepository.GetLabelsByTaskId(taskId);
-            _logger.LogDebug("Retrieved {Count} labels for task {TaskId}", labels.Count, taskId);
-            return _mapper.Map<List<OutputLabelDto>>(labels);
+            List<Label> labels = await _labelRepository.GetLabelsByBoardId(boardId);
+            _logger.LogDebug("Retrieved {Count} labels for board {BoardId}", labels.Count, boardId);
+            return _mapper.Map<List<OutputLabelDetailsDto>>(labels);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving labels for task {TaskId}", taskId);
+            _logger.LogError(ex, "Error retrieving labels for board {BoardId}", boardId);
             throw;
         }
     }
 
-    public async Task<OutputLabelDto?> AddLabel(int boardId, AddLabelDto addLabelDto, int userId)
+    public async Task<OutputLabelDetailsDto?> AddLabel(int boardId, AddLabelDto dto, int uid)
     {
         try
         {
-            Label label = new Label(addLabelDto.Title, addLabelDto.Color, boardId);
+            Label label = new Label(dto.Title, dto.Color, boardId);
             Label? newLabel = await _labelRepository.AddLabel(label);
             if (newLabel == null)
             {
@@ -68,7 +66,7 @@ public class LabelService: BaseService, ILabelService
             }
 
             _logger.LogInformation("Label added to board {BoardId}", boardId);
-            return _mapper.Map<OutputLabelDto>(newLabel);
+            return _mapper.Map<OutputLabelDetailsDto>(newLabel);
         }
         catch (Exception ex)
         {
@@ -77,7 +75,7 @@ public class LabelService: BaseService, ILabelService
         }
     }
 
-    public async Task<OutputLabelDto?> UpdateLabel(int labelId, UpdateLabelDto updateLabelDto, int userId)
+    public async Task<OutputLabelDetailsDto?> UpdateLabel(int labelId, UpdateLabelDto dto, int uid)
     {
         try
         {
@@ -88,13 +86,13 @@ public class LabelService: BaseService, ILabelService
                 return null;
             }
 
-            if (!string.IsNullOrEmpty(updateLabelDto.Color))
+            if (!string.IsNullOrEmpty(dto.Color))
             {
-                label.Color = updateLabelDto.Color;
+                label.Color = dto.Color;
             }
-            if (!string.IsNullOrEmpty(updateLabelDto.Title))
+            if (!string.IsNullOrEmpty(dto.Title))
             {
-                label.Title = updateLabelDto.Title;
+                label.Title = dto.Title;
             }
 
             Label? updatedLabel = await _labelRepository.UpdateLabel(label);
@@ -105,7 +103,7 @@ public class LabelService: BaseService, ILabelService
             }
             
             _logger.LogInformation("Label {LabelId} updated", labelId);
-            return _mapper.Map<OutputLabelDto>(updatedLabel);
+            return _mapper.Map<OutputLabelDetailsDto>(updatedLabel);
         }
         catch (Exception ex)
         {
@@ -114,7 +112,7 @@ public class LabelService: BaseService, ILabelService
         }
     }
 
-    public async Task<OutputLabelDto?> DeleteLabel(int labelId, int userId)
+    public async Task<bool> DeleteLabel(int labelId, int uid)
     {
         try
         {
@@ -122,18 +120,18 @@ public class LabelService: BaseService, ILabelService
             if (label == null)
             {
                 _logger.LogWarning("Label {LabelId} not found for deletion", labelId);
-                return null;
+                return false;
             }
 
-            Label? deletedLabel = await _labelRepository.DeleteLabel(label);
-            if (deletedLabel == null)
+            bool success = await _labelRepository.DeleteLabel(label);
+            if (!success)
             {
                 _logger.LogError("Failed to delete label {LabelId}", labelId);
-                return null;
+                return false;
             }
 
             _logger.LogInformation("Label {LabelId} deleted", labelId);
-            return _mapper.Map<OutputLabelDto>(deletedLabel);
+            return true;
         }
         catch (Exception ex)
         {

@@ -1,12 +1,12 @@
-using TrelloApi.Domain.Entities.Board;
+using TrelloApi.Domain.DTOs;
 
 namespace TrelloApi.Domain.Interfaces.Services;
 
 public interface IBoardService
 {
-    Task<OutputBoardDto?> GetBoardById(int boardId, int userId);
-    Task<List<OutputBoardDto>> GetBoards(int userId);
-    Task<OutputBoardDto?> AddBoard(AddBoardDto addBoardDto, int userId);
-    Task<OutputBoardDto?> UpdateBoard(int boardId, UpdateBoardDto updateBoardDto, int userId);
-    Task<OutputBoardDto?> DeleteBoard(int boardId, int userId);
+    Task<OutputBoardDetailsDto?> GetBoardById(int boardId, int uid);
+    Task<List<OutputBoardListDto>> GetBoardsByUserId(int uid);
+    Task<OutputBoardDetailsDto?> AddBoard(AddBoardDto dto, int uid);
+    Task<OutputBoardDetailsDto?> UpdateBoard(int boardId, UpdateBoardDto dto, int uid);
+    Task<bool> DeleteBoard(int boardId, int uid);
 }

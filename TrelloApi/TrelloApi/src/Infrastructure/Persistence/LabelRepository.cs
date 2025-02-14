@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TrelloApi.app;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.Label;
 
 namespace TrelloApi.Infrastructure.Persistence;
 
@@ -19,7 +19,7 @@ public class LabelRepository: Repository<Label>, ILabelRepository
         try
         {
             Label? label = await Context.Labels
-                .FirstOrDefaultAsync(l => l.Id.Equals(labelId));
+                .FirstOrDefaultAsync(l => l.Id == labelId);
 
             _logger.LogDebug("Label {LabelId} retrieval attempt completed", labelId);
             return label;
@@ -31,29 +31,24 @@ public class LabelRepository: Repository<Label>, ILabelRepository
         }
     }
 
-    public async Task<List<Label>> GetLabelsByTaskId(int taskId)
+    public async Task<List<Label>> GetLabelsByBoardId(int boardId)
     {
         try
         {
             List<Label> labels = await Context.Labels
-                .Join(Context.TaskLabels,
-                    label => label.Id,
-                    taskLabel => taskLabel.LabelId,
-                    (label, taskLabel) => new {label, taskLabel})
-                .Where(tl => tl.taskLabel.TaskId.Equals(taskId))
-                .Select(tl => tl.label)
+                .Where(l => l.BoardId == boardId)
                 .ToListAsync();
-            
-            _logger.LogDebug("Retrieved {Count} labels for task {TaskId}", labels.Count, taskId);
+
+            _logger.LogDebug("Retrieved {Count} labels for board {BoardId}", labels.Count, boardId);
             return labels;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Database error retrieving labels for task {TaskId}", taskId);
+            _logger.LogError(ex, "Database error retrieving labels for board {BoardId}", boardId);
             throw;
         }
     }
-
+    
     public async Task<Label?> AddLabel(Label label)
     {
         try
@@ -88,20 +83,20 @@ public class LabelRepository: Repository<Label>, ILabelRepository
         }
     }
 
-    public async Task<Label?> DeleteLabel(Label label)
+    public async Task<bool> DeleteLabel(Label label)
     {
         try
         {
             Context.Labels.Remove(label);
             await Context.SaveChangesAsync();
-            
+        
             _logger.LogDebug("Label {LabelId} deleted", label.Id);
-            return label;
+            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Database error deleting label {LabelId}", label.Id);
-            throw;
+            return false;
         }
     }
 }

@@ -1,5 +1,5 @@
 using AutoMapper;
-using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Domain.Interfaces.Services;
 
 namespace TrelloApi.Application.Services;
 

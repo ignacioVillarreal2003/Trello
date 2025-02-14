@@ -1,8 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TrelloApi.Application.Services;
-using TrelloApi.Domain.Entities.UserTask;
+using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.Interfaces.Services;
-using TrelloApi.Domain.UserTask.Dto;
 
 namespace TrelloApi.Application.Controllers;
 
@@ -11,20 +10,20 @@ namespace TrelloApi.Application.Controllers;
 public class UserTaskController: BaseController
 {
     private readonly ILogger<UserTaskController> _logger;
-    private readonly IUserTaskService _userTaskService;
+    private readonly IUserCardService _userCardService;
 
-    public UserTaskController(ILogger<UserTaskController> logger, IUserTaskService userTaskService)
+    public UserTaskController(ILogger<UserTaskController> logger, IUserCardService userCardService)
     {
         _logger = logger;
-        _userTaskService = userTaskService;
+        _userCardService = userCardService;
     }
 
     [HttpGet("{taskId:int}")]
-    public async Task<IActionResult> GetUserTaskById(int taskId)
+    public async Task<IActionResult> GetUserCardById(int taskId)
     {
         try
         {
-            OutputUserTaskDto? userTask = await _userTaskService.GetUserTaskById(UserId, taskId);
+            OutputUserCardDto? userTask = await _userCardService.GetUserCardById(UserId, taskId);
             if (userTask == null)
             {
                 _logger.LogDebug("Task {TaskId} to user {UserId} not found", taskId, UserId);
@@ -42,45 +41,45 @@ public class UserTaskController: BaseController
     }
     
     [HttpPost]
-    public async Task<IActionResult> AddUserTask([FromBody] AddUserTaskDto addUserTaskDto)
+    public async Task<IActionResult> AddUserTask([FromBody] AddUserCardDto addUserTaskDto)
     {
         try
         {
-            OutputUserTaskDto? userTask = await _userTaskService.AddUserTask(addUserTaskDto, UserId);
-            if (userTask == null)
+            OutputUserCardDto? userCard = await _userCardService.AddUserCard(addUserTaskDto, UserId);
+            if (userCard == null)
             {
-                _logger.LogError("Failed to add user {UserBoard} to task {TaskId}",  addUserTaskDto.UserId, addUserTaskDto.TaskId);
+                _logger.LogError("Failed to add user {UserBoard} to card {CardId}",  addUserTaskDto.UserId, addUserTaskDto.CardId);
                 return BadRequest(new { message = "Failed to add user." });
             }
             
-            _logger.LogInformation("User {UserBoard} added to task {TaskId}", addUserTaskDto.UserId, addUserTaskDto.TaskId);
-            return CreatedAtAction(nameof(GetUserTaskById), new { userId = userTask.UserId, taskId = userTask.TaskId }, userTask);
+            _logger.LogInformation("User {UserBoard} added to card {CardId}", addUserTaskDto.UserId, addUserTaskDto.CardId);
+            return CreatedAtAction(nameof(GetUserCardById), new { userId = userCard.UserId, taskId = userCard.CardId }, userCard);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding task {TaskId} to user {UserId}", addUserTaskDto.TaskId, addUserTaskDto.UserId);
+            _logger.LogError(ex, "Error adding card {CardId} to user {UserId}", addUserTaskDto.CardId, addUserTaskDto.UserId);
             return StatusCode(500, new { message = "An unexpected error occurred." });
         }
     }
 
-    [HttpDelete("user/{userToDeleteId:int}/task/{taskId:int}")]
-    public async Task<IActionResult> DeleteUserTask(int userToDeleteId, int taskId)
+    [HttpDelete("user/{userToDeleteId:int}/card/{cardId:int}")]
+    public async Task<IActionResult> DeleteUserTask(int userToDeleteId, int cardId)
     {
         try
         {
-            OutputUserTaskDto? userTask = await _userTaskService.DeleteUserTask(userToDeleteId, taskId, UserId);
-            if (userTask == null)
+            OutputUserCardDto? userCard = await _userCardService.DeleteUserCard(userToDeleteId, cardId, UserId);
+            if (userCard == null)
             {
-                _logger.LogDebug("User {UserId} for task {TaskId} not found for deletion.", userToDeleteId, taskId);
+                _logger.LogDebug("User {UserId} for card {CardId} not found for deletion.", userToDeleteId, cardId);
                 return NotFound(new { message = "UserTask not found." });
             }
 
-            _logger.LogInformation("User {UserId} deleted for task {TaskId}.", userToDeleteId, taskId);
-            return Ok(userTask);
+            _logger.LogInformation("User {UserId} deleted for card {CardId}.", userToDeleteId, cardId);
+            return Ok(userCard);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting user {UserId} for task {TaskId}.", userToDeleteId, taskId);
+            _logger.LogError(ex, "Error deleting user {UserId} for card {CardId}.", userToDeleteId, cardId);
             return StatusCode(500, new { message = "An unexpected error occurred." });
         }
     }

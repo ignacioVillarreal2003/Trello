@@ -3,6 +3,7 @@ using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TrelloApi.app;
+using TrelloApi.Application.Mappings;
 using TrelloApi.Application.Middlewares;
 using TrelloApi.Application.Utils;
 using TrelloApi.Infrastructure.Authentication;

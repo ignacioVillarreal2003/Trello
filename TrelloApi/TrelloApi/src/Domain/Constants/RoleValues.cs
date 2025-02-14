@@ -1,4 +1,4 @@
-namespace TrelloApi.Domain;
+namespace TrelloApi.Domain.Constants;
 
 public class RoleValues
 {

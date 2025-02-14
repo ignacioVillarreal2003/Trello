@@ -4,7 +4,9 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using TrelloApi.app;
 using TrelloApi.Domain.Comment;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Authentication;
+using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Integrations;
 

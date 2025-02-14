@@ -2,11 +2,11 @@ using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Services;
-using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.Comment;
-using TrelloApi.Domain.Comment.DTO;
-using TrelloApi.Domain.Entities.Comment;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
+using TrelloApi.Domain.Interfaces.Services;
+using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Services;
 

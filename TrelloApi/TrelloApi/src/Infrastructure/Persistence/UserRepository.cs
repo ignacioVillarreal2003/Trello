@@ -1,8 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TrelloApi.app;
-using TrelloApi.Domain.Entities.User;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.User;
 
 namespace TrelloApi.Infrastructure.Persistence;
 
@@ -81,48 +80,25 @@ public class UserRepository : Repository<User>, IUserRepository
         }
     }
 
-    public async Task<List<User>> GetUsersByBoardId(int boardId)
+    public async Task<List<User>> GetUsersByCardId(int cardId)
     {
         try
         {
             List<User> users = await Context.Users
-                .Join(Context.UserBoards, 
+                .Join(Context.UserCards, 
                     user => user.Id, 
-                    userBoard => userBoard.UserId, 
-                    (user, userBoard) => new { user, userBoard })
-                .Where(ub => ub.userBoard.BoardId.Equals(boardId))
-                .Select(ub => ub.user)
-                .ToListAsync();
-            
-            _logger.LogDebug("Retrieved {Count} users for board {BoardId}", users.Count, boardId);
-            return users;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Database error retrieving users for board {BoardId}", boardId);
-            throw;
-        }
-    }
-
-    public async Task<List<User>> GetUsersByTaskId(int taskId)
-    {
-        try
-        {
-            List<User> users = await Context.Users
-                .Join(Context.UserTasks, 
-                    user => user.Id, 
-                    userTask => userTask.UserId, 
-                    (user, userTask) => new { user, userTask })
-                .Where(ut => ut.userTask.TaskId.Equals(taskId))
+                    userCard => userCard.UserId, 
+                    (user, userCard) => new { user, userCard })
+                .Where(uc => uc.userCard.CardId.Equals(cardId))
                 .Select(ut => ut.user)
                 .ToListAsync();
             
-            _logger.LogDebug("Retrieved {Count} users for task {TaskId}", users.Count, taskId);
+            _logger.LogDebug("Retrieved {Count} users for card {CardId}", users.Count, cardId);
             return users;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Database error retrieving users for task {TaskId}", taskId);
+            _logger.LogError(ex, "Database error retrieving users for card {CardId}", cardId);
             throw;
         }
     }

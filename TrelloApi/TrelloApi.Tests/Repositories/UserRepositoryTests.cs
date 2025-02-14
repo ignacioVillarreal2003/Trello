@@ -2,10 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.app;
-using TrelloApi.Domain.Entities.User;
-using TrelloApi.Domain.Entities.UserTask;
-using TrelloApi.Domain.UserBoard;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Persistence;
+using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Repositories;
 
@@ -163,8 +162,8 @@ public class UserRepositoryTests
         int taskId = 1;
         var user1 = new User(email: "Email1@gmail.com", username: "Username", password: "Password" ) { Id = 1 };
         var user2 = new User(email: "Email2@gmail.com", username: "Username", password: "Password" ) { Id = 2 };
-        var userTask1 = new UserTask(userId: 1, taskId: 1);
-        var userTask2 = new UserTask(userId: 2, taskId: 1);
+        var userTask1 = new UserCard(userId: 1, taskId: 1);
+        var userTask2 = new UserCard(userId: 2, taskId: 1);
 
         _context.Users.AddRange(user1, user2);
         _context.UserTasks.AddRange(userTask1, userTask2);

@@ -2,8 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.app;
-using TrelloApi.Domain.Entities.List;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Persistence;
+using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Repositories;
 

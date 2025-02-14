@@ -1,6 +1,6 @@
 using TrelloApi.app;
-using TrelloApi.Domain.Board;
 using Microsoft.EntityFrameworkCore;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
 
 namespace TrelloApi.Infrastructure.Persistence;
@@ -19,6 +19,7 @@ public class BoardRepository : Repository<Board>, IBoardRepository
         try
         {
             Board? board = await Context.Boards
+                .Where(b => b.IsArchived == false)
                 .FirstOrDefaultAsync(b => b.Id.Equals(boardId));
             
             _logger.LogDebug("Board {BoardId} retrieval attempt completed", boardId);
@@ -31,7 +32,7 @@ public class BoardRepository : Repository<Board>, IBoardRepository
         }
     }
 
-    public async Task<List<Board>> GetBoards(int userId)
+    public async Task<List<Board>> GetBoardsByUserId(int userId)
     {
         try
         {
@@ -40,7 +41,7 @@ public class BoardRepository : Repository<Board>, IBoardRepository
                     board => board.Id,
                     userBoard => userBoard.BoardId,
                     (board, userBoard) => new { board, userBoard })
-                .Where(ub => ub.userBoard.UserId == userId)
+                .Where(ub => ub.userBoard.UserId == userId && ub.board.IsArchived == false)
                 .Select(ub => ub.board)
                 .ToListAsync();
 

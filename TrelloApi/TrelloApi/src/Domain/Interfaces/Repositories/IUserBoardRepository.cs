@@ -1,8 +1,11 @@
+using TrelloApi.Domain.Entities;
+
 namespace TrelloApi.Domain.Interfaces.Repositories;
 
 public interface IUserBoardRepository
 {
-    Task<UserBoard.UserBoard?> GetUserBoardById(int userId, int boardId);
-    Task<UserBoard.UserBoard?> AddUserBoard(UserBoard.UserBoard userBoard);
-    Task<UserBoard.UserBoard?> DeleteUserBoard(UserBoard.UserBoard userBoard);
+    Task<UserBoard?> GetUserBoardById(int userId, int boardId);
+    Task<List<User>> GetUsersForBoard(int boardId);
+    Task<UserBoard?> AddUserBoard(UserBoard userBoard);
+    Task<UserBoard?> DeleteUserBoard(UserBoard userBoard);
 }

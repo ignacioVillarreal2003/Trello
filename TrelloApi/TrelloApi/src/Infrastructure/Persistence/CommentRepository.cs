@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using TrelloApi.app;
-using TrelloApi.Domain.Comment;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
 
 namespace TrelloApi.Infrastructure.Persistence;
@@ -31,20 +31,20 @@ public class CommentRepository : Repository<Comment>, ICommentRepository
         }
     }
 
-    public async Task<List<Comment>> GetCommentsByTaskId(int taskId)
+    public async Task<List<Comment>> GetCommentsByCardId(int cardId)
     {
         try
         {
             List<Comment> comments = await Context.Comments
-                .Where(c => c.TaskId.Equals(taskId))
+                .Where(c => c.CardId.Equals(cardId))
                 .ToListAsync();
 
-            _logger.LogDebug("Retrieved {Count} comments for task {TaskId}", comments.Count, taskId);
+            _logger.LogDebug("Retrieved {Count} comments for card {CardId}", comments.Count, cardId);
             return comments;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Database error retrieving comments for task {TaskId}", taskId);
+            _logger.LogError(ex, "Database error retrieving comments for card {CardId}", cardId);
             throw;
         }
     }
@@ -56,12 +56,12 @@ public class CommentRepository : Repository<Comment>, ICommentRepository
             await Context.Comments.AddAsync(comment);
             await Context.SaveChangesAsync();
             
-            _logger.LogDebug("Comment {CommentId} added to task {TaskId}", comment.Id, comment.TaskId);
+            _logger.LogDebug("Comment {CommentId} added to card {CardId}", comment.Id, comment.CardId);
             return comment;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Database error adding comment to task {TaskId}", comment.TaskId);
+            _logger.LogError(ex, "Database error adding comment to card {CardId}", comment.CardId);
             throw;
         }
     }

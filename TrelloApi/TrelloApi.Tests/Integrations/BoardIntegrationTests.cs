@@ -5,7 +5,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TrelloApi.app;
-using TrelloApi.Domain.Board;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Authentication;
 
 namespace TrelloApi.Tests.Integrations;

@@ -2,9 +2,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.app;
-using TrelloApi.Domain.Entities.TaskLabel;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Label;
 using TrelloApi.Infrastructure.Persistence;
+using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Repositories;
 
@@ -56,8 +57,8 @@ public class LabelRepositoryTests
         int taskId = 1;
         var label1 = new Label(title: "Test Label", color: "Blue", boardId: 1) { Id = 1 };
         var label2 = new Label(title: "Test Label", color: "Blue", boardId: 1) { Id = 2 };
-        var taskLabel1 = new TaskLabel(1, 1);
-        var taskLabel2 = new TaskLabel(1, 2);
+        var taskLabel1 = new CardLabel(1, 1);
+        var taskLabel2 = new CardLabel(1, 2);
         
         _context.Labels.AddRange(label1, label2);
         _context.TaskLabels.AddRange(taskLabel1, taskLabel2);

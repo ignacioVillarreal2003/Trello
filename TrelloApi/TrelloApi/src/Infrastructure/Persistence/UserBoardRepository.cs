@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using TrelloApi.app;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.UserBoard;
 
 namespace TrelloApi.Infrastructure.Persistence;
 
@@ -27,6 +27,29 @@ public class UserBoardRepository: Repository<UserBoard>, IUserBoardRepository
         catch (Exception ex)
         {
             _logger.LogError(ex, "Database error retrieving user {UserId} for board {BoardId}", userId, boardId);
+            throw;
+        }
+    }
+
+    public async Task<List<User>> GetUsersForBoard(int boardId)
+    {
+        try
+        {
+            List<User> users = await Context.Users
+                .Join(Context.UserBoards, 
+                    user => user.Id, 
+                    userBoard => userBoard.UserId, 
+                    (user, userBoard) => new { user, userBoard })
+                .Where(ub => ub.userBoard.BoardId.Equals(boardId))
+                .Select(ub => ub.user)
+                .ToListAsync();
+
+            _logger.LogDebug("Users for board {BoardId} retrieval attempt completed", boardId);
+            return users;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Database error retrieving users for board {BoardId}", boardId);
             throw;
         }
     }

@@ -1,10 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TrelloApi.Application.Filters;
-using TrelloApi.Application.Services;
-using TrelloApi.Domain.Entities.Label;
+using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.Interfaces.Services;
-using TrelloApi.Domain.Label;
-using TrelloApi.Domain.Label.DTO;
 
 namespace TrelloApi.Application.Controllers;
 
@@ -27,7 +24,7 @@ public class LabelController : BaseController
     {
         try
         {
-            OutputLabelDto? label = await _labelService.GetLabelById(labelId, UserId);
+            OutputLabelDetailsDto? label = await _labelService.GetLabelById(labelId, UserId);
             if (label == null)
             {
                 _logger.LogDebug("Label {LabelId} not found", labelId);
@@ -44,28 +41,28 @@ public class LabelController : BaseController
         }
     }
     
-    [HttpGet("task/{taskId:int}")]
-    public async Task<IActionResult> GetLabelsByTaskId(int taskId)
+    [HttpGet("board/{boardId:int}")]
+    public async Task<IActionResult> GetLabelsByBoardId(int boardId)
     {
         try
         {
-            List<OutputLabelDto> labels = await _labelService.GetLabelsByTaskId(taskId, UserId);
-            _logger.LogDebug("Retrieved {Count} labels for task {TaskId}", labels.Count, taskId);
+            List<OutputLabelDetailsDto> labels = await _labelService.GetLabelsByBoardId(boardId, UserId);
+            _logger.LogDebug("Retrieved {Count} labels for board {BoardId}", labels.Count, boardId);
             return Ok(labels);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving labels for task {TaskId}", taskId);
+            _logger.LogError(ex, "Error retrieving labels for board {BoardId}", boardId);
             return StatusCode(500, new { message = "An unexpected error occurred." });
         }
     }
 
     [HttpPost("board/{boardId:int}")]
-    public async Task<IActionResult> AddLabel(int boardId, [FromBody] AddLabelDto addLabelDto)
+    public async Task<IActionResult> AddLabel(int boardId, [FromBody] AddLabelDto dto)
     {
         try
         {
-            OutputLabelDto? label = await _labelService.AddLabel(boardId, addLabelDto, UserId);
+            OutputLabelDetailsDto? label = await _labelService.AddLabel(boardId, dto, UserId);
             if (label == null)
             {
                 _logger.LogError("Failed to add label to board {BoardId}", boardId);
@@ -83,11 +80,11 @@ public class LabelController : BaseController
     }
 
     [HttpPut("{labelId:int}")]
-    public async Task<IActionResult> UpdateLabel(int labelId, [FromBody] UpdateLabelDto updateLabelDto)
+    public async Task<IActionResult> UpdateLabel(int labelId, [FromBody] UpdateLabelDto dto)
     {
         try
         {
-            OutputLabelDto? label = await _labelService.UpdateLabel(labelId, updateLabelDto, UserId);
+            OutputLabelDetailsDto? label = await _labelService.UpdateLabel(labelId, dto, UserId);
             if (label == null)
             {
                 _logger.LogDebug("Label {LabelId} not found for update", labelId);
@@ -109,15 +106,15 @@ public class LabelController : BaseController
     {
         try
         {
-            OutputLabelDto? label = await _labelService.DeleteLabel(labelId, UserId);
-            if (label == null)
+            Boolean isDeleted = await _labelService.DeleteLabel(labelId, UserId);
+            if (!isDeleted)
             {
                 _logger.LogDebug("Label {LabelId} not found for deletion", labelId);
                 return NotFound(new { message = "Label not found." });
             }
 
             _logger.LogInformation("Label {LabelId} deleted", labelId);
-            return Ok(label);
+            return NoContent();
         }
         catch (Exception ex)
         {

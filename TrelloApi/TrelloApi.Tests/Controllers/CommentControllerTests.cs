@@ -3,8 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
-using TrelloApi.Domain.Comment.DTO;
-using TrelloApi.Domain.Entities.Comment;
 using TrelloApi.Domain.Interfaces.Services;
 
 namespace TrelloApi.Tests.Controllers;

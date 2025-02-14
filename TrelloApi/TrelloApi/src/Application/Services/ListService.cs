@@ -1,10 +1,9 @@
 using AutoMapper;
 using Microsoft.IdentityModel.Tokens;
-using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.Entities.List;
+using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
 using TrelloApi.Domain.Interfaces.Services;
-using TrelloApi.Domain.UserBoard;
 
 namespace TrelloApi.Application.Services;
 

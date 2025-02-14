@@ -1,27 +1,26 @@
 using AutoMapper;
-using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.Board;
-using TrelloApi.Domain.Entities.Board;
+using TrelloApi.Domain.Constants;
+using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
 using TrelloApi.Domain.Interfaces.Services;
-using TrelloApi.Domain.UserBoard.DTO;
 
 namespace TrelloApi.Application.Services;
 
 public class BoardService: BaseService, IBoardService
 {
     private readonly IBoardRepository _boardRepository;
-    private readonly IUserBoardService _userBoardService;
+    private readonly IUserBoardRepository _userBoardRepository;
     private readonly ILogger<BoardService> _logger;
     
-    public BoardService(IMapper mapper, IBoardAuthorizationService boardAuthorizationService, IUserBoardService userBoardService, IBoardRepository boardRepository, ILogger<BoardService> logger) : base(mapper, boardAuthorizationService)
+    public BoardService(IMapper mapper, IBoardAuthorizationService boardAuthorizationService, IBoardRepository boardRepository, IUserBoardRepository userBoardRepository, ILogger<BoardService> logger) : base(mapper, boardAuthorizationService)
     {
-        _userBoardService = userBoardService;
         _boardRepository = boardRepository;
+        _userBoardRepository = userBoardRepository;
         _logger = logger;
     }
     
-    public async Task<OutputBoardDto?> GetBoardById(int boardId, int userId)
+    public async Task<OutputBoardDetailsDto?> GetBoardById(int boardId, int uid)
     {
         try
         {
@@ -33,7 +32,7 @@ public class BoardService: BaseService, IBoardService
             }
 
             _logger.LogDebug("Board {BoardId} retrieved", boardId);
-            return _mapper.Map<OutputBoardDto>(board);
+            return _mapper.Map<OutputBoardDetailsDto>(board);
         }
         catch (Exception ex)
         {
@@ -42,51 +41,58 @@ public class BoardService: BaseService, IBoardService
         }
     }
     
-    public async Task<List<OutputBoardDto>> GetBoards(int userId)
+    public async Task<List<OutputBoardListDto>> GetBoardsByUserId(int uid)
     {
         try
         {
-            List<Board> boards = await _boardRepository.GetBoards(userId);
-            _logger.LogDebug("Retrieved {Count} boards for user {UserId}", boards.Count, userId);
-            return _mapper.Map<List<OutputBoardDto>>(boards);
+            List<Board> boards = await _boardRepository.GetBoardsByUserId(uid);
+            _logger.LogDebug("Retrieved {Count} boards for user {UserId}", boards.Count, uid);
+            return _mapper.Map<List<OutputBoardListDto>>(boards);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving boards for user {UserId}", userId);
+            _logger.LogError(ex, "Error retrieving boards for user {UserId}", uid);
             throw;
         }
     }
 
-    public async Task<OutputBoardDto?> AddBoard(AddBoardDto addBoardDto, int userId)
+    public async Task<OutputBoardDetailsDto?> AddBoard(AddBoardDto dto, int uid)
     {
         try
         {
-            Board board = new Board(addBoardDto.Title, addBoardDto.Theme, addBoardDto.Icon);
-            Board? newBoard = await _boardRepository.AddBoard(board);
-            if (newBoard == null)
+            if (!BoardColorValues.BoardColorsAllowed.Contains(dto.Color))
             {
-                _logger.LogError("Failed to add board to user {UserId}", userId);
                 return null;
             }
             
-            AddUserBoardDto userBoard = new AddUserBoardDto
+            Board board = new Board(dto.Title, dto.Color);
+            
+            if (!string.IsNullOrEmpty(dto.Description))
             {
-                BoardId = newBoard.Id,
-                UserId = userId
-            };
-            await _userBoardService.AddUserBoard(userBoard, userId);
+                board.Description = dto.Description;
+            }
+            
+            Board? newBoard = await _boardRepository.AddBoard(board);
+            if (newBoard == null)
+            {
+                _logger.LogError("Failed to add board to user {UserId}", uid);
+                return null;
+            }
 
-            _logger.LogInformation("Board added to user {UserId}", userId);
-            return _mapper.Map<OutputBoardDto>(newBoard);
+            var userBoard = new UserBoard(uid, newBoard.Id);
+            await _userBoardRepository.AddUserBoard(userBoard);
+            
+            _logger.LogInformation("Board added to user {UserId}", uid);
+            return _mapper.Map<OutputBoardDetailsDto>(newBoard);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding board to user {UserId}", userId);
+            _logger.LogError(ex, "Error adding board to user {UserId}", uid);
             throw;
         }
     }
     
-    public async Task<OutputBoardDto?> UpdateBoard(int boardId, UpdateBoardDto updateBoardDto, int userId)
+    public async Task<OutputBoardDetailsDto?> UpdateBoard(int boardId, UpdateBoardDto dto, int uid)
     {
         try
         {
@@ -97,18 +103,24 @@ public class BoardService: BaseService, IBoardService
                 return null;
             }
 
-            if (!string.IsNullOrEmpty(updateBoardDto.Title))
+            if (!string.IsNullOrEmpty(dto.Title))
             {
-                board.Title = updateBoardDto.Title;
+                board.Title = dto.Title;
             }
-            if (!string.IsNullOrEmpty(updateBoardDto.Theme))
+            if (!string.IsNullOrEmpty(dto.Color))
             {
-                board.Theme = updateBoardDto.Theme;
+                board.Color = dto.Color;
             }
-            if (!string.IsNullOrEmpty(updateBoardDto.Icon))
+            if (!string.IsNullOrEmpty(dto.Description))
             {
-                board.Icon = updateBoardDto.Icon;
+                board.Description = dto.Description;
             }
+            if (dto.IsArchived != null)
+            {
+                board.IsArchived = dto.IsArchived.Value;
+                board.ArchivedAt = DateTime.UtcNow;
+            }
+            board.UpdatedAt = DateTime.UtcNow;
 
             Board? updatedBoard = await _boardRepository.UpdateBoard(board);
             if (updatedBoard == null)
@@ -118,7 +130,7 @@ public class BoardService: BaseService, IBoardService
             }
             
             _logger.LogInformation("Board {BoardId} updated", boardId);
-            return _mapper.Map<OutputBoardDto>(updatedBoard);
+            return _mapper.Map<OutputBoardDetailsDto>(updatedBoard);
         }
         catch (Exception ex)
         {
@@ -126,8 +138,8 @@ public class BoardService: BaseService, IBoardService
             throw;
         }
     }
-
-    public async Task<OutputBoardDto?> DeleteBoard(int boardId, int userId)
+    
+    public async Task<bool> DeleteBoard(int boardId, int uid)
     {
         try
         {
@@ -135,18 +147,18 @@ public class BoardService: BaseService, IBoardService
             if (board == null)
             {
                 _logger.LogWarning("Board {BoardId} not found for deletion", boardId);
-                return null;
+                return false;
             }
 
             Board? deletedBoard = await _boardRepository.DeleteBoard(board);
             if (deletedBoard == null)
             {
                 _logger.LogError("Failed to delete board {BoardId}", boardId);
-                return null;
+                return false;
             }
             
             _logger.LogInformation("Board {BoardId} deleted", boardId);
-            return _mapper.Map<OutputBoardDto>(deletedBoard);
+            return true;
         }
         catch (Exception ex)
         {

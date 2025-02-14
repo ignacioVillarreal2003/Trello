@@ -1,9 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TrelloApi.Application.Filters;
-using TrelloApi.Application.Services;
-using TrelloApi.Domain.Comment;
-using TrelloApi.Domain.Comment.DTO;
-using TrelloApi.Domain.Entities.Comment;
+using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.Interfaces.Services;
 
 namespace TrelloApi.Application.Controllers;
@@ -27,7 +24,7 @@ public class CommentController: BaseController
     {
         try
         {
-            OutputCommentDto? comment = await _commentService.GetCommentById(commentId, UserId);
+            OutputCommentDetailsDto? comment = await _commentService.GetCommentById(commentId, UserId);
             if (comment == null)
             {
                 _logger.LogDebug("Comment {CommentId} not found", commentId);
@@ -44,50 +41,50 @@ public class CommentController: BaseController
         }
     }
 
-    [HttpGet("task/{taskId:int}")]
-    public async Task<IActionResult> GetCommentsByTaskId(int taskId)
+    [HttpGet("card/{cardId:int}")]
+    public async Task<IActionResult> GetCommentsByCardId(int cardId)
     {
         try
         {
-            List<OutputCommentDto> comments = await _commentService.GetCommentsByTaskId(taskId, UserId);
-            _logger.LogDebug("Retrieved {Count} comments for task {TaskId}", comments.Count, taskId);
+            List<OutputCommentDetailsDto> comments = await _commentService.GetCommentsByCardId(cardId, UserId);
+            _logger.LogDebug("Retrieved {Count} comments for card {CardId}", comments.Count, cardId);
             return Ok(comments);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving comments for task {TaskId}", taskId);
+            _logger.LogError(ex, "Error retrieving comments for card {CardId}", cardId);
             return StatusCode(500, new { message = "An unexpected error occurred." });
         }
     }
 
-    [HttpPost("task/{taskId:int}")]
-    public async Task<IActionResult> AddComment(int taskId, [FromBody] AddCommentDto addCommentDto)
+    [HttpPost("card/{cardId:int}")]
+    public async Task<IActionResult> AddComment(int cardId, [FromBody] AddCommentDto dto)
     {
         try
         {
-            OutputCommentDto? comment = await _commentService.AddComment(taskId, addCommentDto, UserId);
+            OutputCommentDetailsDto? comment = await _commentService.AddComment(cardId, dto, UserId);
             if (comment == null)
             {
-                _logger.LogError("Failed to add comment to task {TaskId}", taskId);
+                _logger.LogError("Failed to add comment to card {CardId}", cardId);
                 return BadRequest(new { message = "Failed to add comment." });
             }
 
-            _logger.LogInformation("Comment added to task {TaskId}", taskId);
+            _logger.LogInformation("Comment added to card {CardId}", cardId);
             return CreatedAtAction(nameof(GetCommentById), new { commentId = comment.Id }, comment);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding comment to task {TaskId}", taskId);
+            _logger.LogError(ex, "Error adding comment to card {CardId}", cardId);
             return StatusCode(500, new { message = "An unexpected error occurred." });
         }
     }
 
     [HttpPut("{commentId:int}")]
-    public async Task<IActionResult> UpdateComment(int commentId, [FromBody] UpdateCommentDto updateCommentDto)
+    public async Task<IActionResult> UpdateComment(int commentId, [FromBody] UpdateCommentDto dto)
     {
         try
         {
-            OutputCommentDto? comment = await _commentService.UpdateComment(commentId, updateCommentDto, UserId);
+            OutputCommentDetailsDto? comment = await _commentService.UpdateComment(commentId, dto, UserId);
             if (comment == null)
             {
                 _logger.LogDebug("Comment {CommentId} not found for update", commentId);
@@ -109,15 +106,15 @@ public class CommentController: BaseController
     {
         try
         {
-            OutputCommentDto? comment = await _commentService.DeleteComment(commentId, UserId);
-            if (comment == null)
+            Boolean isDeleted = await _commentService.DeleteComment(commentId, UserId);
+            if (!isDeleted)
             {
                 _logger.LogDebug("Comment {CommentId} not found for deletion", commentId);
                 return NotFound(new { message = "Comment not found." });
             }
 
             _logger.LogInformation("Comment {CommentId} deleted", commentId);
-            return Ok(comment);
+            return NoContent();
         }
         catch (Exception ex)
         {
