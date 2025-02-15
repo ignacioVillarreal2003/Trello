@@ -1,30 +1,26 @@
-import {Component} from '@angular/core';
-import {AlertService} from '../../core/services/alert.service';
-import {UserHttpService} from '../../core/services/http/user-http.service';
-import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
-import {HttpErrorResponse, HttpResponse} from '@angular/common/http';
-import {ThemeBtnComponent} from '../../shared/buttons/theme-btn/theme-btn.component';
-import {SessionServiceService} from '../../core/services/session-service.service';
-import {Router} from '@angular/router';
+import { Component } from '@angular/core';
+import { AlertService } from '../../core/services/alert.service';
+import { UserHttpService } from '../../core/services/http/user-http.service';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { ThemeBtnComponent } from '../../shared/buttons/theme-btn/theme-btn.component';
+import { SessionServiceService } from '../../core/services/session-service.service';
+import { Router } from '@angular/router';
 import { Location } from '@angular/common';
 
 @Component({
-  selector: 'app-user-menu-modal',
-  imports: [
-    ReactiveFormsModule,
-    ThemeBtnComponent
-  ],
-  templateUrl: './user-menu-modal.component.html',
-  standalone: true,
-  styleUrl: './user-menu-modal.component.css'
+  selector: 'app-user-menu',
+  imports: [ReactiveFormsModule, ThemeBtnComponent],
+  templateUrl: './user-menu.component.html',
+  styleUrl: './user-menu.component.css'
 })
-export class UserMenuModalComponent {
+export class UserMenuComponent {
 
   constructor(private alertService: AlertService,
-              private userHttpService: UserHttpService,
-              private sessionServiceService: SessionServiceService,
-              private router: Router,
-              private location: Location) {}
+    private userHttpService: UserHttpService,
+    private sessionServiceService: SessionServiceService,
+    private router: Router,
+    private location: Location) { }
 
   updatePasswordForm: FormGroup = new FormGroup({
     oldPassword: new FormControl('', [Validators.required, Validators.minLength(8)]),

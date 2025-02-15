@@ -1,15 +1,15 @@
-export interface List {
+export interface Task {
   id?: string,
   title?: string,
   description?: string
   listId?: string
 }
 
-export interface AddList {
+export interface AddTask {
   title: string,
   description: string
 }
 
-export interface UpdateList {
+export interface UpdateTask {
   title?: string,
   description?: string}

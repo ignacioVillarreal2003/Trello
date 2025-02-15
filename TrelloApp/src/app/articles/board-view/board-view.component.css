@@ -1,4 +1,4 @@
-.board-view {
+.board {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -9,7 +9,7 @@ app-header {
   flex: 0 0 auto;
 }
 
-.board-content {
+.board__content {
   flex: 1 1 auto;
   overflow: hidden;
   display: flex;
@@ -65,7 +65,7 @@ app-header {
   background-size: cover;
 }
 
-.board-header {
+.board__header {
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -76,7 +76,7 @@ app-header {
   flex: 0 0 auto;
 }
 
-.board-title-input {
+.board__title-input {
   max-width: 400px;
   width: 100%;
   padding: 10px;
@@ -88,17 +88,17 @@ app-header {
   transition: all 0.1s cubic-bezier(0.2, 0.5, 0.5, 1);
 }
 
-.board-title-input:hover {
+.board__title-input:hover {
   background-color: var(--transparent-background-3);
 }
 
-.board-title-input:focus-visible {
+.board__title-input:focus-visible {
   outline: none;
   background-color: var(--text-color);
   color: var(--text-color-complement);
 }
 
-.board-options-button {
+.board__options-button {
   width: 40px;
   height: 40px;
   display: flex;
@@ -111,45 +111,45 @@ app-header {
   transition: all .1s ease-in-out;
 }
 
-.board-options-button:hover {
+.board__options-button:hover {
   background-color: var(--transparent-background-3);
 }
 
-.board-options-button .dot {
+.board__options-button .dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background-color: var(--text-color);
 }
 
-.lists-section {
+.board__lists {
   min-width: 100%;
   height: 100%;
   padding: 20px;
   overflow-x: auto;
 }
 
-.lists-section::-webkit-scrollbar {
+.board__lists::-webkit-scrollbar {
   height: 12px;
 }
 
-.lists-section::-webkit-scrollbar-thumb {
+.board__lists::-webkit-scrollbar-thumb {
   background-color: var(--transparent-background-1);
   border-radius: 5px;
 }
 
-.lists-section::-webkit-scrollbar-thumb:hover {
+.board__lists::-webkit-scrollbar-thumb:hover {
   background-color: var(--transparent-background-4);
 }
 
-.lists-container {
+.board__lists-container {
   width: 100%;
   height: 100%;
   display: flex;
   gap: 20px;
 }
 
-.board-list {
+.board__list {
   width: 300px;
   min-width: 300px;
   display: flex;
@@ -161,14 +161,14 @@ app-header {
   backdrop-filter: blur(20px) contrast(120%) brightness(90%);
 }
 
-.list-header {
+.board__list-header {
   width: 100%;
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.list-title-input {
+.board__list-title-input {
   width: 100%;
   padding: 10px;
   font-size: 16px;
@@ -180,13 +180,13 @@ app-header {
   transition: all .2s ease-in-out;
 }
 
-.list-title-input:focus-visible {
+.board__list-title-input:focus-visible {
   outline: none;
   background-color: var(--text-color);
   color: var(--text-color-complement);
 }
 
-.list-options-button {
+.board__list-options-button {
   width: 32px;
   min-width: 32px;
   height: 32px;
@@ -200,18 +200,18 @@ app-header {
   transition: all .1s ease-in-out;
 }
 
-.list-options-button:hover {
+.board__list-options-button:hover {
   background-color: var(--transparent-background-3);
 }
 
-.list-options-button .dot {
+.board__list-options-button .dot {
   width: 4px;
   height: 4px;
   border-radius: 50%;
   background-color: var(--text-color);
 }
 
-.task-list {
+.board__task-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -220,20 +220,20 @@ app-header {
   overflow-y: auto;
 }
 
-.task-list::-webkit-scrollbar {
+.board__task-list::-webkit-scrollbar {
   width: 8px;
 }
 
-.task-list::-webkit-scrollbar-thumb {
+.board__task-list::-webkit-scrollbar-thumb {
   background-color: var(--transparent-background-1);
   border-radius: 5px;
 }
 
-.task-list::-webkit-scrollbar-thumb:hover {
+.board__task-list::-webkit-scrollbar-thumb:hover {
   background-color: var(--transparent-background-4);
 }
 
-.task-button {
+.board__task-button {
   width: 100%;
   padding: 10px;
   text-align: start;
@@ -246,11 +246,11 @@ app-header {
   transition: background-color 0.1s ease-in-out;
 }
 
-.task-button:hover {
+.board__task-button:hover {
   background-color: var(--transparent-background-1);
 }
 
-.add-task-button {
+.board__add-task-button {
   padding: 10px;
   border: none;
   border-radius: 5px;
@@ -259,17 +259,17 @@ app-header {
   transition: all .2s ease-in-out;
 }
 
-.add-task-button:hover {
+.board__add-task-button:hover {
   background-color: var(--transparent-background-1);
 }
 
-.board-list-add {
+.board__list-add {
   width: 300px;
   min-width: 300px;
   padding-right: 20px;
 }
 
-.add-list-button {
+.board__add-list-button {
   width: 100%;
   padding: 10px;
   border: none;
@@ -280,6 +280,6 @@ app-header {
   transition: all .2s ease-in-out;
 }
 
-.add-list-button:hover {
+.board__add-list-button:hover {
   background-color: var(--transparent-background-1);
 }

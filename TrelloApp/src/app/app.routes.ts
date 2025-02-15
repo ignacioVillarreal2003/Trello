@@ -21,6 +21,6 @@ export const routes: Routes = [
   ,
   {
     path: 'user-menu',
-    loadComponent: () => import('./articles/user-menu-modal/user-menu-modal.component').then(m => m.UserMenuModalComponent),
+    loadComponent: () => import('./articles/user-menu/user-menu.component').then(m => m.UserMenuComponent),
   }
 ];

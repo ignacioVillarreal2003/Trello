@@ -1,57 +1,45 @@
-<div class="board-view">
+<div class="board">
   <app-header></app-header>
 
-  <main class="board-content background-3">
-    <header class="board-header">
-      <input
-        class="board-title-input"
-        type="text"
-        value="Board's title"
-        placeholder="Board's title"
-      />
-      <button class="board-options-button" (click)="switchBoardMenu()">
+  <section class="board__content background-3">
+    <header class="board__header">
+      <input class="board__title-input" type="text" value="Board's title" placeholder="Board's title" />
+      <button class="board__options-button" (click)="switchBoardMenu()">
         <span class="dot"></span>
         <span class="dot"></span>
         <span class="dot"></span>
       </button>
     </header>
 
-    <section class="lists-section">
-      <ul class="lists-container">
-        <li class="board-list">
-          <header class="list-header">
-            <input
-              class="list-title-input"
-              type="text"
-              value="list title"
-              placeholder="List title"
-            />
-            <button class="list-options-button">
+    <section class="board__lists">
+      <ul class="board__lists-container">
+        <li class="board__list" *ngFor="let list of lists">
+          <header class="board__list-header">
+            <input class="board__list-title-input" type="text" [value]="list.title" placeholder="List title" />
+            <button class="board__list-options-button">
               <span class="dot"></span>
               <span class="dot"></span>
               <span class="dot"></span>
             </button>
           </header>
 
-          <ul class="task-list">
-            <li>
-              <button class="task-button">
-                task name
-              </button>
+          <ul class="board__task-list">
+            <li *ngFor="let task of list.tasks">
+              <button class="board__task-button">{{ task.title }}</button>
             </li>
           </ul>
 
-          <button class="add-task-button">
+          <button class="board__add-task-button" (click)="addTask(list.id)">
             Add Task
           </button>
         </li>
         
-        <li class="board-list-add">
-          <button class="add-list-button">
+        <li class="board__list-add">
+          <button class="board__add-list-button" (click)="addList()">
             + Add List
           </button>
         </li>
       </ul>
     </section>
-  </main>
+  </section>
 </div>

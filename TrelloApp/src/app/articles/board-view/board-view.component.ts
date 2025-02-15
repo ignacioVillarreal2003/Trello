@@ -111,4 +111,12 @@ export class BoardViewComponent {
       body.style.overflow = 'hidden';
     }
   }
+
+  addList() {
+
+  }
+
+  addTask(n: string | undefined) {
+
+  }
 }

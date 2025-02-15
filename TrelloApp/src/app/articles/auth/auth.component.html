@@ -1,27 +1,49 @@
-<div class="auth">
-  <div class="container">
-    <header>
-      <img class="logo" src="./icons/trello-icon-light.svg" alt="Trello Icon">
-      <h1 class="title">Trello</h1>
+<section class="auth">
+  <div class="auth__container">
+    <header class="auth__header">
+      <img class="auth__logo" src="./icons/trello-icon.svg" alt="Trello Logo">
+      <h1 class="auth__title">Trello</h1>
     </header>
 
-    <h2 class="subtitle" *ngIf="isLogin">Log in to continue</h2>
-    <h2 class="subtitle" *ngIf="!isLogin">Sign up to continue</h2>
+    <h2 class="auth__subtitle" *ngIf="isLogin">Log in to continue</h2>
+    <h2 class="auth__subtitle" *ngIf="!isLogin">Sign up to continue</h2>
 
-    <form class="form-wrapper" *ngIf="isLogin" [formGroup]="formLogin" (ngSubmit)="onSubmitLogin()">
-      <input class="input-base appearance-outline aspect-free blue radius-small size-small" formControlName="email" placeholder="Enter your email">
-      <input class="input-base appearance-outline aspect-free blue radius-small size-small" formControlName="password" type="password" placeholder="Enter your password">
-      <button class="btn-base aspect-free appearance-solid radius-small size-small blue">Continue</button>
+    <form class="auth__form" *ngIf="isLogin" [formGroup]="formLogin" (ngSubmit)="onSubmitLogin()">
+      <fieldset class="auth__field">
+        <legend class="auth__label">Email</legend>
+        <input class="input-base appearance-outline aspect-free radius-small size-small blue" formControlName="email" placeholder="Enter your email">
+      </fieldset>
+      
+      <fieldset class="auth__field">
+        <legend class="auth__label">Password</legend>
+        <input class="input-base appearance-outline aspect-free radius-small size-small blue" formControlName="password" type="password" placeholder="Enter your password">
+      </fieldset>
+      
+      <button class="btn-base aspect-free appearance-solid radius-small size-small blue" type="submit">Continue</button>
     </form>
 
-    <form class="form-wrapper" *ngIf="!isLogin" [formGroup]="formRegister" (ngSubmit)="onSubmitRegister()">
-      <input class="input-base appearance-outline aspect-free blue radius-small size-small" formControlName="email" placeholder="Enter your email">
-      <input class="input-base appearance-outline aspect-free blue radius-small size-small" formControlName="password" type="password" placeholder="Enter your password">
-      <input class="input-base appearance-outline aspect-free blue radius-small size-small" formControlName="username" placeholder="Enter your username">
+    <form class="auth__form" *ngIf="!isLogin" [formGroup]="formRegister" (ngSubmit)="onSubmitRegister()">
+      <fieldset class="auth__field">
+        <legend class="auth__label">Email</legend>
+        <input class="input-base appearance-outline aspect-free radius-small size-small blue" formControlName="email" placeholder="Enter your email">
+      </fieldset>
+      
+      <fieldset class="auth__field">
+        <legend class="auth__label">Password</legend>
+        <input class="input-base appearance-outline aspect-free radius-small size-small blue" formControlName="password" type="password" placeholder="Enter your password">
+      </fieldset>
+      
+      <fieldset class="auth__field">
+        <legend class="auth__label">Username</legend>
+        <input class="input-base appearance-outline aspect-free radius-small size-small blue" formControlName="username" placeholder="Enter your username">
+      </fieldset>
+      
       <button class="btn-base aspect-free appearance-solid radius-small size-small blue" type="submit">Sign up</button>
     </form>
 
-    <a *ngIf="isLogin" (click)="isLogin=!isLogin">Create an account</a>
-    <a *ngIf="!isLogin" (click)="isLogin=!isLogin">Log in</a>
+    <footer class="auth__footer">
+      <a class="auth__link" *ngIf="isLogin" (click)="isLogin=!isLogin">Create an account</a>
+      <a class="auth__link" *ngIf="!isLogin" (click)="isLogin=!isLogin">Log in</a>
+    </footer>
   </div>
-</div>
+</section>

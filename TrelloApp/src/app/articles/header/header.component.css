@@ -1,4 +1,4 @@
-header {
+.header {
   width: 100%;
   padding: 15px 20px;
   display: flex;
@@ -7,31 +7,32 @@ header {
   background-color: var(--background-1);
 }
 
-.link-wrapper {
+.header__brand {
   display: flex;
   gap: 20px;
   align-items: center;
-  justify-content: center;
   text-decoration: none;
 }
 
-.logo {
+.header__logo {
   width: 40px;
   height: 40px;
 }
 
-.title {
+.header__title {
   font-size: clamp(20px, 5vw, 28px);
   color: var(--color-blue-500);
 }
 
-.link-configuration {
+.header__user {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 40px;
   height: 40px;
   background-color: var(--color-blue-500);
   font-size: 26px;
   border-radius: 50%;
-  border: none;
   color: white;
   text-decoration: none;
   text-align: center;

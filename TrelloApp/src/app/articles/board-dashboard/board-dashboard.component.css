@@ -1,11 +1,11 @@
-.board-dashboard {
+.dashboard {
   width: 100%;
   display: flex;
   flex-direction: column;
   background-color: var(--background-1);
 }
 
-.dashboard {
+.dashboard__content {
   width: 100%;
   display: flex;
   flex-direction: column;
@@ -14,11 +14,11 @@
   background-color: var(--background-1);
 }
 
-.dashboard-header {
+.dashboard__header {
   display: flex;
 }
 
-.boards-grid {
+.dashboard__grid {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -28,14 +28,14 @@
   margin: 0;
 }
 
-.board-card {
+.dashboard__card {
   aspect-ratio: 2;
   display: flex;
   border-radius: 5px;
   overflow: hidden;
 }
 
-.board-card-button {
+.dashboard__card-button {
   width: 100%;
   height: 100%;
   background-color: var(--transparent-background-2);
@@ -68,47 +68,29 @@
 .background-6 {
   background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
 }
-.background-7 {
-  background-image: url("/backgrounds/background-1.jpg");
-  background-position: 50%;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-.background-8 {
-  background-image: url("/backgrounds/background-2.jpg");
-  background-position: 50%;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-.background-9 {
-  background-image: url("/backgrounds/background-3.jpg");
-  background-position: 50%;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-.background-10 {
-  background-image: url("/backgrounds/background-4.jpg");
-  background-position: 50%;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-.background-11 {
-  background-image: url("/backgrounds/background-5.jpg");
-  background-position: 50%;
+
+.background-7, .background-8, .background-9, .background-10, .background-11 {
+  background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
 }
 
-.background-7 .board-card-button,
-.background-8 .board-card-button,
-.background-9 .board-card-button,
-.background-10 .board-card-button,
-.background-11 .board-card-button {
+.background-7 { background-image: url("/backgrounds/background-1.jpg"); }
+.background-8 { background-image: url("/backgrounds/background-2.jpg"); }
+.background-9 { background-image: url("/backgrounds/background-3.jpg"); }
+.background-10 { background-image: url("/backgrounds/background-4.jpg"); }
+.background-11 { background-image: url("/backgrounds/background-5.jpg"); }
+
+.background-7 .dashboard__card-button,
+.background-8 .dashboard__card-button,
+.background-9 .dashboard__card-button,
+.background-10 .dashboard__card-button,
+.background-11 .dashboard__card-button {
   color: white;
 }
 
 @media (max-width: 800px) {
-  .boards-grid {
+  .dashboard__grid {
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 }

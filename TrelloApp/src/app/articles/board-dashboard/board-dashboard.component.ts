@@ -23,7 +23,7 @@ import {CreateBoardModalComponent} from '../modals/create-board-modal/create-boa
   styleUrl: './board-dashboard.component.css'
 })
 export class BoardDashboardComponent {
-  isOpenCreateBoard: boolean = false;
+  isCreateBoardOpen: boolean = false;
   boards: Board[] = [];
 
   constructor(private boardHttp: BoardHttpService,
@@ -50,10 +50,10 @@ export class BoardDashboardComponent {
     });
   }
 
-  switchCreateBoard(): void {
-    this.isOpenCreateBoard = !this.isOpenCreateBoard;
+  toggleCreateBoard(): void {
+    this.isCreateBoardOpen = !this.isCreateBoardOpen;
     const body: HTMLElement = document.querySelector('body') as HTMLElement;
-    if (!this.isOpenCreateBoard) {
+    if (!this.isCreateBoardOpen) {
       body.style.overflow = 'auto';
     } else {
       body.style.overflow = 'hidden';
