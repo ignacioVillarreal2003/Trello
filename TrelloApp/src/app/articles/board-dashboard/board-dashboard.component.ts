@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import {NgForOf, NgIf, NgStyle} from '@angular/common';
-import {HeaderComponent} from '../../shared/header/header.component';
+import {HeaderComponent} from '../header/header.component';
 import {BoardHttpService} from '../../core/services/http/board-http.service';
 import {HttpErrorResponse} from '@angular/common/http';
 import {AlertService} from '../../core/services/alert.service';

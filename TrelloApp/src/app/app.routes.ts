@@ -18,4 +18,9 @@ export const routes: Routes = [
     path: 'board-view/:id',
     loadComponent: () => import('./articles/board-view/board-view.component').then(m => m.BoardViewComponent),
   }
+  ,
+  {
+    path: 'user-menu',
+    loadComponent: () => import('./articles/user-menu-modal/user-menu-modal.component').then(m => m.UserMenuModalComponent),
+  }
 ];

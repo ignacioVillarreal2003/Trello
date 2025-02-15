@@ -1,7 +1,7 @@
 <div class="board-view">
   <app-header></app-header>
 
-  <main class="board-content background-1">
+  <main class="board-content background-3">
     <header class="board-header">
       <input
         class="board-title-input"
@@ -9,7 +9,11 @@
         value="Board's title"
         placeholder="Board's title"
       />
-      <app-options-btn (click)="switchBoardMenu()"></app-options-btn>
+      <button class="board-options-button" (click)="switchBoardMenu()">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </button>
     </header>
 
     <section class="lists-section">
@@ -22,7 +26,11 @@
               value="list title"
               placeholder="List title"
             />
-            <app-close-btn></app-close-btn>
+            <button class="list-options-button">
+              <span class="dot"></span>
+              <span class="dot"></span>
+              <span class="dot"></span>
+            </button>
           </header>
 
           <ul class="task-list">
@@ -37,7 +45,7 @@
             Add Task
           </button>
         </li>
-
+        
         <li class="board-list-add">
           <button class="add-list-button">
             + Add List

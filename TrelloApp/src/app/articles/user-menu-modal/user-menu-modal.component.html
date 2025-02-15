@@ -1,0 +1,64 @@
+<section class="user-menu-modal background-1">
+  <div class="user-menu-modal__container">
+    <div class="data-block">
+      <form class="user-menu-modal__form" [formGroup]="updatePasswordForm" (ngSubmit)="onSubmitUpdatePassword()">
+        <fieldset class="user-menu-modal__field">
+          <legend class="user-menu-modal__label">Your last password</legend>
+          <input
+            formControlName="oldPassword"
+            class="input-base appearance-outline aspect-free blue radius-small size-small"
+            placeholder="Your last password"
+          />
+        </fieldset>
+        <fieldset class="user-menu-modal__field">
+          <legend class="user-menu-modal__label">Your new password</legend>
+          <input
+            formControlName="newPassword"
+            class="input-base appearance-outline aspect-free blue radius-small size-small"
+            placeholder="Your new password"
+          />
+        </fieldset>
+  
+        <footer class="user-menu-modal__actions">
+          <button
+            type="submit"
+            class="btn-base appearance-solid size-small radius-small aspect-free skyblue">
+            Change password
+          </button>
+        </footer>
+      </form>
+  
+      <form class="user-menu-modal__form" [formGroup]="updateUsernameForm" (ngSubmit)="onSubmitUpdateUsername()">
+        <fieldset class="user-menu-modal__field">
+          <legend class="user-menu-modal__label">Change username</legend>
+          <input
+            formControlName="username"
+            class="input-base appearance-outline aspect-free blue radius-small size-small"
+            placeholder="Your new username"
+          />
+        </fieldset>
+  
+        <footer class="user-menu-modal__actions">
+          <button
+            type="submit"
+            class="btn-base appearance-solid size-small radius-small aspect-free skyblue">
+            Change username
+          </button>
+        </footer>
+      </form>
+    </div>
+    
+    <div class="data-block">
+      <div class="user-menu-modal__theme-wrapper">
+        <app-theme-btn></app-theme-btn>
+      </div>
+  
+      <footer class="user-menu-modal__global-actions">
+        <button class="btn-base appearance-light orange size-small radius-small aspect-free" (click)="logout()">Log out</button>
+        <button class="btn-base appearance-solid red size-small radius-small aspect-free" (click)="goBack()">Close</button>
+      </footer>
+    </div>
+  </div>
+</section>
+
+

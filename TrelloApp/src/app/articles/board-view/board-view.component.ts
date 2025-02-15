@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import {HeaderComponent} from '../../shared/header/header.component';
+import {HeaderComponent} from '../header/header.component';
 import {NgForOf, NgIf, NgStyle} from '@angular/common';
 import {TaskViewComponent} from '../task-view/task-view.component';
 import {BoardMenuComponent} from '../board-menu/board-menu.component';

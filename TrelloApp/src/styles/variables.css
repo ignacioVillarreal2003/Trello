@@ -135,11 +135,30 @@
 }
 
 body.dark {
+  --background-1: #1E1E1E;
+  --text-color: white;
+  --text-color-complement: black;
+  --transparent-background-1: rgba(0, 0, 0, 0.4);
+  --transparent-background-2: rgba(0, 0, 0, 0.2);
+  --transparent-background-3: rgba(0, 0, 0, 0.5);
+  --transparent-background-4: rgba(0, 0, 0, 0.6);
+}
+
+body.light {
+  --background-1: #F4F4F4;
+  --text-color: black;
+  --text-color-complement: white;
+  --transparent-background-1: rgba(255, 255, 255, 0.4);
+  --transparent-background-2: rgba(255, 255, 255, 0.2);
+  --transparent-background-3: rgba(255, 255, 255, 0.5);
+  --transparent-background-4: rgba(255, 255, 255, 0.6);
+}
+
+body.dark {
   /* Texto */
   --text-1: #E4E4E4;
 
   /* Background */
-  --background-1: #1E1E1E;
   --background-transparent-1: rgba(0, 0, 0, 0.2);
   --background-transparent-2: rgba(0, 0, 0, 0.4);
   --background-transparent-3: rgba(255, 255, 255, 0.1);
@@ -156,7 +175,6 @@ body.light {
   --text-1: #222222;
 
   /* Background */
-  --background-1: #F4F4F4;
   --background-transparent-1: rgba(62, 62, 62, 0.17);
   --background-transparent-2: rgba(0, 0, 0, 0.4);
   --background-transparent-3: rgba(0, 0, 0, 0.1);
