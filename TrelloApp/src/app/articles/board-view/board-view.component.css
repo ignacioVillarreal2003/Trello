@@ -283,3 +283,11 @@ app-header {
 .board__add-list-button:hover {
   background-color: var(--transparent-background-1);
 }
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform .25s cubic-bezier(0, 0, 0.2, 1);
+}

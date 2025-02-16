@@ -12,8 +12,8 @@
     </header>
 
     <section class="board__lists">
-      <ul class="board__lists-container">
-        <li class="board__list" *ngFor="let list of lists">
+      <ul class="board__lists-container"  cdkDropList [cdkDropListData]="lists" (cdkDropListDropped)="drop($event)" cdkDropListGroup cdkDropListOrientation="horizontal">
+        <li class="board__list" *ngFor="let list of lists" cdkDrag>
           <header class="board__list-header">
             <input class="board__list-title-input" type="text" [value]="list.title" placeholder="List title" />
             <button class="board__list-options-button">
@@ -23,17 +23,17 @@
             </button>
           </header>
 
-          <ul class="board__task-list" cdkDropList (cdkDropListDropped)="drop($event)">
-            <li *ngFor="let task of list.tasks; let i = index; trackBy: trackByFn" cdkDrag>
+          <ul class="board__task-list" cdkDropList [cdkDropListData]="list.tasks" (cdkDropListDropped)="drop($event)">
+            <li *ngFor="let task of list.tasks" cdkDrag cdkDragPreviewContainer="parent">
               <button class="board__task-button">{{ task.title }}</button>
             </li>
-          </ul>                  
+          </ul>
 
           <button class="board__add-task-button" (click)="addTask(list.id)">
             Add Task
           </button>
         </li>
-        
+
         <li class="board__list-add">
           <button class="board__add-list-button" (click)="addList()">
             + Add List

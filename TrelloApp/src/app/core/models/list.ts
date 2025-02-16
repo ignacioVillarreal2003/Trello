@@ -4,7 +4,7 @@ export interface List {
   id?: string,
   title?: string,
   boardId?: string
-  tasks?: Task[]
+  tasks: Task[]
 }
 
 export interface AddList {

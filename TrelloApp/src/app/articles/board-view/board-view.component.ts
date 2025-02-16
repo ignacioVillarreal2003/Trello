@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, ElementRef, ViewChild} from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
 import { NgForOf, NgIf, NgStyle } from '@angular/common';
 import { TaskViewComponent } from '../task-view/task-view.component';
@@ -13,7 +13,7 @@ import { ListHttpService } from '../../core/services/http/list-http.service';
 import { AlertService } from '../../core/services/alert.service';
 import { CreateListModalComponent } from '../modals/create-list-modal/create-list-modal.component';
 import { CommunicationService } from '../../core/services/communication.service';
-import { CdkDropList, CdkDrag, DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkDragMove, DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropListGroup} from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-board-view',
@@ -28,7 +28,8 @@ import { CdkDropList, CdkDrag, DragDropModule, CdkDragDrop, moveItemInArray } fr
     CreateTaskModalComponent,
     NgForOf,
     CreateListModalComponent,
-    DragDropModule
+    DragDropModule,
+    CdkDropListGroup,
   ],
   templateUrl: './board-view.component.html',
   standalone: true,
@@ -43,45 +44,56 @@ export class BoardViewComponent {
   isOpenBoardMenu: boolean = false;
   lists: List[] = [
     {
-      id: "1",
-      title: "titulo",
-      boardId: "1",
+      title: "Lista 1",
       tasks: [
         {
-          id: "1",
-          title: "titulo",
-          description: "descripcion",
-          listId: "1"
+          title: "Lista 1 - Tarea 1",
         },
         {
-          id: "2",
-          title: "titulo 2",
-          description: "descripcion",
-          listId: "1"
+          title: "Lista 1 - Tarea 2",
         },
         {
-          id: "3",
-          title: "titulo 3",
-          description: "descripcion",
-          listId: "1"
+          title: "Lista 1 - Tarea 3",
+        }
+      ]
+    },
+    {
+      title: "Lista 2",
+      tasks: [
+        {
+          title: "Lista 2 - Tarea 1",
+        },
+        {
+          title: "Lista 2 - Tarea 2",
+        },
+        {
+          title: "Lista 2 - Tarea 3",
+        }
+      ]
+    },
+    {
+      title: "Lista 2",
+      tasks: [
+        {
+          title: "Lista 2 - Tarea 1",
+        },
+        {
+          title: "Lista 2 - Tarea 2",
+        },
+        {
+          title: "Lista 2 - Tarea 3",
         }
       ]
     }
   ]
 
-  drop(event: CdkDragDrop<any[]>) {
-    const listIndex = this.lists.findIndex(l => {
-      if (l.tasks != null) {
-        l.tasks.includes(event.item.data)
-      }
-    });
-    if (listIndex !== -1 && this.lists[listIndex].tasks != null) {
-      moveItemInArray(this.lists[listIndex].tasks, event.previousIndex, event.currentIndex);
+  drop(event: CdkDragDrop<any[]>): void {
+    if (event.previousContainer === event.container) {
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex)
+    } else {
+      transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex)
     }
-  }
-  
-  trackByFn(index: number, item: any): any {
-    return item.id; // o cualquier propiedad única de la tarea
+    console.log(this.lists)
   }
 
   constructor(private route: ActivatedRoute,
