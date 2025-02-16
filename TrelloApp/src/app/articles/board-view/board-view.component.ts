@@ -1,18 +1,19 @@
 import { Component } from '@angular/core';
-import {HeaderComponent} from '../header/header.component';
-import {NgForOf, NgIf, NgStyle} from '@angular/common';
-import {TaskViewComponent} from '../task-view/task-view.component';
-import {BoardMenuComponent} from '../board-menu/board-menu.component';
-import {OptionsBtnComponent} from '../../shared/buttons/options-btn/options-btn.component';
-import {CloseBtnComponent} from '../../shared/buttons/close-btn/close-btn.component';
-import {CreateTaskModalComponent} from '../modals/create-task-modal/create-task-modal.component';
-import {List} from '../../core/models/list';
-import {ActivatedRoute} from '@angular/router';
-import {HttpErrorResponse} from '@angular/common/http';
-import {ListHttpService} from '../../core/services/http/list-http.service';
-import {AlertService} from '../../core/services/alert.service';
-import {CreateListModalComponent} from '../modals/create-list-modal/create-list-modal.component';
-import {CommunicationService} from '../../core/services/communication.service';
+import { HeaderComponent } from '../header/header.component';
+import { NgForOf, NgIf, NgStyle } from '@angular/common';
+import { TaskViewComponent } from '../task-view/task-view.component';
+import { BoardMenuComponent } from '../board-menu/board-menu.component';
+import { OptionsBtnComponent } from '../../shared/buttons/options-btn/options-btn.component';
+import { CloseBtnComponent } from '../../shared/buttons/close-btn/close-btn.component';
+import { CreateTaskModalComponent } from '../modals/create-task-modal/create-task-modal.component';
+import { List } from '../../core/models/list';
+import { ActivatedRoute } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
+import { ListHttpService } from '../../core/services/http/list-http.service';
+import { AlertService } from '../../core/services/alert.service';
+import { CreateListModalComponent } from '../modals/create-list-modal/create-list-modal.component';
+import { CommunicationService } from '../../core/services/communication.service';
+import { CdkDropList, CdkDrag, DragDropModule, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-board-view',
@@ -26,7 +27,8 @@ import {CommunicationService} from '../../core/services/communication.service';
     CloseBtnComponent,
     CreateTaskModalComponent,
     NgForOf,
-    CreateListModalComponent
+    CreateListModalComponent,
+    DragDropModule
   ],
   templateUrl: './board-view.component.html',
   standalone: true,
@@ -50,15 +52,42 @@ export class BoardViewComponent {
           title: "titulo",
           description: "descripcion",
           listId: "1"
+        },
+        {
+          id: "2",
+          title: "titulo 2",
+          description: "descripcion",
+          listId: "1"
+        },
+        {
+          id: "3",
+          title: "titulo 3",
+          description: "descripcion",
+          listId: "1"
         }
       ]
     }
   ]
 
+  drop(event: CdkDragDrop<any[]>) {
+    const listIndex = this.lists.findIndex(l => {
+      if (l.tasks != null) {
+        l.tasks.includes(event.item.data)
+      }
+    });
+    if (listIndex !== -1 && this.lists[listIndex].tasks != null) {
+      moveItemInArray(this.lists[listIndex].tasks, event.previousIndex, event.currentIndex);
+    }
+  }
+  
+  trackByFn(index: number, item: any): any {
+    return item.id; // o cualquier propiedad única de la tarea
+  }
+
   constructor(private route: ActivatedRoute,
-              private listHttpService: ListHttpService,
-              private alertService: AlertService,
-              private communicationService: CommunicationService) {}
+    private listHttpService: ListHttpService,
+    private alertService: AlertService,
+    private communicationService: CommunicationService) { }
 
   ngOnInit(): void {
     this.route.paramMap.subscribe((params: any): void => {

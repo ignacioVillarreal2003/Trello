@@ -23,11 +23,11 @@
             </button>
           </header>
 
-          <ul class="board__task-list">
-            <li *ngFor="let task of list.tasks">
+          <ul class="board__task-list" cdkDropList (cdkDropListDropped)="drop($event)">
+            <li *ngFor="let task of list.tasks; let i = index; trackBy: trackByFn" cdkDrag>
               <button class="board__task-button">{{ task.title }}</button>
             </li>
-          </ul>
+          </ul>                  
 
           <button class="board__add-task-button" (click)="addTask(list.id)">
             Add Task
