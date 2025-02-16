@@ -1,7 +1,7 @@
 <div class="board">
   <app-header></app-header>
 
-  <section class="board__content background-3">
+  <section class="board__content background-10">
     <header class="board__header">
       <input class="board__title-input" type="text" value="Board's title" placeholder="Board's title" />
       <button class="board__options-button" (click)="switchBoardMenu()">
@@ -42,4 +42,5 @@
       </ul>
     </section>
   </section>
+  <app-board-menu *ngIf="isOpenBoardMenu" (close)="isOpenBoardMenu = false"></app-board-menu>
 </div>

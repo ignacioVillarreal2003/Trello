@@ -23,8 +23,8 @@ import {CommunicationService} from '../../core/services/communication.service';
   styleUrl: './board-menu.component.css'
 })
 export class BoardMenuComponent {
-
-  mode: 'menu' | 'board-background' | 'label' | 'collaborators' = 'menu';
+  @Input() isOpen: boolean = false;
+  mode: 'menu' | 'background' | 'label' | 'friend' = 'menu';
   backgrounds: string[] = [];
   colors: string[] = [];
   @Input() boardId: number | undefined = undefined;

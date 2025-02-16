@@ -142,6 +142,7 @@ body.dark {
   --transparent-background-2: rgba(0, 0, 0, 0.2);
   --transparent-background-3: rgba(0, 0, 0, 0.5);
   --transparent-background-4: rgba(0, 0, 0, 0.6);
+  --transparent-background-5: rgba(30, 30, 30, 0.8);
 }
 
 body.light {
@@ -152,6 +153,7 @@ body.light {
   --transparent-background-2: rgba(255, 255, 255, 0.2);
   --transparent-background-3: rgba(255, 255, 255, 0.5);
   --transparent-background-4: rgba(255, 255, 255, 0.6);
+  --transparent-background-5: rgba(244, 244, 244, 0.8);
 }
 
 body.dark {

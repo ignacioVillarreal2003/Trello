@@ -35,31 +35,31 @@ app-header {
   background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
 }
 .background-7 {
-  background-image: url("/backgrounds/background-1.jpg");
+  background-image: url("/backgrounds/background-1.svg");
   background-position: 50%;
   background-repeat: no-repeat;
   background-size: cover;
 }
 .background-8 {
-  background-image: url("/backgrounds/background-2.jpg");
+  background-image: url("/backgrounds/background-2.svg");
   background-position: 50%;
   background-repeat: no-repeat;
   background-size: cover;
 }
 .background-9 {
-  background-image: url("/backgrounds/background-3.jpg");
+  background-image: url("/backgrounds/background-3.svg");
   background-position: 50%;
   background-repeat: no-repeat;
   background-size: cover;
 }
 .background-10 {
-  background-image: url("/backgrounds/background-4.jpg");
+  background-image: url("/backgrounds/background-4.svg");
   background-position: 50%;
   background-repeat: no-repeat;
   background-size: cover;
 }
 .background-11 {
-  background-image: url("/backgrounds/background-5.jpg");
+  background-image: url("/backgrounds/background-5.svg");
   background-position: 50%;
   background-repeat: no-repeat;
   background-size: cover;

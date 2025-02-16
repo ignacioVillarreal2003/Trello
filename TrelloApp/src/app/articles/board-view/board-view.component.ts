@@ -39,7 +39,21 @@ export class BoardViewComponent {
   listId: number | undefined = undefined;
   isOpenTaskView: boolean = false;
   isOpenBoardMenu: boolean = false;
-  lists: List[] = []
+  lists: List[] = [
+    {
+      id: "1",
+      title: "titulo",
+      boardId: "1",
+      tasks: [
+        {
+          id: "1",
+          title: "titulo",
+          description: "descripcion",
+          listId: "1"
+        }
+      ]
+    }
+  ]
 
   constructor(private route: ActivatedRoute,
               private listHttpService: ListHttpService,
@@ -104,12 +118,6 @@ export class BoardViewComponent {
 
   switchBoardMenu(): void {
     this.isOpenBoardMenu = !this.isOpenBoardMenu;
-    const body: HTMLElement = document.querySelector('body') as HTMLElement;
-    if (!this.isOpenBoardMenu) {
-      body.style.overflow = 'auto';
-    } else {
-      body.style.overflow = 'hidden';
-    }
   }
 
   addList() {

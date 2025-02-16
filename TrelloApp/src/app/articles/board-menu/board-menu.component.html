@@ -1,24 +1,40 @@
-<div class="board-menu">
-  <section class="board-menu-backgrounds">
-    <ul class="background-list">
-      <li class="background-item" *ngFor="let background of backgrounds">
-        <button class="btn-board-background">
-          <img src="{{background}}" alt="{{background}}">
-        </button>
-      </li>
-    </ul>
+<div class="board-menu" [class.open]="isOpen">
+  <header>
+    <button class="btn-base appearance-light aspect-free size-small radius-small skyblue" (click)="mode = 'menu'">
+      Menu
+    </button>
+    <button class="btn-base appearance-light aspect-free size-small radius-small red" (click)="onClose()">
+      Close
+    </button>
+  </header>
+
+  <section *ngIf="mode == 'menu'" class="options">
+    <button class="btn-base appearance-ghost aspect-free size-small radius-small green" (click)="mode = 'background'">
+      Backgrounds
+    </button>
+    <button class="btn-base appearance-ghost aspect-free size-small radius-small green" (click)="mode = 'label'">
+      Labels
+    </button>
+    <button class="btn-base appearance-ghost aspect-free size-small radius-small green" (click)="mode = 'friend'">
+      Friends
+    </button>
   </section>
 
-  <footer class="board-menu-actions">
-    <button
-      type="button"
-      class="btn-base appearance-solid aspect-free size-medium radius-small red">
+  <section class="content" *ngIf="mode == 'background'">
+    <h1>asd</h1>
+  </section>
+
+  <section class="content" *ngIf="mode == 'label'">
+
+  </section>
+
+  <section class="content" *ngIf="mode == 'friend'">
+
+  </section>
+
+  <footer class="actions" *ngIf="mode == 'menu'">
+    <button type="button" class="btn-base appearance-solid aspect-free size-medium radius-small red">
       Delete Board
-    </button>
-    <button
-      type="button"
-      class="btn-base appearance-light aspect-free size-medium radius-small red">
-      Close
     </button>
   </footer>
 </div>
