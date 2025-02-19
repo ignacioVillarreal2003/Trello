@@ -1,9 +1,9 @@
 namespace TrelloApi.Domain.Constants;
 
-public class RoleValues
+internal static class RoleValues
 {
     private const string Admin = "Admin";
     private const string Member = "Member";
 
-    public static readonly List<string> Allowed = new List<string> { Admin, Member };
+    public static readonly List<string> RolesAllowed = new List<string> { Admin, Member };
 }

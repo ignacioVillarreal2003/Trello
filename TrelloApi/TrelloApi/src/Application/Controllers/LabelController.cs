@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using TrelloApi.Application.Filters;
+using TrelloApi.Domain.Constants;
 using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.Interfaces.Services;
 
@@ -54,6 +55,22 @@ public class LabelController : BaseController
         {
             _logger.LogError(ex, "Error retrieving labels for board {BoardId}", boardId);
             return StatusCode(500, new { message = "An unexpected error occurred." });
+        }
+    }
+    
+    [HttpGet("colors")]
+    public Task<IActionResult> GetLabelColors()
+    {
+        try
+        {
+            List<string> labelColorsAllowed = LabelColorValues.LabelColorsAllowed;
+            _logger.LogDebug("Retrieved {Count} colors for label", labelColorsAllowed.Count);
+            return Task.FromResult<IActionResult>(Ok(labelColorsAllowed));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving colors for label");
+            return Task.FromResult<IActionResult>(StatusCode(500, new { message = "An unexpected error occurred." }));
         }
     }
 

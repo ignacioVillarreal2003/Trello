@@ -26,10 +26,10 @@ public class ListRepositoryTests
     }
     
     [Fact]
-    public async Task GetListById_ReturnsList_WhenListExists()
+    public async Task GetListById_ShouldReturnList_WhenListExists()
     {
         int listId = 1;
-        var list = new List(title: "Test List", boardId: 1) { Id = listId };
+        var list = new List(title: "title", boardId: 1, position: 0) { Id = listId };
         
         _context.Lists.Add(list);
         await _context.SaveChangesAsync();
@@ -41,7 +41,7 @@ public class ListRepositoryTests
     }
 
     [Fact]
-    public async Task GetListById_ReturnsNull_WhenListDoesNotExist()
+    public async Task GetListById_ShouldReturnNull_WhenListDoesNotExist()
     {
         int listId = 1;
         
@@ -51,11 +51,11 @@ public class ListRepositoryTests
     }
 
     [Fact]
-    public async Task GetListsByBoardId_ReturnsLists_WhenListsExistForBoard()
+    public async Task GetListsByBoardId_ShouldReturnLists_WhenBoardHasLists()
     {
         int boardId = 1;
-        var list1 = new List(title: "Test List", boardId: 1) { Id = 1 };
-        var list2 = new List(title: "Test List", boardId: 1) { Id = 2 };
+        var list1 = new List(title: "Test List", boardId: 1, position: 0) { Id = 1 };
+        var list2 = new List(title: "Test List", boardId: 1, position:1) { Id = 2 };
 
         _context.Lists.AddRange(list1, list2);
         await _context.SaveChangesAsync();
@@ -67,7 +67,7 @@ public class ListRepositoryTests
     }
 
     [Fact]
-    public async Task GetListsByBoardId_ReturnsEmptyList_WhenNoListsExistForBoard()
+    public async Task GetListsByBoardId_ShouldReturnEmptyList_WhenBoardHasNoLists()
     {
         int boardId = 1;
         
@@ -78,45 +78,47 @@ public class ListRepositoryTests
     }
 
     [Fact]
-    public async Task AddList_ReturnsList_WhenListIsAddedSuccessfully()
+    public async Task AddList_ShouldPersistList_WhenAddedSuccessfully()
     {
-        var list = new List(title: "Test List", boardId: 1) { Id = 1 };
+        var list = new List(title: "Test List", boardId: 1, position: 0) { Id = 1 };
         
         _context.Lists.RemoveRange(_context.Lists);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.AddList(list);
+        await _repository.AddList(list);
+        var result = await _context.Lists.FindAsync(list.Id);
         
         Assert.NotNull(result);
         Assert.Equal(list.Id, result.Id);
     }
 
     [Fact]
-    public async Task UpdateList_ReturnsList_WhenListIsUpdatedSuccessfully()
+    public async Task UpdateList_ShouldPersistChanges_WhenUpdateIsSuccessful()
     {
-        var list = new List(title: "Existing List", boardId: 1) { Id = 1 };
+        var list = new List(title: "title", boardId: 1, position: 0) { Id = 1 };
 
         _context.Lists.Add(list);
         await _context.SaveChangesAsync();
-        list.Title = "Updated List";
         
-        var result = await _repository.UpdateList(list);
+        list.Title = "Updated title";
+        await _repository.UpdateList(list);
+        var result = await _context.Lists.FindAsync(list.Id);
         
         Assert.NotNull(result);
-        Assert.Equal(list.Id, result.Id);
+        Assert.Equal(list.Title, result.Title);
     }
 
     [Fact]
-    public async Task DeleteList_ReturnsList_WhenListIsDeletedSuccessfully()
+    public async Task DeleteList_ShouldRemoveList_WhenListExists()
     {
-        var list = new List(title: "List To Delete", boardId: 1) { Id = 1 };
+        var list = new List(title: "title", boardId: 1, position: 0) { Id = 1 };
 
         _context.Lists.Add(list);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.DeleteList(list);
+        await _repository.DeleteList(list);
+        var result = await _context.Lists.FindAsync(list.Id);
         
-        Assert.NotNull(result);
-        Assert.Equal(list.Id, result.Id);
+        Assert.Null(result);
     }
 }

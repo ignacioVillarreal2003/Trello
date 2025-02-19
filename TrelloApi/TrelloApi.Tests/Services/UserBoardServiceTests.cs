@@ -1,134 +1,196 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xunit;
 using TrelloApi.Application.Services;
 using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
 using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Domain.Constants;           // Para RoleValues, si es necesario
+using TrelloApi.Domain.DTOs;                // Aquí se encuentran AddUserBoardDto y OutputUserBoardDetailsDto
 using Task = System.Threading.Tasks.Task;
 
-namespace TrelloApi.Tests.Services;
-
-public class UserBoardServiceTests
+namespace TrelloApi.Tests.Services
 {
-    private readonly Mock<IUserBoardRepository> _mockUserBoardRepository;
-    private readonly Mock<ILogger<UserBoardService>> _mockLogger;
-    private readonly Mock<IMapper> _mockMapper;
-    private readonly Mock<IBoardAuthorizationService> _mockBoardAuthorizationService;
-    private readonly UserBoardService _service;
-
-    public UserBoardServiceTests()
+    public class UserBoardServiceTests
     {
-        _mockUserBoardRepository = new Mock<IUserBoardRepository>();
-        _mockLogger = new Mock<ILogger<UserBoardService>>();
-        _mockMapper = new Mock<IMapper>();
-        _mockBoardAuthorizationService = new Mock<IBoardAuthorizationService>();
+        private readonly Mock<IUserBoardRepository> _mockUserBoardRepository;
+        private readonly Mock<ILogger<UserBoardService>> _mockLogger;
+        private readonly Mock<IMapper> _mockMapper;
+        private readonly Mock<IBoardAuthorizationService> _mockBoardAuthorizationService;
+        private readonly UserBoardService _service;
 
-        _service = new UserBoardService(_mockMapper.Object, _mockBoardAuthorizationService.Object, _mockLogger.Object, _mockUserBoardRepository.Object);
-    }
+        public UserBoardServiceTests()
+        {
+            _mockUserBoardRepository = new Mock<IUserBoardRepository>();
+            _mockLogger = new Mock<ILogger<UserBoardService>>();
+            _mockMapper = new Mock<IMapper>();
+            _mockBoardAuthorizationService = new Mock<IBoardAuthorizationService>();
 
-    [Fact]
-    public async Task GetUserBoardById_ReturnsOutputUserBoardDto_WhenUserBoardExists()
-    {
-        int boardId = 1, userId = 1;
-        var userBoard = new UserBoard(userId: userId, boardId: boardId);
-        var outputUserBoardDto = new AddUserBoardDto { UserId = userBoard.UserId, BoardId = userBoard.BoardId };
+            // Importante: el orden de parámetros debe coincidir con el constructor del servicio.
+            _service = new UserBoardService(
+                _mockMapper.Object,
+                _mockBoardAuthorizationService.Object,
+                _mockUserBoardRepository.Object,
+                _mockLogger.Object);
+        }
 
-        _mockUserBoardRepository.Setup(r => r.GetUserBoardById(userId, boardId)).ReturnsAsync(userBoard);
-        _mockMapper.Setup(m => m.Map<AddUserBoardDto>(userBoard)).Returns(outputUserBoardDto);
+        [Fact]
+        public async Task GetUserBoardById_ReturnsOutputUserBoardDetailsDto_WhenUserBoardExists()
+        {
+            // Arrange
+            int boardId = 1, userId = 1;
+            var userBoard = new UserBoard(userId: userId, boardId: boardId); // Se asume que este constructor existe
+            var outputDto = new OutputUserBoardDetailsDto 
+            { 
+                UserId = userBoard.UserId, 
+                BoardId = userBoard.BoardId 
+            };
 
-        var result = await _service.GetUserBoardById(userId, boardId);
+            _mockUserBoardRepository
+                .Setup(r => r.GetUserBoardById(userId, boardId))
+                .ReturnsAsync(userBoard);
+            _mockMapper
+                .Setup(m => m.Map<OutputUserBoardDetailsDto>(userBoard))
+                .Returns(outputDto);
 
-        Assert.NotNull(result);
-        Assert.Equal(outputUserBoardDto.UserId, result.UserId);
-        Assert.Equal(outputUserBoardDto.BoardId, result.BoardId);
-    }
+            // Act
+            var result = await _service.GetUsersByBoardId(boardId, userId);
 
-    [Fact]
-    public async Task GetUserBoardById_ReturnsNull_WhenUserBoardDoesNotExist()
-    {
-        int boardId = 1, userId = 1;
+            // Assert
+            Assert.NotNull(result);
+            Assert.Single(result);
+        }
 
-        _mockUserBoardRepository.Setup(r => r.GetUserBoardById(userId, boardId)).ReturnsAsync((UserBoard?)null);
+        [Fact]
+        public async Task GetUserBoardById_ReturnsNull_WhenUserBoardDoesNotExist()
+        {
+            // Arrange
+            int boardId = 1, userId = 1;
+            _mockUserBoardRepository
+                .Setup(r => r.GetUserBoardById(userId, boardId))
+                .ReturnsAsync((UserBoard?)null);
 
-        var result = await _service.GetUserBoardById(userId, boardId);
+            // Act
+            var result = await _service.GetUsersByBoardId(boardId, userId);
 
-        Assert.Null(result);
-    }
+            // Assert
+            Assert.Null(result);
+        }
 
-    [Fact]
-    public async Task AddUserBoard_ReturnsOutputUserBoardDto_WhenUserBoardIsAdded()
-    {
-        int boardId = 1, userId = 1;
-        var addUserBoardDto = new AddUserBoardDto { UserId = userId, BoardId = boardId };
-        var newUserBoard = new UserBoard(userId: addUserBoardDto.UserId, boardId: addUserBoardDto.BoardId);
-        var outputUserBoardDto = new AddUserBoardDto { UserId = newUserBoard.UserId, BoardId = newUserBoard.BoardId };
+        [Fact]
+        public async Task AddUserBoard_ReturnsOutputUserBoardDetailsDto_WhenUserBoardIsAdded()
+        {
+            // Arrange
+            int boardId = 1, userId = 1;
+            var addDto = new AddUserBoardDto 
+            { 
+                UserId = userId, 
+                Role = "Member" // Se asume que el DTO tiene la propiedad Role
+            };
+            var newUserBoard = new UserBoard(userId: addDto.UserId, boardId: boardId, role: addDto.Role);
+            var outputDto = new OutputUserBoardDetailsDto 
+            { 
+                UserId = newUserBoard.UserId, 
+                BoardId = newUserBoard.BoardId, 
+                Role = newUserBoard.Role 
+            };
 
-        _mockUserBoardRepository.Setup(r => r.AddUserBoard(It.IsAny<UserBoard>())).ReturnsAsync(newUserBoard);
-        _mockMapper.Setup(m => m.Map<AddUserBoardDto>(newUserBoard)).Returns(outputUserBoardDto);
+            _mockUserBoardRepository
+                .Setup(r => r.AddUserBoard(It.IsAny<UserBoard>()))
+                .ReturnsAsync(newUserBoard);
+            _mockMapper
+                .Setup(m => m.Map<OutputUserBoardDetailsDto>(newUserBoard))
+                .Returns(outputDto);
 
-        var result = await _service.AddUserBoard(addUserBoardDto, userId);
+            // Act
+            var result = await _service.AddUserToBoard(boardId, addDto, userId);
 
-        Assert.NotNull(result);
-        Assert.Equal(outputUserBoardDto.UserId, result.UserId);
-        Assert.Equal(outputUserBoardDto.BoardId, result.BoardId);
-    }
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(outputDto.UserId, result.UserId);
+            Assert.Equal(outputDto.BoardId, result.BoardId);
+            Assert.Equal(outputDto.Role, result.Role);
+        }
 
-    [Fact]
-    public async Task AddUserBoard_ReturnsNull_WhenRepositoryReturnsNull()
-    {
-        int boardId = 1, userId = 1;
-        var addUserBoardDto = new AddUserBoardDto { UserId = userId, BoardId = boardId };
+        [Fact]
+        public async Task AddUserBoard_ReturnsNull_WhenRepositoryReturnsNull()
+        {
+            // Arrange
+            int boardId = 1, userId = 1;
+            var addDto = new AddUserBoardDto 
+            { 
+                UserId = userId, 
+                Role = "Member" 
+            };
 
-        _mockUserBoardRepository.Setup(r => r.AddUserBoard(It.IsAny<UserBoard>())).ReturnsAsync((UserBoard?)null);
+            _mockUserBoardRepository
+                .Setup(r => r.AddUserBoard(It.IsAny<UserBoard>()))
+                .ReturnsAsync((UserBoard?)null);
 
-        var result = await _service.AddUserBoard(addUserBoardDto, userId);
+            // Act
+            var result = await _service.AddUserToBoard(boardId, addDto, userId);
 
-        Assert.Null(result);
-    }
+            // Assert
+            Assert.Null(result);
+        }
 
-    [Fact]
-    public async Task DeleteUserBoard_ReturnsOutputUserBoardDto_WhenDeletionIsSuccessful()
-    {
-        int boardId = 1, userId = 1, userToDeleteId = 2;
-        var existingUserBoard = new UserBoard(userId: userToDeleteId, boardId: boardId);
-        var deletedUserBoard = existingUserBoard;
-        var outputUserBoardDto = new AddUserBoardDto { UserId = deletedUserBoard.UserId, BoardId = deletedUserBoard.BoardId };
+        [Fact]
+        public async Task RemoveUserFromBoard_ReturnsTrue_WhenDeletionIsSuccessful()
+        {
+            // Arrange
+            int boardId = 1, uid = 1, userToDeleteId = 2;
+            var existingUserBoard = new UserBoard(userId: userToDeleteId, boardId: boardId, role: "Member");
+            _mockUserBoardRepository
+                .Setup(r => r.GetUserBoardById(userToDeleteId, boardId))
+                .ReturnsAsync(existingUserBoard);
+            _mockUserBoardRepository
+                .Setup(r => r.DeleteUserBoard(existingUserBoard))
+                .ReturnsAsync(existingUserBoard);
 
-        _mockUserBoardRepository.Setup(r => r.GetUserBoardById(userToDeleteId, boardId)).ReturnsAsync(existingUserBoard);
-        _mockUserBoardRepository.Setup(r => r.DeleteUserBoard(existingUserBoard)).ReturnsAsync(deletedUserBoard);
-        _mockMapper.Setup(m => m.Map<AddUserBoardDto>(deletedUserBoard)).Returns(outputUserBoardDto);
+            // Act
+            var result = await _service.RemoveUserFromBoard(boardId, userToDeleteId, uid);
 
-        var result = await _service.DeleteUserBoard(userToDeleteId, boardId, userId);
+            // Assert
+            Assert.True(result);
+        }
 
-        Assert.NotNull(result);
-        Assert.Equal(outputUserBoardDto.UserId, result.UserId);
-        Assert.Equal(outputUserBoardDto.BoardId, result.BoardId);
-    }
+        [Fact]
+        public async Task RemoveUserFromBoard_ReturnsFalse_WhenUserBoardNotFound()
+        {
+            // Arrange
+            int boardId = 1, uid = 1, userToDeleteId = 2;
+            _mockUserBoardRepository
+                .Setup(r => r.GetUserBoardById(userToDeleteId, boardId))
+                .ReturnsAsync((UserBoard?)null);
 
-    [Fact]
-    public async Task DeleteUserBoard_ReturnsNull_WhenUserBoardNotFound()
-    {
-        int boardId = 1, userId = 1, userToDeleteId = 2;
+            // Act
+            var result = await _service.RemoveUserFromBoard(boardId, userToDeleteId, uid);
 
-        _mockUserBoardRepository.Setup(r => r.GetUserBoardById(userToDeleteId, boardId)).ReturnsAsync((UserBoard?)null);
+            // Assert
+            Assert.False(result);
+        }
 
-        var result = await _service.DeleteUserBoard(userToDeleteId, userId, boardId);
+        [Fact]
+        public async Task RemoveUserFromBoard_ReturnsFalse_WhenDeletionFails()
+        {
+            // Arrange
+            int boardId = 1, uid = 1, userToDeleteId = 2;
+            var existingUserBoard = new UserBoard(userId: userToDeleteId, boardId: boardId, role: "Member");
+            _mockUserBoardRepository
+                .Setup(r => r.GetUserBoardById(userToDeleteId, boardId))
+                .ReturnsAsync(existingUserBoard);
+            _mockUserBoardRepository
+                .Setup(r => r.DeleteUserBoard(existingUserBoard))
+                .ReturnsAsync((UserBoard?)null);
 
-        Assert.Null(result);
-    }
+            // Act
+            var result = await _service.RemoveUserFromBoard(boardId, userToDeleteId, uid);
 
-    [Fact]
-    public async Task DeleteUserBoard_ReturnsNull_WhenDeletionFails()
-    {
-        int boardId = 1, userId = 1, userToDeleteId = 2;
-        var existingUserBoard = new UserBoard(userId: userToDeleteId, boardId: boardId);
-
-        _mockUserBoardRepository.Setup(r => r.GetUserBoardById(userToDeleteId, boardId)).ReturnsAsync(existingUserBoard);
-        _mockUserBoardRepository.Setup(r => r.DeleteUserBoard(existingUserBoard)).ReturnsAsync((UserBoard?)null);
-
-        var result = await _service.DeleteUserBoard(userToDeleteId, boardId, userId);
-
-        Assert.Null(result);
+            // Assert
+            Assert.False(result);
+        }
     }
 }

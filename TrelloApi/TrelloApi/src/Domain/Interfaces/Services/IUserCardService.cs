@@ -4,7 +4,7 @@ namespace TrelloApi.Domain.Interfaces.Services;
 
 public interface IUserCardService
 {
-    Task<OutputUserCardDto?> GetUserCardById(int taskId, int uid);
-    Task<OutputUserCardDto?> AddUserCard(AddUserCardDto addUserCardDto, int uid);
-    Task<OutputUserCardDto?> DeleteUserCard(int userId, int taskId, int uid);
+    Task<List<OutputUserDetailsDto>> GetUsersByCardId(int cardId, int uid);
+    Task<OutputUserCardDetailsDto?> AddUserToCard(int cardId, AddUserCardDto dto, int uid);
+    Task<Boolean> RemoveUserFromCard(int userId, int cardId, int uid);
 }

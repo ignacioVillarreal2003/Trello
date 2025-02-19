@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.app;
+using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Persistence;
 
 namespace TrelloApi.Tests.Repositories;
@@ -22,99 +23,98 @@ public class CardRepositoryTests
         _mockLogger = new Mock<ILogger<CardRepository>>();
         _repository = new CardRepository(_context, _mockLogger.Object);
     }
-    
-    [Fact]
-    public async Task GetTaskById_ReturnsTask_WhenTaskExists()
-    {
-        int taskId = 1;
-        var task = new Domain.Entities.Card.Task(title: "Test Task", description: "", listId: 1) { Id = 1 };
 
-        _context.Tasks.Add(task);
+    [Fact]
+    public async Task GetCardById_ShouldReturnCard_WhenCardExists()
+    {
+        int cardId = 1;
+        var card = new Card(title: "title", description: "description", listId: 1) { Id = cardId };
+
+        _context.Cards.Add(card);
         await _context.SaveChangesAsync();
-        
-        var result = await _repository.GetTaskById(taskId);
-        
+
+        var result = await _repository.GetCardById(cardId);
+
         Assert.NotNull(result);
-        Assert.Equal(taskId, result.Id);
+        Assert.Equal(cardId, result.Id);
     }
 
     [Fact]
-    public async Task GetTaskById_ReturnsNull_WhenTaskDoesNotExist()
+    public async Task GetCardById_ShouldReturnNull_WhenCardDoesNotExist()
     {
-        int taskId = 1;
-        
-        var result = await _repository.GetTaskById(taskId);
-        
+        int cardId = 1;
+
+        var result = await _repository.GetCardById(cardId);
+
         Assert.Null(result);
     }
 
     [Fact]
-    public async Task GetTasks_ReturnsTasks_WhenTasksExistForUser()
+    public async Task GetCardsByListId_ShouldReturnCards_WhenListHasCards()
     {
         int listId = 1;
-        var task1 = new Domain.Entities.Card.Task(title: "Task 1", description: "", listId: 1) { Id = 1 };
-        var task2 = new Domain.Entities.Card.Task(title: "Task 2", description: "", listId: 1) { Id = 2 };
+        var card1 = new Card(title: "title1", description: "description1", listId: listId) { Id = 1 };
+        var card2 = new Card(title: "title2", description: "description2", listId: listId) { Id = 2 };
 
-        _context.Tasks.AddRange(task1, task2);
+        _context.Cards.AddRange(card1, card2);
         await _context.SaveChangesAsync();
-        
-        var result = await _repository.GetTasksByListId(listId);
-        
+
+        var result = await _repository.GetCardsByListId(listId);
+
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
     }
 
     [Fact]
-    public async Task GetTasks_ReturnsEmptyList_WhenNoTasksExistForUser()
+    public async Task GetCardsByListId_ShouldReturnEmptyList_WhenListHasNoCards()
     {
         int listId = 1;
-        
-        var result = await _repository.GetTasksByListId(listId);
-        
-        Assert.NotNull(result);
+
+        var result = await _repository.GetCardsByListId(listId);
+
         Assert.Empty(result);
     }
 
     [Fact]
-    public async Task AddTask_ReturnsTask_WhenTaskIsAddedSuccessfully()
+    public async Task AddCard_ShouldPersistCard_WhenAddedSuccessfully()
     {
-        var task = new Domain.Entities.Card.Task(title: "New task", description: "", listId: 1) { Id = 1 };
+        var card = new Card(title: "title", description: "description", listId: 1);
 
-        _context.Tasks.RemoveRange(_context.Tasks);
-        await _context.SaveChangesAsync();
-        
-        var result = await _repository.AddTask(task);
-        
+        await _repository.AddCard(card);
+        var result = await _context.Cards.FindAsync(card.Id);
+
         Assert.NotNull(result);
-        Assert.Equal(task.Id, result.Id);
+        Assert.Equal(card.Id, result.Id);
     }
 
     [Fact]
-    public async Task UpdateTask_ReturnsTask_WhenTaskIsUpdatedSuccessfully()
+    public async Task UpdateCard_ShouldPersistChanges_WhenUpdateIsSuccessful()
     {
-        var task = new Domain.Entities.Card.Task(title: "Existing task", description: "", listId: 1) { Id = 1 };
+        var card = new Card(title: "title", description: "description", listId: 1);
 
-        _context.Tasks.Add(task);
+        _context.Cards.Add(card);
         await _context.SaveChangesAsync();
-        task.Title = "Updated task";
-        
-        var result = await _repository.UpdateTask(task);
-        
+
+        card.Title = "updated title";
+        await _repository.UpdateCard(card);
+        var result = await _context.Cards.FindAsync(card.Id);
+
         Assert.NotNull(result);
-        Assert.Equal(task.Id, result.Id);
+        Assert.Equal("updated title", result.Title);
     }
 
     [Fact]
-    public async Task DeleteTask_ReturnsTask_WhenTaskIsDeletedSuccessfully()
+    public async Task DeleteCard_ShouldRemoveCard_WhenCardExists()
     {
-        var task = new Domain.Entities.Card.Task(title: "Task To Delete", description: "", listId: 1) { Id = 1 };
-        
-        _context.Tasks.Add(task);
+        var card = new Card(title: "title", description: "description", listId: 1);
+
+        _context.Cards.Add(card);
         await _context.SaveChangesAsync();
-        
-        var result = await _repository.DeleteTask(task);
-        
-        Assert.NotNull(result);
-        Assert.Equal(task.Id, result.Id);
+
+        await _repository.DeleteCard(card);
+
+        var result = await _context.Cards.FindAsync(card.Id);
+
+        Assert.Null(result);
     }
 }

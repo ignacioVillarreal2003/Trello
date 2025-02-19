@@ -6,7 +6,7 @@ public interface ICardRepository
 {
     Task<Card?> GetCardById(int cardId);
     Task<List<Card>> GetCardsByListId(int listId);
-    Task<Card?> AddCard(Card card);
-    Task<Card?> UpdateCard(Card card);
-    Task<Card?> DeleteCard(Card card);
+    Task AddCard(Card card);
+    Task UpdateCard(Card card);
+    Task DeleteCard(Card card);
 }

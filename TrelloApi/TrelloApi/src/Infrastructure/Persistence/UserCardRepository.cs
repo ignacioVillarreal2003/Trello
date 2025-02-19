@@ -29,16 +29,37 @@ public class UserCardRepository: Repository<UserCard>, IUserCardRepository
             throw;
         }
     }
+    
+    public async Task<List<User>> GetUsersByCardId(int cardId)
+    {
+        try
+        {
+            List<User> users = await Context.UserCards
+                .Join(Context.Users,
+                    userCard => userCard.UserId,
+                    user => user.Id,
+                    (userCard, user) => new { userCard, user })
+                .Where(uc => uc.userCard.CardId.Equals(cardId))
+                .Select(uc => uc.user)
+                .ToListAsync();
 
-    public async Task<UserCard?> AddUserCard(UserCard userCard)
+            _logger.LogDebug("Users for card {CardId} retrieval attempt completed", cardId);
+            return users;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Database error retrieving users for card {CardId}", cardId);
+            throw;
+        }
+    }
+
+    public async Task AddUserCard(UserCard userCard)
     {
         try
         {
             await Context.UserCards.AddAsync(userCard);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("Card {CardId} added to user {UserId}", userCard.CardId, userCard.UserId);
-            return userCard;
         }
         catch (Exception ex)
         {
@@ -47,15 +68,13 @@ public class UserCardRepository: Repository<UserCard>, IUserCardRepository
         }
     }
 
-    public async Task<UserCard?> DeleteUserCard(UserCard userCard)
+    public async Task DeleteUserCard(UserCard userCard)
     {
         try
         {
             Context.UserCards.Remove(userCard);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("Card {CardId} for user {UserId} deleted", userCard.CardId, userCard.UserId);
-            return userCard;
         }
         catch (Exception ex)
         {

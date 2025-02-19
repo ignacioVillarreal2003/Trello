@@ -9,19 +9,13 @@ public class MappingProfile: Profile
     public MappingProfile()
     {
         CreateMap<Board, OutputBoardDetailsDto>();
-        CreateMap<Board, OutputBoardListDto>();
         CreateMap<Card, OutputCardDetailsDto>();
-        CreateMap<Card, OutputCardListDto>();
-        CreateMap<CardLabel, OutputCardLabelListDto>();
+        CreateMap<CardLabel, OutputCardLabelDetailsDto>();
         CreateMap<Comment, OutputCommentDetailsDto>();
         CreateMap<Label, OutputLabelDetailsDto>();
-
-        
-            
-        CreateMap<List, OutputListDto>();
-        CreateMap<User, OutputUserDto>();
-        CreateMap<User, OutputUserBoardDetailsDto>();
-        CreateMap<UserBoard, OutputUserBoardDto>();
-        CreateMap<UserCard, OutputUserTaskDto>();
+        CreateMap<List, OutputListDetailsDto>();
+        CreateMap<UserBoard, OutputUserBoardDetailsDto>();
+        CreateMap<UserCard, OutputUserCardDetailsDto>();
+        CreateMap<User, OutputUserDetailsDto>();
     }
 }

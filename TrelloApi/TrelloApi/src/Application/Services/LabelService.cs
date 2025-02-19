@@ -1,4 +1,5 @@
 using AutoMapper;
+using TrelloApi.Domain.Constants;
 using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
@@ -57,16 +58,17 @@ public class LabelService: BaseService, ILabelService
     {
         try
         {
-            Label label = new Label(dto.Title, dto.Color, boardId);
-            Label? newLabel = await _labelRepository.AddLabel(label);
-            if (newLabel == null)
+            if (!LabelColorValues.LabelColorsAllowed.Contains(dto.Color))
             {
-                _logger.LogError("Failed to add label to board {BoardId}", boardId);
+                _logger.LogError("Property color isn't correct.");
                 return null;
             }
+            
+            Label label = new Label(dto.Title, dto.Color, boardId);
+            await _labelRepository.AddLabel(label);
 
             _logger.LogInformation("Label added to board {BoardId}", boardId);
-            return _mapper.Map<OutputLabelDetailsDto>(newLabel);
+            return _mapper.Map<OutputLabelDetailsDto>(label);
         }
         catch (Exception ex)
         {
@@ -86,7 +88,7 @@ public class LabelService: BaseService, ILabelService
                 return null;
             }
 
-            if (!string.IsNullOrEmpty(dto.Color))
+            if (!string.IsNullOrEmpty(dto.Color) && LabelColorValues.LabelColorsAllowed.Contains(dto.Color))
             {
                 label.Color = dto.Color;
             }
@@ -95,15 +97,10 @@ public class LabelService: BaseService, ILabelService
                 label.Title = dto.Title;
             }
 
-            Label? updatedLabel = await _labelRepository.UpdateLabel(label);
-            if (updatedLabel == null)
-            {
-                _logger.LogError("Failed to update label {LabelId}", labelId);
-                return null;
-            }
+            await _labelRepository.UpdateLabel(label);
             
             _logger.LogInformation("Label {LabelId} updated", labelId);
-            return _mapper.Map<OutputLabelDetailsDto>(updatedLabel);
+            return _mapper.Map<OutputLabelDetailsDto>(label);
         }
         catch (Exception ex)
         {
@@ -123,12 +120,7 @@ public class LabelService: BaseService, ILabelService
                 return false;
             }
 
-            bool success = await _labelRepository.DeleteLabel(label);
-            if (!success)
-            {
-                _logger.LogError("Failed to delete label {LabelId}", labelId);
-                return false;
-            }
+            await _labelRepository.DeleteLabel(label);
 
             _logger.LogInformation("Label {LabelId} deleted", labelId);
             return true;

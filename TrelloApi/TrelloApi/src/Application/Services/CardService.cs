@@ -39,13 +39,13 @@ public class CardService: BaseService, ICardService
         }
     }
 
-    public async Task<List<OutputCardListDto>> GetCardsByListId(int listId, int uid)
+    public async Task<List<OutputCardDetailsDto>> GetCardsByListId(int listId, int uid)
     {
         try
         {
             List<Card> cards = await _cardRepository.GetCardsByListId(listId);
             _logger.LogDebug("Retrieved {Count} cards for list {ListId}", cards.Count, listId);
-            return _mapper.Map<List<OutputCardListDto>>(cards);
+            return _mapper.Map<List<OutputCardDetailsDto>>(cards);
         }
         catch (Exception ex)
         {
@@ -58,16 +58,17 @@ public class CardService: BaseService, ICardService
     {
         try
         {
-            Card card = new Card(dto.Title, dto.Description, listId, dto.Priority);
-            Card? newCard = await _cardRepository.AddCard(card);
-            if (newCard == null)
+            if (!string.IsNullOrEmpty(dto.Priority) && !PriorityValues.PrioritiesAllowed.Contains(dto.Priority))
             {
-                _logger.LogError("Failed to add card to list {ListId}", listId);
+                _logger.LogError("Property priority isn't correct.");
                 return null;
             }
+            
+            Card card = new Card(dto.Title, dto.Description, listId, dto.Priority);
+            await _cardRepository.AddCard(card);
 
             _logger.LogInformation("Card added to list {ListId}", listId);
-            return _mapper.Map<OutputCardDetailsDto>(newCard);
+            return _mapper.Map<OutputCardDetailsDto>(card);
         }
         catch (Exception ex)
         {
@@ -113,15 +114,10 @@ public class CardService: BaseService, ICardService
             }
             card.UpdatedAt = DateTime.UtcNow;
 
-            Card? updatedCard = await _cardRepository.UpdateCard(card);
-            if (updatedCard == null)
-            {
-                _logger.LogError("Failed to update card {CardId}", cardId);
-                return null;
-            }
+            await _cardRepository.UpdateCard(card);
             
             _logger.LogInformation("Card {CardId} updated", cardId);
-            return _mapper.Map<OutputCardDetailsDto>(updatedCard);
+            return _mapper.Map<OutputCardDetailsDto>(card);
         }
         catch (Exception ex)
         {
@@ -141,12 +137,7 @@ public class CardService: BaseService, ICardService
                 return false;
             }
 
-            Card? deletedCard = await _cardRepository.DeleteCard(card);
-            if (deletedCard == null)
-            {
-                _logger.LogError("Failed to delete card {CardId}", cardId);
-                return false;
-            }
+            await _cardRepository.DeleteCard(card);
 
             _logger.LogInformation("Card {CardId} deleted", cardId);
             return true;

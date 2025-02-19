@@ -12,22 +12,22 @@ public class Board
     [StringLength(32), Required]
     public string Title { get; set; }
     
-    [StringLength(256)] 
-    public string Description { get; set; }
+    [StringLength(256)]
+    public string? Description { get; set; }
 
-    [StringLength(8), Required]
-    public string Color { get; set; }
+    [StringLength(32), Required]
+    public string Background { get; set; }
     
     [DataType(DataType.DateTime)]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
-    [DataType(DataType.DateTime)]
-    public DateTime? UpdatedAt { get; set; } = null;
-    
-    public bool IsArchived { get; set; } = false;
+    public DateTime CreatedAt { get; set; }
 
     [DataType(DataType.DateTime)]
-    public DateTime? ArchivedAt { get; set; } = null;
+    public DateTime? UpdatedAt { get; set; }
+
+    public bool IsArchived { get; set; }
+
+    [DataType(DataType.DateTime)]
+    public DateTime? ArchivedAt { get; set; }
     
     public ICollection<List> Lists { get; set; } = new HashSet<List>();
 
@@ -35,10 +35,14 @@ public class Board
 
     public ICollection<Label> Labels { get; set; } = new HashSet<Label>();
 
-    public Board(string title, string color, string description = "")
+    public Board(string title, string background, string? description = null)
     {
         Title = title;
-        Color = color;
         Description = description;
+        Background = background;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = null;
+        IsArchived = false;
+        ArchivedAt = null;
     }
 }

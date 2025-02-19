@@ -31,7 +31,7 @@ public class UserBoardRepository: Repository<UserBoard>, IUserBoardRepository
         }
     }
 
-    public async Task<List<User>> GetUsersForBoard(int boardId)
+    public async Task<List<User>> GetUsersByBoardId(int boardId)
     {
         try
         {
@@ -54,15 +54,13 @@ public class UserBoardRepository: Repository<UserBoard>, IUserBoardRepository
         }
     }
 
-    public async Task<UserBoard?> AddUserBoard(UserBoard userBoard)
+    public async Task AddUserBoard(UserBoard userBoard)
     {
         try
         {
             await Context.UserBoards.AddAsync(userBoard);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("User {UserId} added to board {BoardId}", userBoard.UserId, userBoard.BoardId);
-            return userBoard;
         }
         catch (Exception ex)
         {
@@ -71,15 +69,13 @@ public class UserBoardRepository: Repository<UserBoard>, IUserBoardRepository
         }
     }
 
-    public async Task<UserBoard?> DeleteUserBoard(UserBoard userBoard)
+    public async Task DeleteUserBoard(UserBoard userBoard)
     {
         try
         {
             Context.UserBoards.Remove(userBoard);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("User {UserId} for board {BoardId} deleted", userBoard.UserId, userBoard.BoardId);
-            return userBoard;
         }
         catch (Exception ex)
         {

@@ -19,15 +19,15 @@ public class Card
     public DateTime? DueDate { get; set; }
     
     [StringLength(16)]
-    public string Priority { get; set; }
+    public string? Priority { get; set; }
     
-    public bool IsCompleted { get; set; } = false;
-    
-    [DataType(DataType.DateTime)]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public bool IsCompleted { get; set; }
     
     [DataType(DataType.DateTime)]
-    public DateTime? UpdatedAt { get; set; } = null;
+    public DateTime CreatedAt { get; set; }
+    
+    [DataType(DataType.DateTime)]
+    public DateTime? UpdatedAt { get; set; }
     
     [ForeignKey("List"), Required]
     public int ListId { get; set; }
@@ -37,11 +37,15 @@ public class Card
     
     public ICollection<CardLabel> CardLabels { get; set; } = new HashSet<CardLabel>();
     
-    public Card(string title, string description, int listId, string priority)
+    public Card(string title, string description, int listId, string? priority = null)
     {
         Title = title;
         Description = description;
         ListId = listId;
         Priority = priority;
+        DueDate = null;
+        IsCompleted = false;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = null;
     }
 }

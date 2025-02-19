@@ -32,24 +32,19 @@ public class CardLabelService: BaseService, ICardLabelService
         }
     }
 
-    public async Task<OutputCardLabelListDto?> AddLabelToCard(int cardId, int labelId, int uid)
+    public async Task<OutputCardLabelDetailsDto?> AddLabelToCard(int cardId, AddCardLabelDto dto, int uid)
     {
         try
         {
-            CardLabel cardLabel = new CardLabel(cardId, labelId);
-            CardLabel? newCardLabel = await _cardLabelRepository.AddCardLabel(cardLabel);
-            if (newCardLabel == null)
-            {
-                _logger.LogError("Failed to add label {LabelId} to card {CardId}", labelId, cardId);
-                return null;
-            }
+            CardLabel cardLabel = new CardLabel(cardId, dto.LabelId);
+            await _cardLabelRepository.AddCardLabel(cardLabel);
             
-            _logger.LogInformation("Label {LabelId} added to card {CardId}", labelId, cardId);
-            return _mapper.Map<OutputCardLabelListDto>(newCardLabel);
+            _logger.LogInformation("Label {LabelId} added to card {CardId}", dto.LabelId, cardId);
+            return _mapper.Map<OutputCardLabelDetailsDto>(cardLabel);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding label {LabelId} for card {CardId}", labelId, cardId);
+            _logger.LogError(ex, "Error adding label {LabelId} for card {CardId}", dto.LabelId, cardId);
             throw;
         }
     }
@@ -65,12 +60,7 @@ public class CardLabelService: BaseService, ICardLabelService
                 return false;
             }
 
-            CardLabel? deletedCardLabel = await _cardLabelRepository.DeleteCardLabel(cardLabel);
-            if (deletedCardLabel == null)
-            {
-                _logger.LogError("Failed to delete label {LabelId} for card {CardId}", labelId, cardId);
-                return false;
-            }
+            await _cardLabelRepository.DeleteCardLabel(cardLabel);
 
             _logger.LogInformation("Label {LabelId} for card {CardId} deleted", labelId, cardId);
             return true;

@@ -17,50 +17,39 @@ public class UserCardService: BaseService, IUserCardService
         _userCardRepository = userCardRepository;
     }
 
-    public async Task<OutputUserCardDto?> GetUserCardById(int cardId, int uid)
+    public async Task<List<OutputUserDetailsDto>> GetUsersByCardId(int cardId, int uid)
     {
         try
         {
-            UserCard? userCard = await _userCardRepository.GetUserCardById(cardId, uid);
-            if (userCard == null)
-            {
-                _logger.LogWarning("Card {CardId} for user {UserId} not found.", cardId, uid);
-                return null;
-            }
-
-            _logger.LogDebug("Task {CardId} for card {UserId} retrieved", cardId, uid);
-            return _mapper.Map<OutputUserCardDto>(userCard);
+            List<User> users = await _userCardRepository.GetUsersByCardId(cardId);
+            _logger.LogDebug("Retrieved {Count} users for card {CardId}", users.Count, cardId);
+            return _mapper.Map<List<OutputUserDetailsDto>>(users);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving card {CardId} for user {UserId}", cardId, uid);
+            _logger.LogError(ex, "Error retrieving users for card {CardId}", cardId);
             throw;
         }
     }
 
-    public async Task<OutputUserCardDto?> AddUserCard(AddUserCardDto dto, int uid)
+    public async Task<OutputUserCardDetailsDto?> AddUserToCard(int cardId, AddUserCardDto dto, int uid)
     {
         try
         {
-            UserCard userCard = new UserCard(dto.UserId, dto.CardId);
-            UserCard? newUserCard = await _userCardRepository.AddUserCard(userCard);
-            if (newUserCard == null)
-            {
-                _logger.LogError("Failed to add card {CardId} to user {UserId}", dto.CardId, dto.UserId);
-                return null;
-            }
+            UserCard userCard = new UserCard(dto.UserId, cardId);
+            await _userCardRepository.AddUserCard(userCard);
             
-            _logger.LogInformation("Card {CardId} added to User {UserId}", dto.CardId, dto.UserId);
-            return _mapper.Map<OutputUserCardDto>(newUserCard);
+            _logger.LogInformation("Card {CardId} added to User {UserId}", cardId, dto.UserId);
+            return _mapper.Map<OutputUserCardDetailsDto>(userCard);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding card {CardId} to user {UserId}", dto.CardId, dto.UserId);
+            _logger.LogError(ex, "Error adding card {CardId} to user {UserId}", cardId, dto.UserId);
             throw;
         }
     }
 
-    public async Task<OutputUserCardDto?> DeleteUserCard(int userId, int cardId, int uid)
+    public async Task<Boolean> RemoveUserFromCard(int userId, int cardId, int uid)
     {
         try
         {
@@ -68,18 +57,13 @@ public class UserCardService: BaseService, IUserCardService
             if (userCard == null)
             {
                 _logger.LogWarning("Card {CardId} to user {UserId} not found for deletion", cardId, userId);
-                return null;
+                return false;
             }
 
-            UserCard? deletedUserCard = await _userCardRepository.DeleteUserCard(userCard);
-            if (deletedUserCard == null)
-            {
-                _logger.LogError("Failed to delete card {CardId} to user {UserId}", cardId, userId);
-                return null;
-            }
+            await _userCardRepository.DeleteUserCard(userCard);
 
             _logger.LogInformation("Card {CardId} to user {UserId} deleted", cardId, userId);
-            return _mapper.Map<OutputUserCardDto>(deletedUserCard);
+            return true;
         }
         catch (Exception ex)
         {

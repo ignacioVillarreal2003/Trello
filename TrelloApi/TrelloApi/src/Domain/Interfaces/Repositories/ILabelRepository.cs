@@ -6,7 +6,7 @@ public interface ILabelRepository
 {
     Task<Label?> GetLabelById(int labelId);
     Task<List<Label>> GetLabelsByBoardId(int boardId);
-    Task<Label?> AddLabel(Label label);
-    Task<Label?> UpdateLabel(Label label);
-    Task<bool> DeleteLabel(Label label);
+    Task AddLabel(Label label);
+    Task UpdateLabel(Label label);
+    Task DeleteLabel(Label label);
 }

@@ -48,15 +48,13 @@ public class ListRepository: Repository<List>, IListRepository
         }
     }
 
-    public async Task<List?> AddList(List list)
+    public async Task AddList(List list)
     {
         try
         {
             await Context.Lists.AddAsync(list);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("List {ListId} added to board {BoardId}", list.Id, list.BoardId);
-            return list;
         }
         catch (Exception ex)
         {
@@ -65,15 +63,13 @@ public class ListRepository: Repository<List>, IListRepository
         }
     }
 
-    public async Task<List?> UpdateList(List list)
+    public async Task UpdateList(List list)
     {
         try
         {
             Context.Lists.Update(list);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("List {ListId} updated", list.Id);
-            return list;
         }
         catch (Exception ex)
         {
@@ -82,15 +78,13 @@ public class ListRepository: Repository<List>, IListRepository
         }
     }
 
-    public async Task<List?> DeleteList(List list)
+    public async Task DeleteList(List list)
     {
         try
         {
             Context.Lists.Remove(list);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("List {ListId} deleted", list.Id);
-            return list;
         }
         catch (Exception ex)
         {

@@ -31,7 +31,7 @@ public class BoardIntegrationTests : IClassFixture<CustomWebApplicationFactory<P
     [Fact]
     public async Task GetBoardById_ReturnsOk_WhenBoardExists()
     {
-        var board = new Board(title: "title", icon: "icon", theme: "theme");
+        var board = new Board(title: "title", background: "");
         _dbContext.Boards.Add(board);
         await _dbContext.SaveChangesAsync();
         
@@ -52,8 +52,8 @@ public class BoardIntegrationTests : IClassFixture<CustomWebApplicationFactory<P
     [Fact]
     public async Task GetBoards_ReturnsOk_WithBoardList()
     {
-        var board1 = new Board(title: "title", icon: "icon", theme: "theme");
-        var board2 = new Board(title: "title", icon: "icon", theme: "theme");
+        var board1 = new Board(title: "title", background: "");
+        var board2 = new Board(title: "title", background: "");
         _dbContext.Boards.Add(board1);
         _dbContext.Boards.Add(board2);
         await _dbContext.SaveChangesAsync();
@@ -94,7 +94,7 @@ public class BoardIntegrationTests : IClassFixture<CustomWebApplicationFactory<P
     [Fact]
     public async Task UpdateBoard_ReturnsOk_WhenBoardIsUpdated()
     {
-        var board = new Board(title: "title", icon: "icon", theme: "theme");
+        var board = new Board(title: "title", background: "");
         _dbContext.Boards.Add(board);
         await _dbContext.SaveChangesAsync();
         
@@ -120,7 +120,7 @@ public class BoardIntegrationTests : IClassFixture<CustomWebApplicationFactory<P
     [Fact]
     public async Task DeleteBoard_ReturnsOk_WhenBoardIsDeleted()
     {
-        var board = new Board(title: "title", icon: "icon", theme: "theme");
+        var board = new Board(title: "title", background: "");
         _dbContext.Boards.Add(board);
         await _dbContext.SaveChangesAsync();
         

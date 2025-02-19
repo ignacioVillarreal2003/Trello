@@ -16,93 +16,49 @@ public class BoardRepository : Repository<Board>, IBoardRepository
 
     public async Task<Board?> GetBoardById(int boardId)
     {
-        try
-        {
-            Board? board = await Context.Boards
-                .Where(b => b.IsArchived == false)
-                .FirstOrDefaultAsync(b => b.Id.Equals(boardId));
+        Board? board = await Context.Boards
+            .FirstOrDefaultAsync(b => b.Id.Equals(boardId) && b.IsArchived.Equals(false));
             
-            _logger.LogDebug("Board {BoardId} retrieval attempt completed", boardId);
-            return board;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Database error retrieving board {BoardId}", boardId);
-            throw;
-        }
+        _logger.LogDebug("Board {BoardId} retrieval attempt completed", boardId);
+        return board;
     }
 
     public async Task<List<Board>> GetBoardsByUserId(int userId)
     {
-        try
-        {
-            List<Board> boards = await Context.Boards
-                .Join(Context.UserBoards, 
-                    board => board.Id,
-                    userBoard => userBoard.BoardId,
-                    (board, userBoard) => new { board, userBoard })
-                .Where(ub => ub.userBoard.UserId == userId && ub.board.IsArchived == false)
-                .Select(ub => ub.board)
-                .ToListAsync();
+        List<Board> boards = await Context.Boards
+            .Join(Context.UserBoards, 
+                board => board.Id,
+                userBoard => userBoard.BoardId,
+                (board, userBoard) => new { board, userBoard })
+            .Where(ub => ub.userBoard.UserId == userId && ub.board.IsArchived == false)
+            .Select(ub => ub.board)
+            .ToListAsync();
 
-            _logger.LogDebug("Retrieved {Count} boards for user {UserId}", boards.Count, userId);
-            return boards;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Database error retrieving boards for user {UserId}", userId);
-            throw;
-        }
+        _logger.LogDebug("Retrieved {Count} boards for user {UserId}", boards.Count, userId);
+        return boards;
     }
 
-    public async Task<Board?> AddBoard(Board board)
+    public async Task<Board> AddBoard(Board board)
     {
-        try
-        {
-            await Context.Boards.AddAsync(board);
-            await Context.SaveChangesAsync();
-            
-            _logger.LogDebug("Board {BoardId} added successfully", board.Id);
-            return board;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Database error adding board");
-            throw;
-        }
+        await Context.Boards.AddAsync(board);
+        await Context.SaveChangesAsync();
+        _logger.LogDebug("Board {BoardId} added successfully", board.Id);
+        return board;
     }
 
-    public async Task<Board?> UpdateBoard(Board board)
+    public async Task<Board> UpdateBoard(Board board)
     {
-        try
-        {
-            Context.Boards.Update(board);
-            await Context.SaveChangesAsync();
-            
-            _logger.LogDebug("Board {BoardId} updated", board.Id);
-            return board;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Database error updating board {BoardId}", board.Id);
-            throw;
-        }
+        Context.Boards.Update(board);
+        await Context.SaveChangesAsync();
+        _logger.LogDebug("Board {BoardId} updated", board.Id);
+        return board;
     }
 
-    public async Task<Board?> DeleteBoard(Board board)
+    public async Task<Board> DeleteBoard(Board board)
     {
-        try
-        {
-            Context.Boards.Remove(board);
-            await Context.SaveChangesAsync();
-            
-            _logger.LogDebug("Board {BoardId} deleted", board.Id);
-            return board;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Database error deleting board {BoardId}", board.Id);
-            throw;
-        }
+        Context.Boards.Remove(board);
+        await Context.SaveChangesAsync();
+        _logger.LogDebug("Board {BoardId} deleted", board.Id);
+        return board;
     }
 }

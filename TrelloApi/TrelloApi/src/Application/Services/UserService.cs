@@ -1,5 +1,6 @@
 using AutoMapper;
 using TrelloApi.Application.Utils;
+using TrelloApi.Domain.Constants;
 using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.Entities;
 using TrelloApi.Domain.Interfaces.Repositories;
@@ -20,13 +21,13 @@ public class UserService: BaseService, IUserService
         _encrypt = encrypt;
     }
 
-    public async Task<List<OutputUserDto>> GetUsers(int userId)
+    public async Task<List<OutputUserDetailsDto>> GetUsers(int userId)
     {
         try
         {
             List<User> users = await _userRepository.GetUsers();
             _logger.LogDebug("Retrieved {Count} users", users.Count);
-            return _mapper.Map<List<OutputUserDto>>(users);
+            return _mapper.Map<List<OutputUserDetailsDto>>(users);
         }
         catch (Exception ex)
         {
@@ -35,13 +36,13 @@ public class UserService: BaseService, IUserService
         }
     }
 
-    public async Task<List<OutputUserDto>> GetUsersByUsername(string username, int uid)
+    public async Task<List<OutputUserDetailsDto>> GetUsersByUsername(string username, int uid)
     {
         try
         {
             List<User> users = await _userRepository.GetUsersByUsername(username);
             _logger.LogDebug("Retrieved {Count} users {Username}", users.Count, username);
-            return _mapper.Map<List<OutputUserDto>>(users);
+            return _mapper.Map<List<OutputUserDetailsDto>>(users);
         }
         catch (Exception ex)
         {
@@ -50,13 +51,13 @@ public class UserService: BaseService, IUserService
         }
     }
 
-    public async Task<List<OutputUserDto>> GetUsersByCardId(int cardId, int uid)
+    public async Task<List<OutputUserDetailsDto>> GetUsersByCardId(int cardId, int uid)
     {
         try
         {
             List<User> users = await _userRepository.GetUsersByCardId(cardId);
             _logger.LogDebug("Retrieved {Count} users for card {CardId}", users.Count, cardId);
-            return _mapper.Map<List<OutputUserDto>>(users);
+            return _mapper.Map<List<OutputUserDetailsDto>>(users);
         }
         catch (Exception ex)
         {
@@ -65,56 +66,54 @@ public class UserService: BaseService, IUserService
         }
     }
     
-    public async Task<OutputUserDto?> RegisterUser(RegisterUserDto registerUserDto)
+    public async Task<OutputUserDetailsDto?> RegisterUser(RegisterUserDto dto)
     {
         try
         {
-            User user = new User(registerUserDto.Email, registerUserDto.Username, _encrypt.HashPassword(registerUserDto.Password));
-            User? newUser = await _userRepository.AddUser(user);
-            if (newUser == null)
-            {
-                _logger.LogError("Failed to add user {Email}", registerUserDto.Email);
-                return null;
-            }
+            User user = new User(dto.Email, dto.Username, _encrypt.HashPassword(dto.Password), UserThemeValues.UserThemesAllowed[1]);
+            await _userRepository.AddUser(user);
 
-            _logger.LogInformation("User {Email} register", registerUserDto.Email);
-            return _mapper.Map<OutputUserDto>(newUser);
+            _logger.LogInformation("User {Email} register", dto.Email);
+            return _mapper.Map<OutputUserDetailsDto>(user);
         }
         catch (Exception ex)
         {
-            _logger.LogInformation("User {Email} register", registerUserDto.Email);
+            _logger.LogInformation("User {Email} register", dto.Email);
             throw;
         }
     }
 
-    public async Task<OutputUserDto?> LoginUser(LoginUserDto loginUserDto)
+    public async Task<OutputUserDetailsDto?> LoginUser(LoginUserDto dto)
     {
         try
         {
-            User? user = await _userRepository.GetUserByEmail(loginUserDto.Email);
+            User? user = await _userRepository.GetUserByEmail(dto.Email);
             if (user == null)
             {
-                _logger.LogError("Failed to login user {Email}", loginUserDto.Email);
+                _logger.LogError("Failed to login user {Email}", dto.Email);
                 return null;
             }
 
-            if (!_encrypt.ComparePassword(loginUserDto.Password, user.Password))
+            if (!_encrypt.ComparePassword(dto.Password, user.Password))
             {
-                _logger.LogWarning("Invalid user credentials for user {Email}.", loginUserDto.Email);
+                _logger.LogWarning("Invalid user credentials for user {Email}.", dto.Email);
                 throw new UnauthorizedAccessException("Invalid user credentials.");
             }
 
-            _logger.LogInformation("User {Email} login", loginUserDto.Email);
-            return _mapper.Map<OutputUserDto>(user);
+            user.LastLogin = DateTime.UtcNow;
+            await _userRepository.UpdateUser(user);
+                
+            _logger.LogInformation("User {Email} login", dto.Email);
+            return _mapper.Map<OutputUserDetailsDto>(user);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error login user {Email}", loginUserDto.Email);
+            _logger.LogError(ex, "Error login user {Email}", dto.Email);
             throw;
         }
     }
 
-    public async Task<OutputUserDto?> UpdateUser(UpdateUserDto updateUserDto, int uid)
+    public async Task<OutputUserDetailsDto?> UpdateUser(UpdateUserDto dto, int uid)
     {
         try
         {
@@ -125,33 +124,28 @@ public class UserService: BaseService, IUserService
                 return null;
             }
             
-            if (!string.IsNullOrEmpty(updateUserDto.Username))
+            if (!string.IsNullOrEmpty(dto.Username))
             {
-                user.Username = updateUserDto.Username;
+                user.Username = dto.Username;
             }
-            if (!string.IsNullOrEmpty(updateUserDto.Theme))
+            if (!string.IsNullOrEmpty(dto.Theme) && UserThemeValues.UserThemesAllowed.Contains(dto.Theme))
             {
-                user.Theme = updateUserDto.Theme;
+                user.Theme = dto.Theme;
             }
-            if (!string.IsNullOrEmpty(updateUserDto.OldPassword) && !string.IsNullOrEmpty(updateUserDto.NewPassword))
+            if (!string.IsNullOrEmpty(dto.OldPassword) && !string.IsNullOrEmpty(dto.NewPassword))
             {
-                if (!_encrypt.ComparePassword(updateUserDto.OldPassword, user.Password))
+                if (!_encrypt.ComparePassword(dto.OldPassword, user.Password))
                 {
                     _logger.LogWarning("User {UserId} password not found for update", uid);
                     throw new UnauthorizedAccessException("Invalid user credentials.");
                 }
-                user.Password = _encrypt.HashPassword(updateUserDto.NewPassword);
+                user.Password = _encrypt.HashPassword(dto.NewPassword);
             }
 
-            User? updatedUser = await _userRepository.UpdateUser(user);
-            if (updatedUser == null)
-            {
-                _logger.LogError("Failed to update user {UserId}", uid);
-                return null;
-            }
+            await _userRepository.UpdateUser(user);
             
             _logger.LogInformation("User {UserId} updated", uid);
-            return _mapper.Map<OutputUserDto>(updatedUser);
+            return _mapper.Map<OutputUserDetailsDto>(user);
         }
         catch (Exception ex)
         {
@@ -160,7 +154,7 @@ public class UserService: BaseService, IUserService
         }
     }
 
-    public async Task<OutputUserDto?> DeleteUser(int uid)
+    public async Task<Boolean> DeleteUser(int uid)
     {
         try
         {
@@ -168,18 +162,13 @@ public class UserService: BaseService, IUserService
             if (user == null)
             {
                 _logger.LogWarning("User {UserId} not found for deletion", uid);
-                return null;
+                return false;
             }
 
-            User? deletedUser = await _userRepository.DeleteUser(user);
-            if (deletedUser == null)
-            {
-                _logger.LogError("Failed to delete user {UserId}", uid);
-                return null;
-            }
+            await _userRepository.DeleteUser(user);
             
             _logger.LogInformation("User {UserId} deleted", uid);
-            return _mapper.Map<OutputUserDto>(deletedUser);
+            return true;
         }
         catch (Exception ex)
         {

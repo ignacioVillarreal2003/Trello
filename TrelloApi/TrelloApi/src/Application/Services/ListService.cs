@@ -18,7 +18,7 @@ public class ListService: BaseService, IListService
         _listRepository = listRepository;
     }
     
-    public async Task<OutputListDto?> GetListById(int listId, int userId)
+    public async Task<OutputListDetailsDto?> GetListById(int listId, int uid)
     {
         try
         {
@@ -30,7 +30,7 @@ public class ListService: BaseService, IListService
             }
 
             _logger.LogDebug("List {ListId} retrieved", listId);
-            return _mapper.Map<OutputListDto>(list);
+            return _mapper.Map<OutputListDetailsDto>(list);
         }
         catch (Exception ex)
         {
@@ -39,13 +39,13 @@ public class ListService: BaseService, IListService
         }
     }
     
-    public async Task<List<OutputListDto>> GetListsByBoardId(int boardId, int userId)
+    public async Task<List<OutputListDetailsDto>> GetListsByBoardId(int boardId, int uid)
     {
         try
         {
             List<List> lists = await _listRepository.GetListsByBoardId(boardId);
             _logger.LogDebug("Retrieved {Count} lists for board {BoardId}", lists.Count, boardId);
-            return _mapper.Map<List<OutputListDto>>(lists);
+            return _mapper.Map<List<OutputListDetailsDto>>(lists);
         }
         catch (Exception ex)
         {
@@ -54,20 +54,16 @@ public class ListService: BaseService, IListService
         }
     }
 
-    public async Task<OutputListDto?> AddList(AddListDto addListDto, int boardId, int userId)
+    public async Task<OutputListDetailsDto?> AddList(int boardId, AddListDto dto, int uid)
     {
         try
         {
-            List list = new List(addListDto.Title, boardId);
-            List? newList = await _listRepository.AddList(list);
-            if (newList == null)
-            {
-                _logger.LogError("Failed to add list to board {BoardId}", boardId);
-                return null;
-            }
+            List list = new List(dto.Title, boardId, dto.Position);
+            
+            await _listRepository.AddList(list);
 
             _logger.LogInformation("List added to board {BoardId}", boardId);
-            return _mapper.Map<OutputListDto>(newList);
+            return _mapper.Map<OutputListDetailsDto>(list);
         }
         catch (Exception ex)
         {
@@ -76,7 +72,7 @@ public class ListService: BaseService, IListService
         }
     }
 
-    public async Task<OutputListDto?> UpdateList(int listId, UpdateListDto updateListDto, int userId)
+    public async Task<OutputListDetailsDto?> UpdateList(int listId, UpdateListDto dto, int uid)
     {
         try
         {
@@ -87,20 +83,21 @@ public class ListService: BaseService, IListService
                 return null;
             }
 
-            if (!string.IsNullOrEmpty(updateListDto.Title))
+            if (!string.IsNullOrEmpty(dto.Title))
             {
-                list.Title = updateListDto.Title;
+                list.Title = dto.Title;
             }
+            if (dto.Position != null)
+            {
+                list.Position = dto.Position.Value;
+            }
+
+            list.UpdatedAt = DateTime.UtcNow;
             
-            List? updatedList = await _listRepository.UpdateList(list);
-            if (updatedList == null)
-            {
-                _logger.LogError("Failed to update list {ListId}", listId);
-                return null;
-            }
+            await _listRepository.UpdateList(list);
             
             _logger.LogInformation("List {ListId} updated", listId);
-            return _mapper.Map<OutputListDto>(updatedList);
+            return _mapper.Map<OutputListDetailsDto>(list);
         }
         catch (Exception ex)
         {
@@ -109,7 +106,7 @@ public class ListService: BaseService, IListService
         }
     }
 
-    public async Task<OutputListDto?> DeleteList(int listId, int userId)
+    public async Task<Boolean> DeleteList(int listId, int uid)
     {
         try
         {
@@ -117,18 +114,13 @@ public class ListService: BaseService, IListService
             if (list == null)
             {
                 _logger.LogWarning("List {ListId} not found for deletion", listId);
-                return null;
+                return false;
             }
             
-            List? deletedList = await _listRepository.DeleteList(list);
-            if (deletedList == null)
-            {
-                _logger.LogError("Failed to delete list {ListId}", listId);
-                return null;
-            }
+            await _listRepository.DeleteList(list);
             
             _logger.LogInformation("List {ListId} deleted", listId);
-            return _mapper.Map<OutputListDto>(deletedList);
+            return true;
         }
         catch (Exception ex)
         {

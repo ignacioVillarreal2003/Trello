@@ -15,20 +15,13 @@ public class OutputCardDetailsDto
         
     public DateTime? DueDate { get; set; }
         
-    public string Priority { get; set; } = "Medium";
+    public string? Priority { get; set; }
         
     public bool IsCompleted { get; set; }
         
     public DateTime CreatedAt { get; set; }
         
-    public DateTime UpdatedAt { get; set; }
-}
-
-public class OutputCardListDto
-{
-    public int Id { get; set; }
-    
-    public string Title { get; set; } = string.Empty;
+    public DateTime? UpdatedAt { get; set; }
 }
 
 public class AddCardDto
@@ -40,12 +33,12 @@ public class AddCardDto
     public string Description { get; set; } = string.Empty;
     
     [StringLength(32)]
-    public string Priority { get; set; } = PriorityValues.PrioritiesAllowed[1];
+    public string? Priority { get; set; }
 }
 
 public class UpdateCardDto
 {
-    [StringLength(64)]
+    [StringLength(32)]
     public string? Title { get; set; }
         
     [StringLength(256)]

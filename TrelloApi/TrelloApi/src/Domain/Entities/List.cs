@@ -9,10 +9,16 @@ public class List
     [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     
-    [StringLength(64), Required]
+    [StringLength(32), Required]
     public string Title { get; set; }
     
     public int Position { get; set; }
+    
+    [DataType(DataType.DateTime)]
+    public DateTime CreatedAt { get; set; }
+    
+    [DataType(DataType.DateTime)]
+    public DateTime? UpdatedAt { get; set; }
     
     [ForeignKey("Board"), Required]
     public int BoardId { get; set; }
@@ -20,16 +26,12 @@ public class List
     
     public ICollection<Card> Tasks { get; set; } = new HashSet<Card>();
     
-    [DataType(DataType.DateTime)]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
-    [DataType(DataType.DateTime)]
-    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-
-    public List(string title, int boardId, int position = 0)
+    public List(string title, int boardId, int position)
     {
         Title = title;
         BoardId = boardId;
         Position = position;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = null;
     }
 }

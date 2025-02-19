@@ -5,6 +5,7 @@ namespace TrelloApi.Domain.Interfaces.Repositories;
 public interface IUserCardRepository
 {
     Task<UserCard?> GetUserCardById(int userId, int cardId);
-    Task<UserCard?> AddUserCard(UserCard userCard);
-    Task<UserCard?> DeleteUserCard(UserCard userCard);
+    Task<List<User>> GetUsersByCardId(int cardId);
+    Task AddUserCard(UserCard userCard);
+    Task DeleteUserCard(UserCard userCard);
 }

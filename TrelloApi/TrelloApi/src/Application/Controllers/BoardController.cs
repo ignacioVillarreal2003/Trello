@@ -47,7 +47,7 @@ public class BoardController : BaseController
     {
         try
         {
-            List<OutputBoardListDto> boards = await _boardService.GetBoardsByUserId(UserId);
+            List<OutputBoardDetailsDto> boards = await _boardService.GetBoardsByUserId(UserId);
             _logger.LogDebug("Retrieved {Count} boards for user {UserId}", boards.Count, UserId);
             return Ok(boards);
         }
@@ -63,13 +63,13 @@ public class BoardController : BaseController
     {
         try
         {
-            List<string> boardColorsAllowed = BoardColorValues.BoardColorsAllowed;
-            _logger.LogDebug("Retrieved {Count} colors for board", boardColorsAllowed.Count);
-            return Task.FromResult<IActionResult>(Ok(boardColorsAllowed));
+            List<string> boardBackgroundsAllowed = BoardBackgroundValues.BoardBackgroundsAllowed;
+            _logger.LogDebug("Retrieved {Count} backgrounds for board", boardBackgroundsAllowed.Count);
+            return Task.FromResult<IActionResult>(Ok(boardBackgroundsAllowed));
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving colors for board");
+            _logger.LogError(ex, "Error retrieving backgrounds for board");
             return Task.FromResult<IActionResult>(StatusCode(500, new { message = "An unexpected error occurred." }));
         }
     }

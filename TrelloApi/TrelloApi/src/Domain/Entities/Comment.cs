@@ -13,7 +13,7 @@ public class Comment
     public string Text { get; set; }
     
     [DataType(DataType.DateTime)]
-    public DateTime Date { get; set; } = DateTime.UtcNow;
+    public DateTime Date { get; set; }
     
     [ForeignKey("Card"), Required]
     public int CardId { get; set; }
@@ -28,5 +28,6 @@ public class Comment
         Text = text;
         CardId = cardId;
         AuthorId = authorId;
+        Date = DateTime.UtcNow;
     }
 }

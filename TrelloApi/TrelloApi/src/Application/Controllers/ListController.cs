@@ -25,7 +25,7 @@ public class ListController: BaseController
     {
         try
         {
-            OutputListDto? list = await _listService.GetListById(listId, UserId);
+            OutputListDetailsDto? list = await _listService.GetListById(listId, UserId);
             if (list == null)
             {
                 _logger.LogDebug("List {ListId} not found", listId);
@@ -47,7 +47,7 @@ public class ListController: BaseController
     {
         try
         {
-            List<OutputListDto> lists = await _listService.GetListsByBoardId(boardId, UserId);
+            List<OutputListDetailsDto> lists = await _listService.GetListsByBoardId(boardId, UserId);
             _logger.LogDebug("Retrieved {Count} lists for board {BoardId}", lists.Count, boardId);
             return Ok(lists);
         }
@@ -59,11 +59,11 @@ public class ListController: BaseController
     }
 
     [HttpPost("board/{boardId:int}")]
-    public async Task<IActionResult> AddList(int boardId, [FromBody] AddListDto addListDto)
+    public async Task<IActionResult> AddList(int boardId, [FromBody] AddListDto dto)
     {
         try
         {
-            OutputListDto? list = await _listService.AddList(addListDto, boardId, UserId);
+            OutputListDetailsDto? list = await _listService.AddList(boardId, dto, UserId);
             if (list == null)
             {
                 _logger.LogError("Failed to add list to board {BoardId}", boardId);
@@ -81,11 +81,11 @@ public class ListController: BaseController
     }
 
     [HttpPut("{listId:int}")]
-    public async Task<IActionResult> UpdateList(int listId, [FromBody] UpdateListDto updateListDto)
+    public async Task<IActionResult> UpdateList(int listId, [FromBody] UpdateListDto dto)
     {
         try
         {
-            OutputListDto? list = await _listService.UpdateList(listId, updateListDto, UserId);
+            OutputListDetailsDto? list = await _listService.UpdateList(listId, dto, UserId);
             if (list == null)
             {
                 _logger.LogDebug("List {ListId} not found for update", listId);
@@ -107,15 +107,15 @@ public class ListController: BaseController
     {
         try
         {
-            OutputListDto? list = await _listService.DeleteList(listId, UserId);
-            if (list == null)
+            Boolean isDeleted = await _listService.DeleteList(listId, UserId);
+            if (!isDeleted)
             {
                 _logger.LogDebug("List {ListId} not found for deletion", listId);
                 return NotFound(new { message = "List not found." });
             }
             
             _logger.LogInformation("List {ListId} deleted", listId);
-            return Ok(list);
+            return NoContent();
         }
         catch (Exception ex)
         {

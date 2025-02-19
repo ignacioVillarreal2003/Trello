@@ -49,15 +49,13 @@ public class CardRepository: Repository<Card>, ICardRepository
         }
     }
 
-    public async Task<Card?> AddCard(Card card)
+    public async Task AddCard(Card card)
     {
         try
         {
             await Context.Cards.AddAsync(card);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("Card {CardId} added successfully", card.Id);
-            return card;
         }
         catch (Exception ex)
         {
@@ -66,15 +64,13 @@ public class CardRepository: Repository<Card>, ICardRepository
         }
     }
 
-    public async Task<Card?> UpdateCard(Card card)
+    public async Task UpdateCard(Card card)
     {
         try
         {
             Context.Cards.Update(card);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("Card {CardId} updated", card.Id);
-            return card;
         }
         catch (Exception ex)
         {
@@ -83,15 +79,13 @@ public class CardRepository: Repository<Card>, ICardRepository
         }
     }
 
-    public async Task<Card?> DeleteCard(Card card)
+    public async Task DeleteCard(Card card)
     {
         try
         {
             Context.Cards.Remove(card);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("Card {CardId} deleted", card.Id);
-            return card;
         }
         catch (Exception ex)
         {

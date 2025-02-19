@@ -47,7 +47,7 @@ public class CardController: BaseController
     {
         try
         {
-            List<OutputCardListDto> cards = await _cardService.GetCardsByListId(listId, UserId);
+            List<OutputCardDetailsDto> cards = await _cardService.GetCardsByListId(listId, UserId);
             _logger.LogDebug("Retrieved {Count} cards for list {ListId}", cards.Count, listId);
             return Ok(cards);
         }
@@ -74,6 +74,22 @@ public class CardController: BaseController
         }
     }
 
+    [HttpGet("colors")]
+    public Task<IActionResult> GetLabelColors()
+    {
+        try
+        {
+            List<string> prioritiesAllowed = PriorityValues.PrioritiesAllowed;
+            _logger.LogDebug("Retrieved {Count} priorities for card", prioritiesAllowed.Count);
+            return Task.FromResult<IActionResult>(Ok(prioritiesAllowed));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving priorities for card");
+            return Task.FromResult<IActionResult>(StatusCode(500, new { message = "An unexpected error occurred." }));
+        }
+    }
+    
     [HttpPost("list/{listId:int}")]
     public async Task<IActionResult> AddCard(int listId, [FromBody] AddCardDto dto)
     {

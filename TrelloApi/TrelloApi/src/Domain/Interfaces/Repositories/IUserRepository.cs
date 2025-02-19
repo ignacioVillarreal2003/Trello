@@ -9,7 +9,7 @@ public interface IUserRepository
     Task<List<User>> GetUsers();
     Task<List<User>> GetUsersByUsername(string username);
     Task<List<User>> GetUsersByCardId(int cardId);
-    Task<User?> AddUser(User user);
-    Task<User?> UpdateUser(User user);
-    Task<User?> DeleteUser(User user);
+    Task AddUser(User user);
+    Task UpdateUser(User user);
+    Task DeleteUser(User user);
 }

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace TrelloApi.Domain.DTOs;
 
-public class OutputUserCardDto
+public class OutputUserCardDetailsDto
 {
     public int UserId { get; set; }
         
@@ -13,7 +13,4 @@ public class AddUserCardDto
 {
     [Required]
     public int UserId { get; set; }
-        
-    [Required]
-    public int CardId { get; set; }
 }

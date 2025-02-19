@@ -3,7 +3,6 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using TrelloApi.app;
-using TrelloApi.Domain.Comment;
 using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Authentication;
 using Task = System.Threading.Tasks.Task;
@@ -31,7 +30,7 @@ public class CommentIntegrationTests: IClassFixture<CustomWebApplicationFactory<
     [Fact]
     public async Task GetCommentById_ReturnsOk_WhenCommentExists()
     {
-        var comment = new Comment(text: "title", taskId: 1, authorId: 1);
+        var comment = new Comment(text: "title", cardId: 1, authorId: 1);
         _dbContext.Comments.Add(comment);
         await _dbContext.SaveChangesAsync();
         
@@ -50,16 +49,16 @@ public class CommentIntegrationTests: IClassFixture<CustomWebApplicationFactory<
     }
     
     [Fact]
-    public async Task GetCommentsByTaskId_ReturnsOk_WithCommentList()
+    public async Task GetCommentsByCardId_ReturnsOk_WithCommentList()
     {
-        var taskId = 1;
-        var comment1 = new Comment(text: "title 1", taskId: 1, authorId: 1);
-        var comment2 = new Comment(text: "title 2", taskId: 1, authorId: 1);
+        var cardId = 1;
+        var comment1 = new Comment(text: "title 1", cardId: 1, authorId: 1);
+        var comment2 = new Comment(text: "title 2", cardId: 1, authorId: 1);
         _dbContext.Comments.Add(comment1);
         _dbContext.Comments.Add(comment2);
         await _dbContext.SaveChangesAsync();
         
-        var response = await _client.GetAsync($"/Comment/task/{taskId}");
+        var response = await _client.GetAsync($"/Comment/task/{cardId}");
         
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
@@ -67,9 +66,9 @@ public class CommentIntegrationTests: IClassFixture<CustomWebApplicationFactory<
     [Fact]
     public async Task GetComments_ReturnsOk_WithEmptyCommentList()
     {
-        var taskId = 1;
+        var cardId = 1;
         
-        var response = await _client.GetAsync($"/Comment/task/{taskId}");
+        var response = await _client.GetAsync($"/Comment/task/{cardId}");
         
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
@@ -77,9 +76,9 @@ public class CommentIntegrationTests: IClassFixture<CustomWebApplicationFactory<
     [Fact]
     public async Task AddComment_ReturnsCreated_WhenCommentIsAdded()
     {
-        var taskId = 1;
+        var cardId = 1;
         var addCommentDto = new { Text = "Test Comment", AuthorId = 1 };
-        var response = await _client.PostAsJsonAsync($"/Comment/task/{taskId}", addCommentDto);
+        var response = await _client.PostAsJsonAsync($"/Comment/task/{cardId}", addCommentDto);
         
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
@@ -87,10 +86,10 @@ public class CommentIntegrationTests: IClassFixture<CustomWebApplicationFactory<
     [Fact]
     public async Task AddComment_ReturnsNotCreated_WhenCommentIsNotAdded()
     {
-        var taskId = 1;
+        var cardId = 1;
         var addCommentDto = new { Text = "Test Comment" };
         
-        var response = await _client.PostAsJsonAsync($"/Comment/task/{taskId}", addCommentDto);
+        var response = await _client.PostAsJsonAsync($"/Comment/task/{cardId}", addCommentDto);
         
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
@@ -98,7 +97,7 @@ public class CommentIntegrationTests: IClassFixture<CustomWebApplicationFactory<
     [Fact]
     public async Task UpdateComment_ReturnsOk_WhenCommentIsUpdated()
     {
-        var comment = new Comment(text: "title", taskId: 1, authorId: 1);
+        var comment = new Comment(text: "title", cardId: 1, authorId: 1);
         _dbContext.Comments.Add(comment);
         await _dbContext.SaveChangesAsync();
         
@@ -123,7 +122,7 @@ public class CommentIntegrationTests: IClassFixture<CustomWebApplicationFactory<
     [Fact]
     public async Task DeleteComment_ReturnsOk_WhenCommentIsDeleted()
     {
-        var comment = new Comment(text: "title", taskId: 1, authorId: 1);
+        var comment = new Comment(text: "title", cardId: 1, authorId: 1);
         _dbContext.Comments.Add(comment);
         await _dbContext.SaveChangesAsync();
         

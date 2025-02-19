@@ -41,13 +41,13 @@ public class BoardService: BaseService, IBoardService
         }
     }
     
-    public async Task<List<OutputBoardListDto>> GetBoardsByUserId(int uid)
+    public async Task<List<OutputBoardDetailsDto>> GetBoardsByUserId(int uid)
     {
         try
         {
             List<Board> boards = await _boardRepository.GetBoardsByUserId(uid);
             _logger.LogDebug("Retrieved {Count} boards for user {UserId}", boards.Count, uid);
-            return _mapper.Map<List<OutputBoardListDto>>(boards);
+            return _mapper.Map<List<OutputBoardDetailsDto>>(boards);
         }
         catch (Exception ex)
         {
@@ -60,30 +60,21 @@ public class BoardService: BaseService, IBoardService
     {
         try
         {
-            if (!BoardColorValues.BoardColorsAllowed.Contains(dto.Color))
+            if (!BoardBackgroundValues.BoardBackgroundsAllowed.Contains(dto.Background))
             {
+                _logger.LogError("Property background isn't correct.");
                 return null;
             }
             
-            Board board = new Board(dto.Title, dto.Color);
+            Board board = new Board(dto.Title, dto.Background, dto.Description);
             
-            if (!string.IsNullOrEmpty(dto.Description))
-            {
-                board.Description = dto.Description;
-            }
-            
-            Board? newBoard = await _boardRepository.AddBoard(board);
-            if (newBoard == null)
-            {
-                _logger.LogError("Failed to add board to user {UserId}", uid);
-                return null;
-            }
+            await _boardRepository.AddBoard(board);
 
-            var userBoard = new UserBoard(uid, newBoard.Id);
+            var userBoard = new UserBoard(uid, board.Id, RoleValues.RolesAllowed[0]);
             await _userBoardRepository.AddUserBoard(userBoard);
             
             _logger.LogInformation("Board added to user {UserId}", uid);
-            return _mapper.Map<OutputBoardDetailsDto>(newBoard);
+            return _mapper.Map<OutputBoardDetailsDto>(board);
         }
         catch (Exception ex)
         {
@@ -107,9 +98,15 @@ public class BoardService: BaseService, IBoardService
             {
                 board.Title = dto.Title;
             }
-            if (!string.IsNullOrEmpty(dto.Color))
+            if (!string.IsNullOrEmpty(dto.Background))
             {
-                board.Color = dto.Color;
+                if (!BoardBackgroundValues.BoardBackgroundsAllowed.Contains(dto.Background))
+                {
+                    _logger.LogError("Property background isn't correct.");
+                    return null;
+                }
+                
+                board.Background = dto.Background;
             }
             if (!string.IsNullOrEmpty(dto.Description))
             {
@@ -122,15 +119,10 @@ public class BoardService: BaseService, IBoardService
             }
             board.UpdatedAt = DateTime.UtcNow;
 
-            Board? updatedBoard = await _boardRepository.UpdateBoard(board);
-            if (updatedBoard == null)
-            {
-                _logger.LogError("Failed to update board {BoardId}", boardId);
-                return null;
-            }
+            await _boardRepository.UpdateBoard(board);
             
             _logger.LogInformation("Board {BoardId} updated", boardId);
-            return _mapper.Map<OutputBoardDetailsDto>(updatedBoard);
+            return _mapper.Map<OutputBoardDetailsDto>(board);
         }
         catch (Exception ex)
         {
@@ -150,12 +142,7 @@ public class BoardService: BaseService, IBoardService
                 return false;
             }
 
-            Board? deletedBoard = await _boardRepository.DeleteBoard(board);
-            if (deletedBoard == null)
-            {
-                _logger.LogError("Failed to delete board {BoardId}", boardId);
-                return false;
-            }
+            await _boardRepository.DeleteBoard(board);
             
             _logger.LogInformation("Board {BoardId} deleted", boardId);
             return true;

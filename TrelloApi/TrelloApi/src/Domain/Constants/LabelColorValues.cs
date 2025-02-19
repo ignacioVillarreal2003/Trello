@@ -1,6 +1,6 @@
 namespace TrelloApi.Domain.Constants;
 
-internal static class BoardColorValues
+internal static class LabelColorValues
 {
     private const string Red = "ff6575";
     private const string Yellow = "ffd02f";
@@ -9,5 +9,5 @@ internal static class BoardColorValues
     private const string Blue = "0077ff";
     private const string Orange = "ff9b00";
     
-    public static readonly List<string> BoardColorsAllowed = new List<string> { Red, Yellow, Green, Purple, Blue, Orange };
+    public static readonly List<string> LabelColorsAllowed = new List<string> { Red, Yellow, Green, Purple, Blue, Orange };
 }

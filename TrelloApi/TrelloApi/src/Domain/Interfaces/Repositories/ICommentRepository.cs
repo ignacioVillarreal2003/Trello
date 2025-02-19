@@ -6,7 +6,7 @@ public interface ICommentRepository
 {
     Task<Comment?> GetCommentById(int commentId);
     Task<List<Comment>> GetCommentsByCardId(int cardId);
-    Task<Comment?> AddComment(Comment comment);
-    Task<Comment?> UpdateComment(Comment comment);
-    Task<Comment?> DeleteComment(Comment comment);
+    Task AddComment(Comment comment);
+    Task UpdateComment(Comment comment);
+    Task DeleteComment(Comment comment);
 }

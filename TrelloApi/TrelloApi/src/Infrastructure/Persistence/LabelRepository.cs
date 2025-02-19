@@ -49,15 +49,13 @@ public class LabelRepository: Repository<Label>, ILabelRepository
         }
     }
     
-    public async Task<Label?> AddLabel(Label label)
+    public async Task AddLabel(Label label)
     {
         try
         {
             await Context.Labels.AddAsync(label);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("Label {LabelId} added.", label.Id);
-            return label;
         }
         catch (Exception ex)
         {
@@ -66,15 +64,13 @@ public class LabelRepository: Repository<Label>, ILabelRepository
         }
     }
 
-    public async Task<Label?> UpdateLabel(Label label)
+    public async Task UpdateLabel(Label label)
     {
         try
         {
             Context.Labels.Update(label);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("Label {LabelId} updated", label.Id);
-            return label;
         }
         catch (Exception ex)
         {
@@ -83,20 +79,18 @@ public class LabelRepository: Repository<Label>, ILabelRepository
         }
     }
 
-    public async Task<bool> DeleteLabel(Label label)
+    public async Task DeleteLabel(Label label)
     {
         try
         {
             Context.Labels.Remove(label);
             await Context.SaveChangesAsync();
-        
             _logger.LogDebug("Label {LabelId} deleted", label.Id);
-            return true;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Database error deleting label {LabelId}", label.Id);
-            return false;
+            throw;
         }
     }
 }

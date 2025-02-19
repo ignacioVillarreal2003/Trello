@@ -25,10 +25,10 @@ public class BoardRepositoryTests
     }
     
     [Fact]
-    public async Task GetBoardById_ReturnsBoard_WhenBoardExists()
+    public async Task GetBoardById_ShouldReturnBoard_WhenBoardExists()
     {
         int boardId = 1;
-        var board = new Board(title: "Test Board", icon: "TestIcon", theme: "TestTheme") { Id = boardId };
+        var board = new Board(title: "title", background: "background") { Id = boardId };
         
         _context.Boards.Add(board);
         await _context.SaveChangesAsync();
@@ -40,7 +40,7 @@ public class BoardRepositoryTests
     }
 
     [Fact]
-    public async Task GetBoardById_ReturnsNull_WhenBoardDoesNotExist()
+    public async Task GetBoardById_ShouldReturnNull_WhenBoardDoesNotExist()
     {
         int boardId = 1;
         
@@ -48,13 +48,27 @@ public class BoardRepositoryTests
         
         Assert.Null(result);
     }
-
+    
     [Fact]
-    public async Task GetBoards_ReturnsBoards_WhenBoardsExistForUser()
+    public async Task GetBoardById_ShouldReturnNull_WhenBoardIsArchived()
+    {
+        int boardId = 1;
+        var board = new Board(title: "title", background: "background") { Id = boardId, IsArchived = true, ArchivedAt = DateTime.UtcNow };
+
+        _context.Boards.Add(board);
+        await _context.SaveChangesAsync();
+        
+        var result = await _repository.GetBoardById(boardId);
+        
+        Assert.Null(result);
+    }
+    
+    [Fact]
+    public async Task GetBoardsByUserId_ShouldReturnBoards_WhenUserHasBoards()
     {
         int userId = 1;
-        var board1 = new Board(title: "Board 1", icon: "Icon1", theme: "Theme1") { Id = 1 };
-        var board2 = new Board(title: "Board 2", icon: "Icon2", theme: "Theme2") { Id = 2 };
+        var board1 = new Board(title: "title", background: "background") { Id = 1 };
+        var board2 = new Board(title: "title", background: "background") { Id = 2 };
         var userBoard1 = new UserBoard(userId: userId, boardId: 1);
         var userBoard2 = new UserBoard(userId: userId, boardId: 2);
 
@@ -62,63 +76,82 @@ public class BoardRepositoryTests
         _context.UserBoards.AddRange(userBoard1, userBoard2);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.GetBoards(userId);
+        var result = await _repository.GetBoardsByUserId(userId);
         
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
     }
-
+    
     [Fact]
-    public async Task GetBoards_ReturnsEmptyList_WhenNoBoardsExistForUser()
+    public async Task GetBoardsByUserId_ShouldReturnEmptyList_WhenUserHasNoBoards()
     {
         int userId = 1;
         
-        var result = await _repository.GetBoards(userId);
+        var result = await _repository.GetBoardsByUserId(userId);
         
         Assert.NotNull(result);
         Assert.Empty(result);
     }
 
     [Fact]
-    public async Task AddBoard_ReturnsBoard_WhenBoardIsAddedSuccessfully()
+    public async Task GetBoardsByUserId_ShouldNotReturnArchivedBoards()
     {
-        var board = new Board(title: "New Board", icon: "NewIcon", theme: "NewTheme") { Id = 1 };
-        
-        _context.Boards.RemoveRange(_context.Boards);
+        int userId = 1;
+        var board1 = new Board(title: "title", background: "background") { Id = 1, IsArchived = true, ArchivedAt = DateTime.UtcNow };
+        var board2 = new Board(title: "title", background: "background") { Id = 2 };
+        var userBoard1 = new UserBoard(userId: userId, boardId: 1);
+        var userBoard2 = new UserBoard(userId: userId, boardId: 2);
+
+        _context.Boards.AddRange(board1, board2);
+        _context.UserBoards.AddRange(userBoard1, userBoard2);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.AddBoard(board);
+        var result = await _repository.GetBoardsByUserId(userId);
         
+        Assert.NotNull(result);
+        Assert.Single(result);
+    }
+    
+    [Fact]
+    public async Task AddBoard_ShouldPersistBoard_WhenAddedSuccessfully()
+    {
+        var board = new Board(title: "title", background: "background") { Id = 1 };
+        
+        await _repository.AddBoard(board);
+        var result = await _context.Boards.FindAsync(board.Id);
+
         Assert.NotNull(result);
         Assert.Equal(board.Id, result.Id);
     }
 
     [Fact]
-    public async Task UpdateBoard_ReturnsBoard_WhenBoardIsUpdatedSuccessfully()
+    public async Task UpdateBoard_ShouldPersistChanges_WhenUpdateIsSuccessful()
     {
-        var board = new Board(title: "Existing Board", icon: "Icon1", theme: "Theme1") { Id = 1 };
+        var board = new Board(title: "title", background: "background") { Id = 1 };
         
         _context.Boards.Add(board);
         await _context.SaveChangesAsync();
-        board.Title = "Updated Board";
         
-        var result = await _repository.UpdateBoard(board);
-        
+        board.Title = "updated title";
+        await _repository.UpdateBoard(board);
+        var result = await _context.Boards.FindAsync(board.Id);
+
         Assert.NotNull(result);
-        Assert.Equal(board.Id, result.Id);
+        Assert.Equal("updated title", result.Title);
     }
 
     [Fact]
-    public async Task DeleteBoard_ReturnsBoard_WhenBoardIsDeletedSuccessfully()
+    public async Task DeleteBoard_ShouldRemoveBoard_WhenBoardExists()
     {
-        var board = new Board(title: "Board To Delete", icon: "IconDel", theme: "ThemeDel") { Id = 1 };
+        var board = new Board(title: "title", background: "background") { Id = 1 };
         
         _context.Boards.Add(board);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.DeleteBoard(board);
+        await _repository.DeleteBoard(board);
+
+        var result = await _context.Boards.FindAsync(board.Id);
         
-        Assert.NotNull(result);
-        Assert.Equal(board.Id, result.Id);
+        Assert.Null(result);
     }
 }

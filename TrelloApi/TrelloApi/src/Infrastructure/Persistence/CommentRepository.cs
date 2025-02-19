@@ -49,15 +49,13 @@ public class CommentRepository : Repository<Comment>, ICommentRepository
         }
     }
 
-    public async Task<Comment?> AddComment(Comment comment)
+    public async Task AddComment(Comment comment)
     {
         try
         {
             await Context.Comments.AddAsync(comment);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("Comment {CommentId} added to card {CardId}", comment.Id, comment.CardId);
-            return comment;
         }
         catch (Exception ex)
         {
@@ -66,15 +64,13 @@ public class CommentRepository : Repository<Comment>, ICommentRepository
         }
     }
 
-    public async Task<Comment?> UpdateComment(Comment comment)
+    public async Task UpdateComment(Comment comment)
     {
         try
         {
             Context.Comments.Update(comment);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("Comment {CommentId} updated", comment.Id);
-            return comment;
         }
         catch (Exception ex)
         {
@@ -83,15 +79,13 @@ public class CommentRepository : Repository<Comment>, ICommentRepository
         }
     }
 
-    public async Task<Comment?> DeleteComment(Comment comment)
+    public async Task DeleteComment(Comment comment)
     {
         try
         {
             Context.Comments.Remove(comment);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("Comment {CommentId} deleted", comment.Id);
-            return comment;
         }
         catch (Exception ex)
         {

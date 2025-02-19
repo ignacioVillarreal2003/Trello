@@ -1,50 +1,51 @@
 using System.ComponentModel.DataAnnotations;
+using TrelloApi.Domain.Constants;
 
 namespace TrelloApi.Domain.DTOs;
+
+public class OutputUserDetailsDto
+{
+    public int Id { get; set; }
+    
+    public string Email { get; set; } = string.Empty;
+    
+    public string Username { get; set; } = string.Empty;
+    
+    public string Theme { get; set; } = string.Empty;
+}
 
 public class LoginUserDto
 {
     [StringLength(64), EmailAddress, Required] 
-    public string Email { get; set; }
+    public string Email { get; set; } = string.Empty;
 
     [StringLength(64), Required] 
-    public string Password { get; set; }
-}
-
-public class OutputUserDto
-{
-    public int Id { get; set; }
-    
-    public string Email { get; set; }
-    
-    public string Username { get; set; }
-    
-    public string Theme { get; set; }
+    public string Password { get; set; } = string.Empty;
 }
 
 public class RegisterUserDto
 {
     [StringLength(64), EmailAddress, Required] 
-    public string Email { get; set; }
+    public string Email { get; set; } = string.Empty;
     
     [StringLength(64), Required] 
-    public string Username { get; set; }
+    public string Username { get; set; } = string.Empty;
     
     [StringLength(64), Required] 
-    public string Password { get; set; }
+    public string Password { get; set; } = string.Empty;
 }
 
 public class UpdateUserDto
 {
     [StringLength(64)] 
-    public string? Username { get; set; }
+    public string? Username { get; set; } = string.Empty;
     
     [StringLength(64)] 
-    public string? OldPassword { get; set; }
+    public string? OldPassword { get; set; } = string.Empty;
     
     [StringLength(64)] 
-    public string? NewPassword { get; set; }
+    public string? NewPassword { get; set; } = string.Empty;
     
-    [StringLength(8)] 
-    public string? Theme { get; set; }
+    [StringLength(32)] 
+    public string? Theme { get; set; } = string.Empty;
 }

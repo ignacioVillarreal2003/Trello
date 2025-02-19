@@ -54,7 +54,7 @@ public class CardLabelRepository: Repository<CardLabel>, ICardLabelRepository
         }
     }
 
-    public async Task<CardLabel?> AddCardLabel(CardLabel cardLabel)
+    public async Task AddCardLabel(CardLabel cardLabel)
     {
         try
         {
@@ -62,7 +62,6 @@ public class CardLabelRepository: Repository<CardLabel>, ICardLabelRepository
             await Context.SaveChangesAsync();
             
             _logger.LogDebug("Label {LabelId} added to card {CardId}", cardLabel.LabelId, cardLabel.CardId);
-            return cardLabel;
         }
         catch (Exception ex)
         {
@@ -71,15 +70,13 @@ public class CardLabelRepository: Repository<CardLabel>, ICardLabelRepository
         }
     }
 
-    public async Task<CardLabel?> DeleteCardLabel(CardLabel cardLabel)
+    public async Task DeleteCardLabel(CardLabel cardLabel)
     {
         try
         {
             Context.CardLabels.Remove(cardLabel);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("Label {LabelId} for card {CardId} deleted", cardLabel.LabelId, cardLabel.CardId);
-            return cardLabel;
         }
         catch (Exception ex)
         {

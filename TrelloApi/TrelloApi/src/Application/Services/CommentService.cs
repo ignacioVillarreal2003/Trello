@@ -53,20 +53,15 @@ public class CommentService: BaseService, ICommentService
         }
     }
 
-    public async Task<OutputCommentDetailsDto?> AddComment(int cardId, AddCommentDto addCommentDto, int uid)
+    public async Task<OutputCommentDetailsDto?> AddComment(int cardId, AddCommentDto dto, int uid)
     {
         try
         {
-            Comment comment = new Comment(addCommentDto.Text, cardId, addCommentDto.AuthorId);
-            Comment? newComment = await _commentRepository.AddComment(comment);
-            if (newComment == null)
-            {
-                _logger.LogError("Failed to add comment to card {CardId}", cardId);
-                return null;
-            }
+            Comment comment = new Comment(dto.Text, cardId, dto.AuthorId);
+            await _commentRepository.AddComment(comment);
 
             _logger.LogInformation("Comment added to card {CardId}", cardId);
-            return _mapper.Map<OutputCommentDetailsDto>(newComment);
+            return _mapper.Map<OutputCommentDetailsDto>(comment);
         }
         catch (Exception ex)
         {
@@ -75,7 +70,7 @@ public class CommentService: BaseService, ICommentService
         }
     }
 
-    public async Task<OutputCommentDetailsDto?> UpdateComment(int commentId, UpdateCommentDto updateCommentDto, int uid)
+    public async Task<OutputCommentDetailsDto?> UpdateComment(int commentId, UpdateCommentDto dto, int uid)
     {
         try
         {
@@ -86,20 +81,15 @@ public class CommentService: BaseService, ICommentService
                 return null;
             }
 
-            if (!string.IsNullOrEmpty(updateCommentDto.Text))
+            if (!string.IsNullOrEmpty(dto.Text))
             {
-                comment.Text = updateCommentDto.Text;
+                comment.Text = dto.Text;
             }
 
-            Comment? updatedComment = await _commentRepository.UpdateComment(comment);
-            if (updatedComment == null)
-            {
-                _logger.LogError("Failed to update comment {CommentId}", commentId);
-                return null;
-            }
+            await _commentRepository.UpdateComment(comment);
             
             _logger.LogInformation("Comment {CommentId} updated", commentId);
-            return _mapper.Map<OutputCommentDetailsDto>(updatedComment);
+            return _mapper.Map<OutputCommentDetailsDto>(comment);
         }
         catch (Exception ex)
         {
@@ -119,12 +109,7 @@ public class CommentService: BaseService, ICommentService
                 return false;
             }
 
-            Comment? deletedComment = await _commentRepository.DeleteComment(comment);
-            if (deletedComment == null)
-            {
-                _logger.LogError("Failed to delete comment {CommentId}", commentId);
-                return false;
-            }
+            await _commentRepository.DeleteComment(comment);
 
             _logger.LogInformation("Comment {CommentId} deleted", commentId);
             return true;

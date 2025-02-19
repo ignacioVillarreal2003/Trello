@@ -23,10 +23,10 @@ public class User
     public string Theme { get; set; }
     
     [DataType(DataType.DateTime)]
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; }
 
     [DataType(DataType.DateTime)] 
-    public DateTime LastLogin { get; set; } = DateTime.UtcNow;
+    public DateTime LastLogin { get; set; }
     
     public ICollection<UserBoard> UserBoards { get; set; } = new HashSet<UserBoard>();
 
@@ -40,5 +40,7 @@ public class User
         Username = username;
         Password = password;
         Theme = theme;
+        CreatedAt = DateTime.UtcNow;
+        LastLogin = DateTime.UtcNow;
     }
 }

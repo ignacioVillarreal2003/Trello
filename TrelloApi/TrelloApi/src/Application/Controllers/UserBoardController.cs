@@ -20,11 +20,11 @@ public class UserBoardController: BaseController
     }   
     
     [HttpGet("board/{boardId:int}")]
-    public async Task<IActionResult> GetBoardMembers(int boardId)
+    public async Task<IActionResult> GetUsersByBoardId(int boardId)
     {
         try
         {
-            List<OutputUserBoardListDto> users = await _userBoardService.GetBoardMembers(boardId, UserId);
+            List<OutputUserDetailsDto> users = await _userBoardService.GetUsersByBoardId(boardId, UserId);
             _logger.LogDebug("Retrieved {Count} users for board {BoardId}", users.Count, boardId);
             return Ok(users);
         }
@@ -37,11 +37,11 @@ public class UserBoardController: BaseController
 
     
     [HttpPost("board/{boardId:int}")]
-    public async Task<IActionResult> AddMemberToBoard(int boardId, [FromBody] AddUserBoardDto dto)
+    public async Task<IActionResult> AddUserToBoard(int boardId, [FromBody] AddUserBoardDto dto)
     {
         try
         {
-            OutputUserBoardDto? userBoard = await _userBoardService.AddMemberToBoard(boardId, dto, UserId);
+            OutputUserBoardDetailsDto? userBoard = await _userBoardService.AddUserToBoard(boardId, dto, UserId);
             if (userBoard == null)
             {
                 _logger.LogError("Failed to add user {UserId} to board {BoardId}", dto.UserId, boardId);
@@ -49,7 +49,7 @@ public class UserBoardController: BaseController
             }
         
             _logger.LogInformation("User {UserId} added to board {BoardId}", dto.UserId, boardId);
-            return CreatedAtAction(nameof(GetBoardMembers), new { boardId = userBoard.Id }, userBoard);
+            return CreatedAtAction(nameof(GetUsersByBoardId), new { boardId = userBoard.BoardId }, userBoard);
         }
         catch (Exception ex)
         {
@@ -60,11 +60,11 @@ public class UserBoardController: BaseController
 
 
     [HttpDelete("board/{boardId:int}/user/{userId:int}")]
-    public async Task<IActionResult> RemoveMemberFromBoard(int boardId, int userId)
+    public async Task<IActionResult> RemoveUserFromBoard(int boardId, int userId)
     {
         try
         {
-            bool isDeleted = await _userBoardService.RemoveMemberFromBoard(boardId, userId, UserId);
+            Boolean isDeleted = await _userBoardService.RemoveUserFromBoard(boardId, userId, UserId);
             if (!isDeleted)
             {
                 _logger.LogDebug("User {UserId} not found in board {BoardId} for deletion.", userId, boardId);

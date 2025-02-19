@@ -6,7 +6,7 @@ public interface IListRepository
 {
     Task<List?> GetListById(int listId);
     Task<List<List>> GetListsByBoardId(int boardId);
-    Task<List?> UpdateList(List list);
-    Task<List?> DeleteList(List list);
-    Task<List?> AddList(List list);
+    Task AddList(List list);
+    Task UpdateList(List list);
+    Task DeleteList(List list);
 }

@@ -103,15 +103,13 @@ public class UserRepository : Repository<User>, IUserRepository
         }
     }
 
-    public async Task<User?> AddUser(User user)
+    public async Task AddUser(User user)
     {
         try
         {
             await Context.Users.AddAsync(user);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("User {UserId} added successfully", user.Id);
-            return user;
         }
         catch (Exception ex)
         {
@@ -120,15 +118,13 @@ public class UserRepository : Repository<User>, IUserRepository
         }
     }
 
-    public async Task<User?> UpdateUser(User user)
+    public async Task UpdateUser(User user)
     {
         try
         {
             Context.Users.Update(user);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("User {UserId} updated", user.Id);
-            return user;
         }
         catch (Exception ex)
         {
@@ -137,15 +133,13 @@ public class UserRepository : Repository<User>, IUserRepository
         }
     }
 
-    public async Task<User?> DeleteUser(User user)
+    public async Task DeleteUser(User user)
     {
         try
         {
             Context.Users.Remove(user);
             await Context.SaveChangesAsync();
-            
             _logger.LogDebug("User {UserId} deleted", user.Id);
-            return user;
         }
         catch (Exception ex)
         {

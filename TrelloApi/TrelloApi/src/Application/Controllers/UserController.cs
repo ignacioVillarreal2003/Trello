@@ -27,7 +27,7 @@ public class UserController : BaseController
     {
         try
         {
-            List<OutputUserDto> users = await _userService.GetUsers(UserId);
+            List<OutputUserDetailsDto> users = await _userService.GetUsers(UserId);
             _logger.LogDebug("Retrieved {Count} users.", users.Count);
             return Ok(users);
         }
@@ -44,7 +44,7 @@ public class UserController : BaseController
     {
         try
         {
-            List<OutputUserDto> users = await _userService.GetUsersByUsername(username, UserId);
+            List<OutputUserDetailsDto> users = await _userService.GetUsersByUsername(username, UserId);
             _logger.LogDebug("Retrieved {Count} users for username {Username}", users.Count, username);
             return Ok(users);
         }
@@ -61,7 +61,7 @@ public class UserController : BaseController
     {
         try
         {
-            List<OutputUserDto> users = await _userService.GetUsersByCardId(cardId, UserId);
+            List<OutputUserDetailsDto> users = await _userService.GetUsersByCardId(cardId, UserId);
             _logger.LogDebug("Retrieved {Count} users.", users.Count);
             return Ok(users);
         }
@@ -77,7 +77,7 @@ public class UserController : BaseController
     {
         try
         {
-            OutputUserDto? user = await _userService.RegisterUser(registerUserDto);
+            OutputUserDetailsDto? user = await _userService.RegisterUser(registerUserDto);
             if (user == null)
             {
                 _logger.LogError("Failed to register user {Email}", registerUserDto.Email);
@@ -101,7 +101,7 @@ public class UserController : BaseController
     {
         try
         {
-            OutputUserDto? user = await _userService.LoginUser(loginUserDto);
+            OutputUserDetailsDto? user = await _userService.LoginUser(loginUserDto);
             if (user == null)
             {
                 _logger.LogError("Failed to login user {Email}", loginUserDto.Email);
@@ -126,7 +126,7 @@ public class UserController : BaseController
     {
         try
         {
-            OutputUserDto? user = await _userService.UpdateUser(updateUserDto, UserId);
+            OutputUserDetailsDto? user = await _userService.UpdateUser(updateUserDto, UserId);
             if (user == null)
             {
                 _logger.LogDebug("User {UserId} not found for update", UserId);
@@ -149,15 +149,15 @@ public class UserController : BaseController
     {
         try
         {
-            OutputUserDto? user = await _userService.DeleteUser(UserId);
-            if (user == null)
+            Boolean isDeleted = await _userService.DeleteUser(UserId);
+            if (!isDeleted)
             {
                 _logger.LogDebug("User {UserId} not found for deletion", UserId);
                 return NotFound(new { message = "User not found." });
             }
 
             _logger.LogInformation("User {UserId} deleted", UserId);
-            return Ok(user);
+            return NoContent();
         }
         catch (Exception ex)
         {

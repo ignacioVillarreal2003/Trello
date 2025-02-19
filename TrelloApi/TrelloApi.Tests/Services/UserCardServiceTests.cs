@@ -1,134 +1,182 @@
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Moq;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Xunit;
 using TrelloApi.Application.Services;
-using TrelloApi.Domain.Entities;
+using TrelloApi.Domain.DTOs;                // DTOs: OutputUserDetailsDto, AddUserCardDto, OutputUserCardDetailsDto
+using TrelloApi.Domain.Entities;             // Entidades: UserCard, User
 using TrelloApi.Domain.Interfaces.Repositories;
 using TrelloApi.Domain.Interfaces.Services;
 using Task = System.Threading.Tasks.Task;
 
-namespace TrelloApi.Tests.Services;
-
-public class UserCardServiceTests
+namespace TrelloApi.Tests.Services
 {
-    private readonly Mock<IUserCardRepository> _mockUserTaskRepository;
-    private readonly Mock<ILogger<UserCardService>> _mockLogger;
-    private readonly Mock<IMapper> _mockMapper;
-    private readonly Mock<IBoardAuthorizationService> _mockBoardAuthorizationService;
-    private readonly UserCardService _service;
-
-    public UserCardServiceTests()
+    public class UserCardServiceTests
     {
-        _mockUserTaskRepository = new Mock<IUserCardRepository>();
-        _mockLogger = new Mock<ILogger<UserCardService>>();
-        _mockMapper = new Mock<IMapper>();
-        _mockBoardAuthorizationService = new Mock<IBoardAuthorizationService>();
+        private readonly Mock<IUserCardRepository> _mockUserCardRepository;
+        private readonly Mock<ILogger<UserCardService>> _mockLogger;
+        private readonly Mock<IMapper> _mockMapper;
+        private readonly Mock<IBoardAuthorizationService> _mockBoardAuthorizationService;
+        private readonly UserCardService _service;
 
-        _service = new UserCardService(_mockMapper.Object, _mockBoardAuthorizationService.Object, _mockLogger.Object, _mockUserTaskRepository.Object);
-    }
-    
-    [Fact]
-    public async Task GetUserTaskById_ReturnsOutputUserTaskDto_WhenUserTaskExists()
-    {
-        int taskId = 1, userId = 1;
-        var userTask = new UserCard(userId: userId, taskId: taskId);
-        var outputUserTaskDto = new OutputUserTaskDto { UserId = userTask.UserId, TaskId = userTask.TaskId };
+        public UserCardServiceTests()
+        {
+            _mockUserCardRepository = new Mock<IUserCardRepository>();
+            _mockLogger = new Mock<ILogger<UserCardService>>();
+            _mockMapper = new Mock<IMapper>();
+            _mockBoardAuthorizationService = new Mock<IBoardAuthorizationService>();
 
-        _mockUserTaskRepository.Setup(r => r.GetUserTaskById(userId, taskId)).ReturnsAsync(userTask);
-        _mockMapper.Setup(m => m.Map<OutputUserTaskDto>(userTask)).Returns(outputUserTaskDto);
+            _service = new UserCardService(
+                _mockMapper.Object,
+                _mockBoardAuthorizationService.Object,
+                _mockLogger.Object,
+                _mockUserCardRepository.Object);
+        }
 
-        var result = await _service.GetUserTaskById(userId, taskId);
+        [Fact]
+        public async Task GetUsersByCardId_ReturnsListOfOutputUserDetailsDto_WhenUsersExist()
+        {
+            // Arrange
+            int cardId = 1, uid = 1;
+            var users = new List<User>
+            {
+                new User(email: "email1@gmail.com", username: "User1", password: "password") { Id = 1},
+                new User(email: "email2@gmail.com", username: "User2", password: "password") { Id = 2},
+            };
+            var outputDtos = new List<OutputUserDetailsDto>
+            {
+                new OutputUserDetailsDto { Id = 1, Username = "User1" },
+                new OutputUserDetailsDto { Id = 2, Username = "User2" }
+            };
 
-        Assert.NotNull(result);
-        Assert.Equal(outputUserTaskDto.UserId, result.UserId);
-        Assert.Equal(outputUserTaskDto.TaskId, result.TaskId);
-    }
+            _mockUserCardRepository.Setup(r => r.GetUsersByCardId(cardId))
+                .ReturnsAsync(users);
+            _mockMapper.Setup(m => m.Map<List<OutputUserDetailsDto>>(users))
+                .Returns(outputDtos);
 
-    [Fact]
-    public async Task GetUserTaskById_ReturnsNull_WhenUserTaskDoesNotExist()
-    {
-        int taskId = 1, userId = 1;
-        
-        _mockUserTaskRepository.Setup(r => r.GetUserTaskById(userId, taskId)).ReturnsAsync((UserCard?)null);
+            // Act
+            var result = await _service.GetUsersByCardId(cardId, uid);
 
-        var result = await _service.GetUserTaskById(userId, taskId);
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(2, result.Count);
+            Assert.Equal(outputDtos[0].Id, result[0].Id);
+            Assert.Equal(outputDtos[1].Id, result[1].Id);
+        }
 
-        Assert.Null(result);
-    }
-    
-    [Fact]
-    public async Task AddUserTask_ReturnsOutputUserTaskDto_WhenUserTaskIsAdded()
-    {
-        int taskId = 1, userId = 1;
-        var addUserTaskDto = new AddUserTaskDto { UserId = userId, TaskId = taskId };
-        var newUserTask = new UserCard(userId: addUserTaskDto.UserId, taskId: addUserTaskDto.TaskId);
-        var outputUserTaskDto = new OutputUserTaskDto { UserId = newUserTask.UserId, TaskId = newUserTask.TaskId };
+        [Fact]
+        public async Task GetUsersByCardId_ReturnsEmptyList_WhenNoUsersExist()
+        {
+            // Arrange
+            int cardId = 1, uid = 1;
+            _mockUserCardRepository.Setup(r => r.GetUsersByCardId(cardId))
+                .ReturnsAsync(new List<User>());
+            _mockMapper.Setup(m => m.Map<List<OutputUserDetailsDto>>(It.IsAny<List<User>>()))
+                .Returns(new List<OutputUserDetailsDto>());
 
-        _mockUserTaskRepository.Setup(r => r.AddUserTask(It.IsAny<UserCard>())).ReturnsAsync(newUserTask);
-        _mockMapper.Setup(m => m.Map<OutputUserTaskDto>(newUserTask)).Returns(outputUserTaskDto);
+            // Act
+            var result = await _service.GetUsersByCardId(cardId, uid);
 
-        var result = await _service.AddUserTask(addUserTaskDto, userId);
+            // Assert
+            Assert.NotNull(result);
+            Assert.Empty(result);
+        }
 
-        Assert.NotNull(result);
-        Assert.Equal(outputUserTaskDto.UserId, result.UserId);
-        Assert.Equal(outputUserTaskDto.TaskId, result.TaskId);
-    }
+        [Fact]
+        public async Task AddUserToCard_ReturnsOutputUserCardDetailsDto_WhenUserCardIsAdded()
+        {
+            // Arrange
+            int cardId = 1, uid = 1;
+            var addDto = new AddUserCardDto { UserId = 2 };
+            var newUserCard = new UserCard(addDto.UserId, cardId);
+            var outputDto = new OutputUserCardDetailsDto 
+            { 
+                UserId = newUserCard.UserId, 
+                CardId = cardId 
+            };
 
-    [Fact]
-    public async Task AddUserTask_ReturnsNull_WhenRepositoryReturnsNull()
-    {
-        int taskId = 1, userId = 1;
-        var addUserTaskDto = new AddUserTaskDto { UserId = userId, TaskId = taskId };
+            _mockUserCardRepository.Setup(r => r.AddUserCard(It.IsAny<UserCard>()))
+                .ReturnsAsync(newUserCard);
+            _mockMapper.Setup(m => m.Map<OutputUserCardDetailsDto>(newUserCard))
+                .Returns(outputDto);
 
-        _mockUserTaskRepository.Setup(r => r.AddUserTask(It.IsAny<UserCard>())).ReturnsAsync((UserCard?)null);
+            // Act
+            var result = await _service.AddUserToCard(cardId, addDto, uid);
 
-        var result = await _service.AddUserTask(addUserTaskDto, userId);
+            // Assert
+            Assert.NotNull(result);
+            Assert.Equal(outputDto.UserId, result.UserId);
+            Assert.Equal(outputDto.CardId, result.CardId);
+        }
 
-        Assert.Null(result);
-    }
-    
-    [Fact]
-    public async Task DeleteUserTask_ReturnsOutputUserTaskDto_WhenDeletionIsSuccessful()
-    {
-        int taskId = 1, userId = 1, userToDeleteId = 2;
-        var existingUserTask = new UserCard(userId: userToDeleteId, taskId: taskId);
-        var deletedUserTask = existingUserTask;
-        var outputUserTaskDto = new OutputUserTaskDto { UserId = deletedUserTask.UserId, TaskId = deletedUserTask.TaskId };
+        [Fact]
+        public async Task AddUserToCard_ReturnsNull_WhenRepositoryReturnsNull()
+        {
+            // Arrange
+            int cardId = 1, uid = 1;
+            var addDto = new AddUserCardDto { UserId = 2 };
 
-        _mockUserTaskRepository.Setup(r => r.GetUserTaskById(userToDeleteId, taskId)).ReturnsAsync(existingUserTask);
-        _mockUserTaskRepository.Setup(r => r.DeleteUserTask(existingUserTask)).ReturnsAsync(deletedUserTask);
-        _mockMapper.Setup(m => m.Map<OutputUserTaskDto>(deletedUserTask)).Returns(outputUserTaskDto);
+            _mockUserCardRepository.Setup(r => r.AddUserCard(It.IsAny<UserCard>()))
+                .ReturnsAsync((UserCard?)null);
 
-        var result = await _service.DeleteUserTask(userToDeleteId, taskId, userId);
+            // Act
+            var result = await _service.AddUserToCard(cardId, addDto, uid);
 
-        Assert.NotNull(result);
-        Assert.Equal(outputUserTaskDto.UserId, result.UserId);
-        Assert.Equal(outputUserTaskDto.TaskId, result.TaskId);
-    }
+            // Assert
+            Assert.Null(result);
+        }
 
-    [Fact]
-    public async Task DeleteUserTask_ReturnsNull_WhenUserTaskNotFound()
-    {
-        int taskId = 1, userId = 1, userToDeleteId = 2;
-        
-        _mockUserTaskRepository.Setup(r => r.GetUserTaskById(userToDeleteId, taskId)).ReturnsAsync((UserCard?)null);
+        [Fact]
+        public async Task RemoveUserFromCard_ReturnsTrue_WhenDeletionIsSuccessful()
+        {
+            // Arrange
+            int cardId = 1, uid = 1, userId = 2;
+            var existingUserCard = new UserCard(userId, cardId);
+            _mockUserCardRepository.Setup(r => r.GetUserCardById(userId, cardId))
+                .ReturnsAsync(existingUserCard);
+            _mockUserCardRepository.Setup(r => r.DeleteUserCard(existingUserCard))
+                .ReturnsAsync(existingUserCard);
 
-        var result = await _service.DeleteUserTask(userToDeleteId, userId, taskId);
+            // Act
+            var result = await _service.RemoveUserFromCard(userId, cardId, uid);
 
-        Assert.Null(result);
-    }
+            // Assert
+            Assert.True(result);
+        }
 
-    [Fact]
-    public async Task DeleteUserTask_ReturnsNull_WhenDeletionFails()
-    {
-        int taskId = 1, userId = 1, userToDeleteId = 2;
-        var existingUserTask = new UserCard(userId: userToDeleteId, taskId: taskId);
+        [Fact]
+        public async Task RemoveUserFromCard_ReturnsFalse_WhenUserCardNotFound()
+        {
+            // Arrange
+            int cardId = 1, uid = 1, userId = 2;
+            _mockUserCardRepository.Setup(r => r.GetUserCardById(userId, cardId))
+                .ReturnsAsync((UserCard?)null);
 
-        _mockUserTaskRepository.Setup(r => r.GetUserTaskById(userToDeleteId, taskId)).ReturnsAsync(existingUserTask);
-        _mockUserTaskRepository.Setup(r => r.DeleteUserTask(existingUserTask)).ReturnsAsync((UserCard?)null);
+            // Act
+            var result = await _service.RemoveUserFromCard(userId, cardId, uid);
 
-        var result = await _service.DeleteUserTask(userToDeleteId, taskId, userId);
+            // Assert
+            Assert.False(result);
+        }
 
-        Assert.Null(result);
+        [Fact]
+        public async Task RemoveUserFromCard_ReturnsFalse_WhenDeletionFails()
+        {
+            // Arrange
+            int cardId = 1, uid = 1, userId = 2;
+            var existingUserCard = new UserCard(userId, cardId);
+            _mockUserCardRepository.Setup(r => r.GetUserCardById(userId, cardId))
+                .ReturnsAsync(existingUserCard);
+            _mockUserCardRepository.Setup(r => r.DeleteUserCard(existingUserCard))
+                .ReturnsAsync((UserCard?)null);
+
+            // Act
+            var result = await _service.RemoveUserFromCard(userId, cardId, uid);
+
+            // Assert
+            Assert.False(result);
+        }
     }
 }

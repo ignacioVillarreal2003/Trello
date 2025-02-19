@@ -33,24 +33,24 @@ public class CardLabelController: BaseController
         }
     }
     
-    [HttpPost("card/{cardId:int}/label/{labelId:int}")]
-    public async Task<IActionResult> AddLabelToCard(int cardId, int labelId)
+    [HttpPost("card/{cardId:int}")]
+    public async Task<IActionResult> AddLabelToCard(int cardId, AddCardLabelDto dto)
     {
         try
         {
-            OutputCardLabelListDto? cardLabel = await _cardLabelService.AddLabelToCard(cardId, labelId, UserId);
+            OutputCardLabelDetailsDto? cardLabel = await _cardLabelService.AddLabelToCard(cardId, dto, UserId);
             if (cardLabel == null)
             {
-                _logger.LogError("Failed to add label {LabelId} to card {CardId}", labelId, cardId);
+                _logger.LogError("Failed to add label {LabelId} to card {CardId}", dto, cardId);
                 return BadRequest(new { message = "Failed to add card label." });
             }
             
-            _logger.LogInformation("Label {LabelId} added to card {CardId}", labelId, cardId);
+            _logger.LogInformation("Label {LabelId} added to card {CardId}", dto, cardId);
             return CreatedAtAction(nameof(GetLabelsByCardId), new { cardId = cardLabel.CardId, labelId = cardLabel.LabelId }, cardLabel);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding label {LabelId} to card {CardId}", labelId, cardId);
+            _logger.LogError(ex, "Error adding label {LabelId} to card {CardId}", dto.LabelId, cardId);
             return StatusCode(500, new { message = "An unexpected error occurred." });
         }
     }

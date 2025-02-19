@@ -3,9 +3,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.app;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Domain.Label;
 using TrelloApi.Infrastructure.Persistence;
-using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Repositories;
 
@@ -27,10 +25,10 @@ public class LabelRepositoryTests
     }
     
     [Fact]
-    public async Task GetLabelById_ReturnsLabel_WhenLabelExists()
+    public async Task GetLabelById_ShouldReturnLabel_WhenLabelExists()
     {
         int labelId = 1;
-        var label = new Label(title: "Test Label", color: "Blue", boardId: 1) { Id = labelId };
+        var label = new Label(title: "title", color: "color", boardId: 1) { Id = labelId };
         
         _context.Labels.Add(label);
         await _context.SaveChangesAsync();
@@ -42,7 +40,7 @@ public class LabelRepositoryTests
     }
 
     [Fact]
-    public async Task GetLabelById_ReturnsNull_WhenLabelDoesNotExist()
+    public async Task GetLabelById_ShouldReturnNull_WhenLabelDoesNotExist()
     {
         int labelId = 1;
         
@@ -52,45 +50,40 @@ public class LabelRepositoryTests
     }
 
     [Fact]
-    public async Task GetLabelsByTaskId_ReturnsLabels_WhenLabelsExistForUser()
+    public async Task GetLabelsByBoardId_ShouldReturnLabels_WhenBoardHasLabels()
     {
-        int taskId = 1;
-        var label1 = new Label(title: "Test Label", color: "Blue", boardId: 1) { Id = 1 };
-        var label2 = new Label(title: "Test Label", color: "Blue", boardId: 1) { Id = 2 };
-        var taskLabel1 = new CardLabel(1, 1);
-        var taskLabel2 = new CardLabel(1, 2);
+        int boardId = 1;
+        var label1 = new Label(title: "title 1", color: "color", boardId: boardId) { Id = 1 };
+        var label2 = new Label(title: "title 1", color: "color", boardId: boardId) { Id = 2 };
         
         _context.Labels.AddRange(label1, label2);
-        _context.TaskLabels.AddRange(taskLabel1, taskLabel2);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.GetLabelsByTaskId(taskId);
+        var result = await _repository.GetLabelsByBoardId(boardId);
         
         Assert.NotNull(result);
         Assert.Equal(2, result.Count);
     }
 
     [Fact]
-    public async Task GetLabelsByTaskId_ReturnsEmptyList_WhenNoLabelsExistForUser()
+    public async Task GetLabelsByBoardId_ShouldReturnEmptyList_WhenBoardHasNoLabels()
     {
-        int taskId = 1;
+        int boardId = 1;
         
-        var result = await _repository.GetLabelsByTaskId(taskId);
+        var result = await _repository.GetLabelsByBoardId(boardId);
         
         Assert.NotNull(result);
         Assert.Empty(result);
     }
 
     [Fact]
-    public async Task AddLabel_ReturnsLabel_WhenLabelIsAddedSuccessfully()
+    public async Task AddLabel_ShouldPersistLabel_WhenAddedSuccessfully()
     {
-        var label = new Label(title: "New Label", color: "Blue", boardId: 1) { Id = 1 };
+        var label = new Label(title: "title", color: "color", boardId: 1) { Id = 1 };
+        
+        await _repository.AddLabel(label);
+        var result = await _context.Labels.FindAsync(label.Id);
 
-        _context.Labels.RemoveRange(_context.Labels);
-        await _context.SaveChangesAsync();
-        
-        var result = await _repository.AddLabel(label);
-        
         Assert.NotNull(result);
         Assert.Equal(label.Id, result.Id);
     }
@@ -98,29 +91,30 @@ public class LabelRepositoryTests
     [Fact]
     public async Task UpdateLabel_ReturnsLabel_WhenLabelIsUpdatedSuccessfully()
     {
-        var label = new Label(title: "Existing Label", color: "Blue", boardId: 1) { Id = 1 };
+        var label = new Label(title: "title", color: "color", boardId: 1) { Id = 1 };
 
         _context.Labels.Add(label);
         await _context.SaveChangesAsync();
-        label.Title = "Updated Label";
         
-        var result = await _repository.UpdateLabel(label);
+        label.Title = "updated title";
+        await _repository.UpdateLabel(label);
+        var result = await _context.Labels.FindAsync(label.Id);
         
         Assert.NotNull(result);
-        Assert.Equal(label.Id, result.Id);
+        Assert.Equal(label.Title, result.Title);
     }
 
     [Fact]
     public async Task DeleteLabel_ReturnsLabel_WhenLabelIsDeletedSuccessfully()
     {
-        var label = new Label(title: "Label To Delete", color: "Blue", boardId: 1) { Id = 1 };
+        var label = new Label(title: "title", color: "color", boardId: 1) { Id = 1 };
 
         _context.Labels.Add(label);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.DeleteLabel(label);
-        
-        Assert.NotNull(result);
-        Assert.Equal(label.Id, result.Id);
+        await _repository.DeleteLabel(label);
+        var result = await _context.Labels.FindAsync(label.Id);
+
+        Assert.Null(result);
     }
 }
