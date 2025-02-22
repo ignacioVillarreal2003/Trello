@@ -4,16 +4,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TrelloApi.Domain.Entities;
 
 [Table("Comment")]
-public class Comment
+public class Comment: Entity
 {
-    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-    
     [StringLength(256), Required]
     public string Text { get; set; }
-    
-    [DataType(DataType.DateTime)]
-    public DateTime Date { get; set; }
     
     [ForeignKey("Card"), Required]
     public int CardId { get; set; }
@@ -28,6 +22,5 @@ public class Comment
         Text = text;
         CardId = cardId;
         AuthorId = authorId;
-        Date = DateTime.UtcNow;
     }
 }

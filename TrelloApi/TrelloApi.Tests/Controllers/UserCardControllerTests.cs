@@ -6,8 +6,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
+using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs;
-using TrelloApi.Domain.Interfaces.Services;
 using Xunit;
 
 namespace TrelloApi.Tests.Controllers

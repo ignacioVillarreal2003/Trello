@@ -1,13 +1,16 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TrelloApi.Application.Filters;
-using TrelloApi.Domain.DTOs;
-using TrelloApi.Domain.Interfaces.Services;
+using Microsoft.AspNetCore.RateLimiting;
+using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Domain.DTOs.User;
+using TrelloApi.Domain.DTOs.UserBoard;
 
 namespace TrelloApi.Application.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[RequireAuthentication]
+[Authorize]
+[EnableRateLimiting("fixed")]
 public class UserBoardController: BaseController
 {
     private readonly ILogger<UserBoardController> _logger;
@@ -24,7 +27,7 @@ public class UserBoardController: BaseController
     {
         try
         {
-            List<OutputUserDetailsDto> users = await _userBoardService.GetUsersByBoardId(boardId, UserId);
+            List<UserResponse> users = await _userBoardService.GetUsersByBoardId(boardId);
             _logger.LogDebug("Retrieved {Count} users for board {BoardId}", users.Count, boardId);
             return Ok(users);
         }
@@ -41,7 +44,7 @@ public class UserBoardController: BaseController
     {
         try
         {
-            OutputUserBoardDetailsDto? userBoard = await _userBoardService.AddUserToBoard(boardId, dto, UserId);
+            UserBoardResponse? userBoard = await _userBoardService.AddUserToBoard(boardId, dto);
             if (userBoard == null)
             {
                 _logger.LogError("Failed to add user {UserId} to board {BoardId}", dto.UserId, boardId);
@@ -64,7 +67,7 @@ public class UserBoardController: BaseController
     {
         try
         {
-            Boolean isDeleted = await _userBoardService.RemoveUserFromBoard(boardId, userId, UserId);
+            Boolean isDeleted = await _userBoardService.RemoveUserFromBoard(boardId, userId);
             if (!isDeleted)
             {
                 _logger.LogDebug("User {UserId} not found in board {BoardId} for deletion.", userId, boardId);

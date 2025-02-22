@@ -1,8 +1,9 @@
 using AutoMapper;
+using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.DTOs.Comment;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Infrastructure.Persistence.Interfaces;
 
 namespace TrelloApi.Application.Services;
 
@@ -11,17 +12,21 @@ public class CommentService: BaseService, ICommentService
     private readonly ILogger<CommentService> _logger;
     private readonly ICommentRepository _commentRepository;
 
-    public CommentService(IMapper mapper, IBoardAuthorizationService boardAuthorizationService, ILogger<CommentService> logger, ICommentRepository commentRepository) : base(mapper, boardAuthorizationService)
+    public CommentService(IMapper mapper, 
+        IUnitOfWork unitOfWork, 
+        ILogger<CommentService> logger, 
+        ICommentRepository commentRepository) 
+        : base(mapper, unitOfWork)
     {
         _logger = logger;
         _commentRepository = commentRepository;
     }
     
-    public async Task<OutputCommentDetailsDto?> GetCommentById(int commentId, int uid)
+    public async Task<CommentResponse?> GetCommentById(int commentId)
     {
         try
         {
-            Comment? comment = await _commentRepository.GetCommentById(commentId);
+            Comment? comment = await _commentRepository.GetAsync(c => c.Id.Equals(commentId));
             if (comment == null)
             {
                 _logger.LogWarning("Comment {CommentId} not found", commentId);
@@ -29,7 +34,7 @@ public class CommentService: BaseService, ICommentService
             }
 
             _logger.LogDebug("Comment {CommentId} retrieved", commentId);
-            return _mapper.Map<OutputCommentDetailsDto>(comment);
+            return _mapper.Map<CommentResponse>(comment);
         }
         catch (Exception ex)
         {
@@ -38,13 +43,13 @@ public class CommentService: BaseService, ICommentService
         }
     }
     
-    public async Task<List<OutputCommentDetailsDto>> GetCommentsByCardId(int cardId, int uid)
+    public async Task<List<CommentResponse>> GetCommentsByCardId(int cardId)
     {
         try
         {
-            List<Comment> comments = await _commentRepository.GetCommentsByCardId(cardId);
+            List<Comment> comments = (await _commentRepository.GetListAsync(c => c.Id.Equals(cardId))).ToList();
             _logger.LogDebug("Retrieved {Count} comments for card {CardId}", comments.Count, cardId);
-            return _mapper.Map<List<OutputCommentDetailsDto>>(comments);
+            return _mapper.Map<List<CommentResponse>>(comments);
         }
         catch (Exception ex)
         {
@@ -53,15 +58,16 @@ public class CommentService: BaseService, ICommentService
         }
     }
 
-    public async Task<OutputCommentDetailsDto?> AddComment(int cardId, AddCommentDto dto, int uid)
+    public async Task<CommentResponse?> AddComment(int cardId, AddCommentDto dto, int userId)
     {
         try
         {
-            Comment comment = new Comment(dto.Text, cardId, dto.AuthorId);
-            await _commentRepository.AddComment(comment);
+            Comment comment = new Comment(dto.Text, cardId, userId);
+            await _commentRepository.CreateAsync(comment);
+            await _unitOfWork.CommitAsync();
 
             _logger.LogInformation("Comment added to card {CardId}", cardId);
-            return _mapper.Map<OutputCommentDetailsDto>(comment);
+            return _mapper.Map<CommentResponse>(comment);
         }
         catch (Exception ex)
         {
@@ -70,11 +76,11 @@ public class CommentService: BaseService, ICommentService
         }
     }
 
-    public async Task<OutputCommentDetailsDto?> UpdateComment(int commentId, UpdateCommentDto dto, int uid)
+    public async Task<CommentResponse?> UpdateComment(int commentId, UpdateCommentDto dto)
     {
         try
         {
-            Comment? comment = await _commentRepository.GetCommentById(commentId);
+            Comment? comment = await _commentRepository.GetAsync(c => c.Id.Equals(commentId));
             if (comment == null)
             {
                 _logger.LogWarning("Comment {CommentId} not found for update", commentId);
@@ -86,10 +92,11 @@ public class CommentService: BaseService, ICommentService
                 comment.Text = dto.Text;
             }
 
-            await _commentRepository.UpdateComment(comment);
-            
+            await _commentRepository.UpdateAsync(comment);
+            await _unitOfWork.CommitAsync();
+
             _logger.LogInformation("Comment {CommentId} updated", commentId);
-            return _mapper.Map<OutputCommentDetailsDto>(comment);
+            return _mapper.Map<CommentResponse>(comment);
         }
         catch (Exception ex)
         {
@@ -98,18 +105,19 @@ public class CommentService: BaseService, ICommentService
         }
     }
 
-    public async Task<Boolean> DeleteComment(int commentId, int uid)
+    public async Task<Boolean> DeleteComment(int commentId)
     {
         try
         {
-            Comment? comment = await _commentRepository.GetCommentById(commentId);
+            Comment? comment = await _commentRepository.GetAsync(c => c.Id.Equals(commentId));
             if (comment == null)
             {
                 _logger.LogWarning("Comment {CommentId} not found for deletion", commentId);
                 return false;
             }
 
-            await _commentRepository.DeleteComment(comment);
+            await _commentRepository.DeleteAsync(comment);
+            await _unitOfWork.CommitAsync();
 
             _logger.LogInformation("Comment {CommentId} deleted", commentId);
             return true;

@@ -1,8 +1,10 @@
 using AutoMapper;
+using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.DTOs.User;
+using TrelloApi.Domain.DTOs.UserCard;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Infrastructure.Persistence.Interfaces;
 
 namespace TrelloApi.Application.Services;
 
@@ -11,19 +13,23 @@ public class UserCardService: BaseService, IUserCardService
     private readonly ILogger<UserCardService> _logger;
     private readonly IUserCardRepository _userCardRepository;
     
-    public UserCardService(IMapper mapper, IBoardAuthorizationService boardAuthorizationService, ILogger<UserCardService> logger, IUserCardRepository userCardRepository) : base(mapper, boardAuthorizationService)
+    public UserCardService(IMapper mapper, 
+        IUnitOfWork unitOfWork,
+        ILogger<UserCardService> logger, 
+        IUserCardRepository userCardRepository) 
+        : base(mapper, unitOfWork)
     {
         _logger = logger;
         _userCardRepository = userCardRepository;
     }
 
-    public async Task<List<OutputUserDetailsDto>> GetUsersByCardId(int cardId, int uid)
+    public async Task<List<UserResponse>> GetUsersByCardId(int cardId)
     {
         try
         {
-            List<User> users = await _userCardRepository.GetUsersByCardId(cardId);
+            List<User> users = (await _userCardRepository.GetUsersByCardIdAsync(cardId)).ToList();
             _logger.LogDebug("Retrieved {Count} users for card {CardId}", users.Count, cardId);
-            return _mapper.Map<List<OutputUserDetailsDto>>(users);
+            return _mapper.Map<List<UserResponse>>(users);
         }
         catch (Exception ex)
         {
@@ -32,15 +38,16 @@ public class UserCardService: BaseService, IUserCardService
         }
     }
 
-    public async Task<OutputUserCardDetailsDto?> AddUserToCard(int cardId, AddUserCardDto dto, int uid)
+    public async Task<UserCardResponse?> AddUserToCard(int cardId, AddUserCardDto dto)
     {
         try
         {
             UserCard userCard = new UserCard(dto.UserId, cardId);
-            await _userCardRepository.AddUserCard(userCard);
-            
+            await _userCardRepository.CreateAsync(userCard);
+            await _unitOfWork.CommitAsync();
+
             _logger.LogInformation("Card {CardId} added to User {UserId}", cardId, dto.UserId);
-            return _mapper.Map<OutputUserCardDetailsDto>(userCard);
+            return _mapper.Map<UserCardResponse>(userCard);
         }
         catch (Exception ex)
         {
@@ -49,18 +56,19 @@ public class UserCardService: BaseService, IUserCardService
         }
     }
 
-    public async Task<Boolean> RemoveUserFromCard(int userId, int cardId, int uid)
+    public async Task<Boolean> RemoveUserFromCard(int userId, int cardId)
     {
         try
         {
-            UserCard? userCard = await _userCardRepository.GetUserCardById(userId, cardId);
+            UserCard? userCard = await _userCardRepository.GetAsync(uc => uc.UserId.Equals(userId) && uc.CardId.Equals(cardId));
             if (userCard == null)
             {
                 _logger.LogWarning("Card {CardId} to user {UserId} not found for deletion", cardId, userId);
                 return false;
             }
 
-            await _userCardRepository.DeleteUserCard(userCard);
+            await _userCardRepository.DeleteAsync(userCard);
+            await _unitOfWork.CommitAsync();
 
             _logger.LogInformation("Card {CardId} to user {UserId} deleted", cardId, userId);
             return true;

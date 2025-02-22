@@ -1,13 +1,15 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TrelloApi.Application.Filters;
-using TrelloApi.Domain.DTOs;
-using TrelloApi.Domain.Interfaces.Services;
+using Microsoft.AspNetCore.RateLimiting;
+using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Domain.DTOs.Comment;
 
 namespace TrelloApi.Application.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[RequireAuthentication]
+[Authorize]
+[EnableRateLimiting("fixed")]
 public class CommentController: BaseController
 {
     private readonly ILogger<CommentController> _logger;
@@ -24,7 +26,7 @@ public class CommentController: BaseController
     {
         try
         {
-            OutputCommentDetailsDto? comment = await _commentService.GetCommentById(commentId, UserId);
+            CommentResponse? comment = await _commentService.GetCommentById(commentId);
             if (comment == null)
             {
                 _logger.LogDebug("Comment {CommentId} not found", commentId);
@@ -46,7 +48,7 @@ public class CommentController: BaseController
     {
         try
         {
-            List<OutputCommentDetailsDto> comments = await _commentService.GetCommentsByCardId(cardId, UserId);
+            List<CommentResponse> comments = await _commentService.GetCommentsByCardId(cardId);
             _logger.LogDebug("Retrieved {Count} comments for card {CardId}", comments.Count, cardId);
             return Ok(comments);
         }
@@ -62,7 +64,7 @@ public class CommentController: BaseController
     {
         try
         {
-            OutputCommentDetailsDto? comment = await _commentService.AddComment(cardId, dto, UserId);
+            CommentResponse? comment = await _commentService.AddComment(cardId, dto, UserId);
             if (comment == null)
             {
                 _logger.LogError("Failed to add comment to card {CardId}", cardId);
@@ -84,7 +86,7 @@ public class CommentController: BaseController
     {
         try
         {
-            OutputCommentDetailsDto? comment = await _commentService.UpdateComment(commentId, dto, UserId);
+            CommentResponse? comment = await _commentService.UpdateComment(commentId, dto);
             if (comment == null)
             {
                 _logger.LogDebug("Comment {CommentId} not found for update", commentId);
@@ -106,7 +108,7 @@ public class CommentController: BaseController
     {
         try
         {
-            Boolean isDeleted = await _commentService.DeleteComment(commentId, UserId);
+            Boolean isDeleted = await _commentService.DeleteComment(commentId);
             if (!isDeleted)
             {
                 _logger.LogDebug("Comment {CommentId} not found for deletion", commentId);

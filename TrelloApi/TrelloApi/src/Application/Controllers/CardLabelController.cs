@@ -1,11 +1,17 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Domain.DTOs.CardLabel;
+using TrelloApi.Domain.DTOs.Label;
 
 namespace TrelloApi.Application.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize]
+[EnableRateLimiting("fixed")]
 public class CardLabelController: BaseController
 {
     private readonly ILogger<CardLabelController> _logger;
@@ -22,7 +28,7 @@ public class CardLabelController: BaseController
     {
         try
         {
-            List<OutputLabelDetailsDto> labels = await _cardLabelService.GetLabelsByCardId(cardId, UserId);
+            List<LabelResponse> labels = await _cardLabelService.GetLabelsByCardId(cardId);
             _logger.LogDebug("Retrieved {Count} labels for card {CardId}", labels.Count, cardId);
             return Ok(labels);
         }
@@ -38,7 +44,7 @@ public class CardLabelController: BaseController
     {
         try
         {
-            OutputCardLabelDetailsDto? cardLabel = await _cardLabelService.AddLabelToCard(cardId, dto, UserId);
+            CardLabelResponse? cardLabel = await _cardLabelService.AddLabelToCard(cardId, dto);
             if (cardLabel == null)
             {
                 _logger.LogError("Failed to add label {LabelId} to card {CardId}", dto, cardId);
@@ -60,7 +66,7 @@ public class CardLabelController: BaseController
     {
         try
         {
-            bool isDeleted = await _cardLabelService.RemoveLabelFromCard(cardId, labelId, UserId);
+            bool isDeleted = await _cardLabelService.RemoveLabelFromCard(cardId, labelId);
             if (!isDeleted)
             {
                 _logger.LogDebug("Label {LabelId} to card {CardId} not found for deletion.", labelId, cardId);

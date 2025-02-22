@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TrelloApi.app;
+using TrelloApi.Infrastructure.Persistence.Data;
 
 namespace TrelloApi.Tests.Integrations;
 

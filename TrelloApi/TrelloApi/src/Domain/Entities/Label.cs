@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TrelloApi.Domain.Entities;
 
 [Table("Label")]
-public class Label
+public class Label: Entity
 {
-    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)] 
-    public int Id { get; set; }
-
     [StringLength(32), Required] 
     public string Title { get; set; }
 
@@ -19,7 +16,7 @@ public class Label
     public int BoardId { get; set; }
     public Board Board { get; set; }
 
-    public ICollection<CardLabel> TaskLabels { get; set; } = new HashSet<CardLabel>();
+    public ICollection<CardLabel> CardLabels { get; set; }
 
     public Label(string title, string color, int boardId)
     {

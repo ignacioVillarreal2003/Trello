@@ -1,14 +1,16 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TrelloApi.Application.Filters;
+using Microsoft.AspNetCore.RateLimiting;
+using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.Constants;
-using TrelloApi.Domain.DTOs;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Domain.DTOs.Card;
 
 namespace TrelloApi.Application.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[RequireAuthentication]
+[Authorize]
+[EnableRateLimiting("fixed")]
 public class CardController: BaseController
 {
     private readonly ILogger<CardController> _logger;
@@ -25,7 +27,7 @@ public class CardController: BaseController
     {
         try
         {
-            OutputCardDetailsDto? card = await _cardService.GetCardById(cardId, UserId);
+            CardResponse? card = await _cardService.GetCardById(cardId);
             if (card == null)
             {
                 _logger.LogDebug("Card {CardId} not found", cardId);
@@ -47,7 +49,7 @@ public class CardController: BaseController
     {
         try
         {
-            List<OutputCardDetailsDto> cards = await _cardService.GetCardsByListId(listId, UserId);
+            List<CardResponse> cards = await _cardService.GetCardsByListId(listId);
             _logger.LogDebug("Retrieved {Count} cards for list {ListId}", cards.Count, listId);
             return Ok(cards);
         }
@@ -73,29 +75,13 @@ public class CardController: BaseController
             return Task.FromResult<IActionResult>(StatusCode(500, new { message = "An unexpected error occurred." }));
         }
     }
-
-    [HttpGet("colors")]
-    public Task<IActionResult> GetLabelColors()
-    {
-        try
-        {
-            List<string> prioritiesAllowed = PriorityValues.PrioritiesAllowed;
-            _logger.LogDebug("Retrieved {Count} priorities for card", prioritiesAllowed.Count);
-            return Task.FromResult<IActionResult>(Ok(prioritiesAllowed));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving priorities for card");
-            return Task.FromResult<IActionResult>(StatusCode(500, new { message = "An unexpected error occurred." }));
-        }
-    }
     
     [HttpPost("list/{listId:int}")]
     public async Task<IActionResult> AddCard(int listId, [FromBody] AddCardDto dto)
     {
         try
         {
-            OutputCardDetailsDto? card = await _cardService.AddCard(listId, dto, UserId);
+            CardResponse? card = await _cardService.AddCard(listId, dto);
             if (card == null)
             {
                 _logger.LogError("Failed to add card to list {ListId}", listId);
@@ -117,7 +103,7 @@ public class CardController: BaseController
     {
         try
         {
-            OutputCardDetailsDto? card = await _cardService.UpdateCard(cardId, dto, UserId);
+            CardResponse? card = await _cardService.UpdateCard(cardId, dto);
             if (card == null)
             {
                 _logger.LogDebug("Card {CardId} not found for update", cardId);
@@ -139,7 +125,7 @@ public class CardController: BaseController
     {
         try
         {
-            Boolean isDeleted = await _cardService.DeleteCard(cardId, UserId);
+            Boolean isDeleted = await _cardService.DeleteCard(cardId);
             if (!isDeleted)
             {
                 _logger.LogDebug("Card {CardId} not found for deletion.", cardId);

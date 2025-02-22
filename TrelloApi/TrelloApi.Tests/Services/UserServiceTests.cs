@@ -11,8 +11,7 @@ using TrelloApi.Application.Utils;
 using TrelloApi.Domain.Constants;
 using TrelloApi.Domain.DTOs;          // Contiene RegisterUserDto, LoginUserDto, UpdateUserDto, OutputUserDetailsDto, etc.
 using TrelloApi.Domain.Entities;
-using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Infrastructure.Persistence.Interfaces;
 using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Services

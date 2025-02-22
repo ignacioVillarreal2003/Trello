@@ -7,9 +7,8 @@ using System.Threading.Tasks;
 using Xunit;
 using TrelloApi.Application.Services;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.Interfaces.Services;
-using TrelloApi.Domain.DTOs; // Aquí se encuentran los DTOs: AddListDto, UpdateListDto, OutputListDetailsDto
+using TrelloApi.Domain.DTOs;
+using TrelloApi.Infrastructure.Persistence.Interfaces; // Aquí se encuentran los DTOs: AddListDto, UpdateListDto, OutputListDetailsDto
 
 namespace TrelloApi.Tests.Services
 {

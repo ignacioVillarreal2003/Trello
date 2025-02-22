@@ -1,9 +1,9 @@
 using AutoMapper;
+using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.Constants;
-using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.DTOs.Board;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Infrastructure.Persistence.Interfaces;
 
 namespace TrelloApi.Application.Services;
 
@@ -13,18 +13,23 @@ public class BoardService: BaseService, IBoardService
     private readonly IUserBoardRepository _userBoardRepository;
     private readonly ILogger<BoardService> _logger;
     
-    public BoardService(IMapper mapper, IBoardAuthorizationService boardAuthorizationService, IBoardRepository boardRepository, IUserBoardRepository userBoardRepository, ILogger<BoardService> logger) : base(mapper, boardAuthorizationService)
+    public BoardService(IMapper mapper, 
+        IUnitOfWork unitOfWork, 
+        IBoardRepository boardRepository, 
+        IUserBoardRepository userBoardRepository, 
+        ILogger<BoardService> logger) 
+        : base(mapper, unitOfWork)
     {
         _boardRepository = boardRepository;
         _userBoardRepository = userBoardRepository;
         _logger = logger;
     }
     
-    public async Task<OutputBoardDetailsDto?> GetBoardById(int boardId, int uid)
+    public async Task<BoardResponse?> GetBoardById(int boardId)
     {
         try
         {
-            Board? board = await _boardRepository.GetBoardById(boardId);
+            Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId) && b.IsArchived.Equals(false));
             if (board == null)
             {
                 _logger.LogWarning("Board {BoardId} not found", boardId);
@@ -32,7 +37,7 @@ public class BoardService: BaseService, IBoardService
             }
 
             _logger.LogDebug("Board {BoardId} retrieved", boardId);
-            return _mapper.Map<OutputBoardDetailsDto>(board);
+            return _mapper.Map<BoardResponse>(board);
         }
         catch (Exception ex)
         {
@@ -41,53 +46,48 @@ public class BoardService: BaseService, IBoardService
         }
     }
     
-    public async Task<List<OutputBoardDetailsDto>> GetBoardsByUserId(int uid)
+    public async Task<List<BoardResponse>> GetBoardsByUserId(int userId)
     {
         try
         {
-            List<Board> boards = await _boardRepository.GetBoardsByUserId(uid);
-            _logger.LogDebug("Retrieved {Count} boards for user {UserId}", boards.Count, uid);
-            return _mapper.Map<List<OutputBoardDetailsDto>>(boards);
+            List<Board> boards = (await _boardRepository.GetBoardsByUserIdAsync(userId)).ToList();
+            _logger.LogDebug("Retrieved {Count} boards for user {UserId}", boards.Count, userId);
+            return _mapper.Map<List<BoardResponse>>(boards);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving boards for user {UserId}", uid);
+            _logger.LogError(ex, "Error retrieving boards for user {UserId}", userId);
             throw;
         }
     }
 
-    public async Task<OutputBoardDetailsDto?> AddBoard(AddBoardDto dto, int uid)
+    public async Task<BoardResponse?> AddBoard(AddBoardDto dto, int userId)
     {
         try
         {
-            if (!BoardBackgroundValues.BoardBackgroundsAllowed.Contains(dto.Background))
-            {
-                _logger.LogError("Property background isn't correct.");
-                return null;
-            }
-            
             Board board = new Board(dto.Title, dto.Background, dto.Description);
             
-            await _boardRepository.AddBoard(board);
+            await _boardRepository.CreateAsync(board);
 
-            var userBoard = new UserBoard(uid, board.Id, RoleValues.RolesAllowed[0]);
-            await _userBoardRepository.AddUserBoard(userBoard);
-            
-            _logger.LogInformation("Board added to user {UserId}", uid);
-            return _mapper.Map<OutputBoardDetailsDto>(board);
+            var userBoard = new UserBoard(userId, board.Id, RoleValues.RolesAllowed[0]);
+            await _userBoardRepository.CreateAsync(userBoard);
+
+            await _unitOfWork.CommitAsync();
+            _logger.LogInformation("Board added to user {UserId}", userId);
+            return _mapper.Map<BoardResponse>(board);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding board to user {UserId}", uid);
+            _logger.LogError(ex, "Error adding board to user {UserId}", userId);
             throw;
         }
     }
     
-    public async Task<OutputBoardDetailsDto?> UpdateBoard(int boardId, UpdateBoardDto dto, int uid)
+    public async Task<BoardResponse?> UpdateBoard(int boardId, UpdateBoardDto dto)
     {
         try
         {
-            Board? board = await _boardRepository.GetBoardById(boardId);
+            Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId) && b.IsArchived.Equals(false));
             if (board == null)
             {
                 _logger.LogWarning("Board {BoardId} not found for update", boardId);
@@ -100,12 +100,6 @@ public class BoardService: BaseService, IBoardService
             }
             if (!string.IsNullOrEmpty(dto.Background))
             {
-                if (!BoardBackgroundValues.BoardBackgroundsAllowed.Contains(dto.Background))
-                {
-                    _logger.LogError("Property background isn't correct.");
-                    return null;
-                }
-                
                 board.Background = dto.Background;
             }
             if (!string.IsNullOrEmpty(dto.Description))
@@ -117,12 +111,12 @@ public class BoardService: BaseService, IBoardService
                 board.IsArchived = dto.IsArchived.Value;
                 board.ArchivedAt = DateTime.UtcNow;
             }
-            board.UpdatedAt = DateTime.UtcNow;
 
-            await _boardRepository.UpdateBoard(board);
-            
+            await _boardRepository.UpdateAsync(board);
+            await _unitOfWork.CommitAsync();
+
             _logger.LogInformation("Board {BoardId} updated", boardId);
-            return _mapper.Map<OutputBoardDetailsDto>(board);
+            return _mapper.Map<BoardResponse>(board);
         }
         catch (Exception ex)
         {
@@ -131,19 +125,20 @@ public class BoardService: BaseService, IBoardService
         }
     }
     
-    public async Task<bool> DeleteBoard(int boardId, int uid)
+    public async Task<Boolean> DeleteBoard(int boardId)
     {
         try
         {
-            Board? board = await _boardRepository.GetBoardById(boardId);
+            Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId) && b.IsArchived.Equals(false));
             if (board == null)
             {
                 _logger.LogWarning("Board {BoardId} not found for deletion", boardId);
                 return false;
             }
 
-            await _boardRepository.DeleteBoard(board);
-            
+            await _boardRepository.DeleteAsync(board);
+            await _unitOfWork.CommitAsync();
+
             _logger.LogInformation("Board {BoardId} deleted", boardId);
             return true;
         }

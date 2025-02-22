@@ -4,11 +4,11 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
 using TrelloApi.Domain.DTOs;
-using TrelloApi.Domain.Interfaces.Services;
 using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TrelloApi.Application.Services.Interfaces;
 
 namespace TrelloApi.Tests.Controllers
 {

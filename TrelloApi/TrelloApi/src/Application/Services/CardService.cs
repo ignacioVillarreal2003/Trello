@@ -1,9 +1,11 @@
 using AutoMapper;
+using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.Constants;
 using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.DTOs.Card;
+using TrelloApi.Domain.DTOs.CardLabel;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Infrastructure.Persistence.Interfaces;
 
 namespace TrelloApi.Application.Services;
 
@@ -12,17 +14,21 @@ public class CardService: BaseService, ICardService
     private readonly ILogger<CardService> _logger;
     private readonly ICardRepository _cardRepository;
 
-    public CardService(IMapper mapper, IBoardAuthorizationService boardAuthorizationService, ILogger<CardService> logger, ICardRepository cardRepository): base(mapper, boardAuthorizationService)
+    public CardService(IMapper mapper, 
+        IUnitOfWork unitOfWork, 
+        ILogger<CardService> logger, 
+        ICardRepository cardRepository)
+        : base(mapper, unitOfWork)
     {
         _logger = logger;
         _cardRepository = cardRepository;
     }
     
-    public async Task<OutputCardDetailsDto?> GetCardById(int cardId, int uid)
+    public async Task<CardResponse?> GetCardById(int cardId)
     {
         try
         {
-            Card? card = await _cardRepository.GetCardById(cardId);
+            Card? card = await _cardRepository.GetAsync(c => c.Id.Equals(cardId));
             if (card == null)
             {
                 _logger.LogWarning("Card {CardId} not found", cardId);
@@ -30,7 +36,7 @@ public class CardService: BaseService, ICardService
             }
 
             _logger.LogDebug("Card {CardId} retrieved", cardId);
-            return _mapper.Map<OutputCardDetailsDto>(card);
+            return _mapper.Map<CardResponse>(card);
         }
         catch (Exception ex)
         {
@@ -39,13 +45,13 @@ public class CardService: BaseService, ICardService
         }
     }
 
-    public async Task<List<OutputCardDetailsDto>> GetCardsByListId(int listId, int uid)
+    public async Task<List<CardResponse>> GetCardsByListId(int listId)
     {
         try
         {
-            List<Card> cards = await _cardRepository.GetCardsByListId(listId);
+            List<Card> cards = (await _cardRepository.GetListAsync(c => c.ListId.Equals(listId))).ToList();
             _logger.LogDebug("Retrieved {Count} cards for list {ListId}", cards.Count, listId);
-            return _mapper.Map<List<OutputCardDetailsDto>>(cards);
+            return _mapper.Map<List<CardResponse>>(cards);
         }
         catch (Exception ex)
         {
@@ -54,21 +60,16 @@ public class CardService: BaseService, ICardService
         }
     }
 
-    public async Task<OutputCardDetailsDto?> AddCard(int listId, AddCardDto dto, int uid)
+    public async Task<CardResponse?> AddCard(int listId, AddCardDto dto)
     {
         try
         {
-            if (!string.IsNullOrEmpty(dto.Priority) && !PriorityValues.PrioritiesAllowed.Contains(dto.Priority))
-            {
-                _logger.LogError("Property priority isn't correct.");
-                return null;
-            }
-            
             Card card = new Card(dto.Title, dto.Description, listId, dto.Priority);
-            await _cardRepository.AddCard(card);
+            await _cardRepository.CreateAsync(card);
+            await _unitOfWork.CommitAsync();
 
             _logger.LogInformation("Card added to list {ListId}", listId);
-            return _mapper.Map<OutputCardDetailsDto>(card);
+            return _mapper.Map<CardResponse>(card);
         }
         catch (Exception ex)
         {
@@ -77,11 +78,11 @@ public class CardService: BaseService, ICardService
         }
     }
 
-    public async Task<OutputCardDetailsDto?> UpdateCard(int cardId, UpdateCardDto dto, int uid)
+    public async Task<CardResponse?> UpdateCard(int cardId, UpdateCardDto dto)
     {
         try
         {
-            Card? card = await _cardRepository.GetCardById(cardId);
+            Card? card = await _cardRepository.GetAsync(c => c.Id.Equals(cardId));
             if (card == null)
             {
                 _logger.LogWarning("Task {cardId} not found for update", cardId);
@@ -108,16 +109,16 @@ public class CardService: BaseService, ICardService
             {
                 card.IsCompleted = dto.IsCompleted.Value;
             }
-            if (!string.IsNullOrEmpty(dto.Priority) && PriorityValues.PrioritiesAllowed.Contains(dto.Priority))
+            if (!string.IsNullOrEmpty(dto.Priority))
             {
                 card.Priority = dto.Priority;
             }
-            card.UpdatedAt = DateTime.UtcNow;
 
-            await _cardRepository.UpdateCard(card);
-            
+            await _cardRepository.UpdateAsync(card);
+            await _unitOfWork.CommitAsync();
+
             _logger.LogInformation("Card {CardId} updated", cardId);
-            return _mapper.Map<OutputCardDetailsDto>(card);
+            return _mapper.Map<CardResponse>(card);
         }
         catch (Exception ex)
         {
@@ -126,18 +127,19 @@ public class CardService: BaseService, ICardService
         }
     }
 
-    public async Task<Boolean> DeleteCard(int cardId, int uid)
+    public async Task<Boolean> DeleteCard(int cardId)
     {
         try
         {
-            Card? card = await _cardRepository.GetCardById(cardId);
+            Card? card = await _cardRepository.GetAsync(c => c.Id.Equals(cardId));
             if (card == null)
             {
                 _logger.LogWarning("Card {CardId} not found for deletion", cardId);
                 return false;
             }
 
-            await _cardRepository.DeleteCard(card);
+            await _cardRepository.DeleteAsync(card);
+            await _unitOfWork.CommitAsync();
 
             _logger.LogInformation("Card {CardId} deleted", cardId);
             return true;

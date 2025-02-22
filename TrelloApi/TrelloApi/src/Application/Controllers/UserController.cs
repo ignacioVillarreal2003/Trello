@@ -1,33 +1,34 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TrelloApi.Application.Filters;
-using TrelloApi.Domain.DTOs;
-using TrelloApi.Domain.Interfaces.Services;
-using TrelloApi.Infrastructure.Authentication;
+using Microsoft.AspNetCore.RateLimiting;
+using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Domain.DTOs.User;
 
 namespace TrelloApi.Application.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[EnableRateLimiting("fixed")]
 public class UserController : BaseController
 {
     private readonly ILogger<UserController> _logger;
     private readonly IUserService _userService;
-    private readonly IJwt _jwt;
+    private readonly IJwtService _jwtService;
 
-    public UserController(ILogger<UserController> logger, IUserService userService, IJwt jwt)
+    public UserController(ILogger<UserController> logger, IUserService userService, IJwtService jwtService)
     {
         _logger = logger;
         _userService = userService;
-        _jwt = jwt;
+        _jwtService = jwtService;
     }
     
     [HttpGet]
-    [RequireAuthentication]
+    [Authorize]
     public async Task<IActionResult> GetUsers()
     {
         try
         {
-            List<OutputUserDetailsDto> users = await _userService.GetUsers(UserId);
+            List<UserResponse> users = await _userService.GetUsers();
             _logger.LogDebug("Retrieved {Count} users.", users.Count);
             return Ok(users);
         }
@@ -39,12 +40,12 @@ public class UserController : BaseController
     }
 
     [HttpGet("username/{username}")]
-    [RequireAuthentication]
+    [Authorize]
     public async Task<IActionResult> GetUsersByUsername(string username)
     {
         try
         {
-            List<OutputUserDetailsDto> users = await _userService.GetUsersByUsername(username, UserId);
+            List<UserResponse> users = await _userService.GetUsersByUsername(username);
             _logger.LogDebug("Retrieved {Count} users for username {Username}", users.Count, username);
             return Ok(users);
         }
@@ -56,12 +57,12 @@ public class UserController : BaseController
     }
     
     [HttpGet("card/{cardId:int}")]
-    [RequireAuthentication]
+    [Authorize]
     public async Task<IActionResult> GetUsersByCardId(int cardId)
     {
         try
         {
-            List<OutputUserDetailsDto> users = await _userService.GetUsersByCardId(cardId, UserId);
+            List<UserResponse> users = await _userService.GetUsersByCardId(cardId);
             _logger.LogDebug("Retrieved {Count} users.", users.Count);
             return Ok(users);
         }
@@ -77,17 +78,19 @@ public class UserController : BaseController
     {
         try
         {
-            OutputUserDetailsDto? user = await _userService.RegisterUser(registerUserDto);
+            UserResponse? user = await _userService.RegisterUser(registerUserDto);
             if (user == null)
             {
                 _logger.LogError("Failed to register user {Email}", registerUserDto.Email);
                 return BadRequest(new { message = "Failed to register user." });
             }
 
-            string token = _jwt.GenerateToken(user.Id);
+            string accessToken = _jwtService.GenerateAccessToken(user.Id);
+            string refreshToken = _jwtService.GenerateRefreshToken();
+            await _jwtService.SaveRefreshToken(user.Id, refreshToken);
             
             _logger.LogInformation("User {UserId} register", user.Id);
-            return CreatedAtAction(nameof(GetUsersByUsername), new { username = user.Username }, new { token, user });
+            return CreatedAtAction(nameof(GetUsersByUsername), new { username = user.Username }, new { accessToken, refreshToken, user });
         }
         catch (Exception ex)
         {
@@ -97,21 +100,24 @@ public class UserController : BaseController
     }
 
     [HttpPost("login-user")]
+    [EnableRateLimiting("block")]
     public async Task<IActionResult> LoginUser([FromBody] LoginUserDto loginUserDto)
     {
         try
         {
-            OutputUserDetailsDto? user = await _userService.LoginUser(loginUserDto);
+            UserResponse? user = await _userService.LoginUser(loginUserDto);
             if (user == null)
             {
                 _logger.LogError("Failed to login user {Email}", loginUserDto.Email);
                 return BadRequest(new { message = "Failed to login user." });
             }
 
-            string token = _jwt.GenerateToken(user.Id);
+            string accessToken = _jwtService.GenerateAccessToken(user.Id);
+            string refreshToken = _jwtService.GenerateRefreshToken();
+            await _jwtService.SaveRefreshToken(user.Id, refreshToken);
             
             _logger.LogInformation("User {UserId} login", user.Id);
-            return Ok (new { token, user });
+            return Ok (new { accessToken, refreshToken, user });
         }
         catch (Exception ex)
         {
@@ -120,13 +126,29 @@ public class UserController : BaseController
         }
     }
     
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    {
+        var userId = await _jwtService.ValidateRefreshToken(request.RefreshToken);
+        if (userId == null)
+        {
+            return Unauthorized(new { message = "Invalid or expired refresh token" });
+        }
+
+        string accessToken = _jwtService.GenerateAccessToken(userId.Value);
+        string refreshToken = _jwtService.GenerateRefreshToken();
+        await _jwtService.SaveRefreshToken(userId.Value, refreshToken);
+
+        return Ok (new { accessToken, refreshToken });
+    }
+    
     [HttpPut]
-    [RequireAuthentication]
+    [Authorize]
     public async Task<IActionResult> UpdateUser([FromBody] UpdateUserDto updateUserDto)
     {
         try
         {
-            OutputUserDetailsDto? user = await _userService.UpdateUser(updateUserDto, UserId);
+            UserResponse? user = await _userService.UpdateUser(updateUserDto, UserId);
             if (user == null)
             {
                 _logger.LogDebug("User {UserId} not found for update", UserId);
@@ -144,7 +166,7 @@ public class UserController : BaseController
     }
 
     [HttpDelete]
-    [RequireAuthentication]
+    [Authorize]
     public async Task<IActionResult> DeleteUser()
     {
         try

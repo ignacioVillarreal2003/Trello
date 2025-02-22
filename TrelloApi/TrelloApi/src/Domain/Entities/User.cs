@@ -5,11 +5,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TrelloApi.Domain.Entities;
 
 [Table("User")]
-public class User
+public class User: Entity
 {
-    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-    
     [StringLength(64), EmailAddress, Required]
     public string Email { get; set; }
     
@@ -21,18 +18,20 @@ public class User
     
     [StringLength(32), Required]
     public string Theme { get; set; }
-    
-    [DataType(DataType.DateTime)]
-    public DateTime CreatedAt { get; set; }
 
     [DataType(DataType.DateTime)] 
     public DateTime LastLogin { get; set; }
     
-    public ICollection<UserBoard> UserBoards { get; set; } = new HashSet<UserBoard>();
-
-    public ICollection<UserCard> UserTasks { get; set; } = new HashSet<UserCard>();
+    public string? RefreshToken { get; set; }
     
-    public ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
+    [DataType(DataType.DateTime)] 
+    public DateTime? RefreshTokenExpiryTime { get; set; }
+    
+    public ICollection<UserBoard> UserBoards { get; set; }
+
+    public ICollection<UserCard> UserCards { get; set; }
+    
+    public ICollection<Comment> Comments { get; set; }
 
     public User(string email, string username, string password, string theme = "Light")
     {
@@ -42,5 +41,7 @@ public class User
         Theme = theme;
         CreatedAt = DateTime.UtcNow;
         LastLogin = DateTime.UtcNow;
+        RefreshToken = null;
+        RefreshTokenExpiryTime = null;
     }
 }

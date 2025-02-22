@@ -3,8 +3,10 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Microsoft.Extensions.DependencyInjection;
 using TrelloApi.app;
+using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Application.Utils;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Infrastructure.Authentication;
+using TrelloApi.Infrastructure.Persistence.Data;
 using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Integrations;
@@ -22,7 +24,7 @@ public class CommentIntegrationTests: IClassFixture<CustomWebApplicationFactory<
         _scope = factory.Services.CreateScope();
         _dbContext = _scope.ServiceProvider.GetRequiredService<TrelloContext>();
 
-        var jwtService = _scope.ServiceProvider.GetRequiredService<IJwt>();
+        var jwtService = _scope.ServiceProvider.GetRequiredService<IJwtService>();
         var token = jwtService.GenerateToken(1);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }

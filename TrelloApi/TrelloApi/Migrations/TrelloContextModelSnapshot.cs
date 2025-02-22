@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using TrelloApi.app;
+using TrelloApi.Infrastructure.Persistence.Data;
 
 #nullable disable
 
@@ -22,7 +22,7 @@ namespace TrelloApi.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TrelloApi.Domain.Board.Board", b =>
+            modelBuilder.Entity("TrelloApi.Domain.Entities.Board", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -30,33 +30,30 @@ namespace TrelloApi.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("ArchivedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("Icon")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<bool>("IsArchived")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Theme")
+                    b.Property<string>("Background")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("IsArchived")
+                        .HasColumnType("boolean");
+
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
@@ -64,155 +61,7 @@ namespace TrelloApi.Migrations
                     b.ToTable("Board", (string)null);
                 });
 
-            modelBuilder.Entity("TrelloApi.Domain.Comment.Comment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("AuthorId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("TaskId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Text")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AuthorId");
-
-                    b.HasIndex("TaskId");
-
-                    b.ToTable("Comment", (string)null);
-                });
-
-            modelBuilder.Entity("TrelloApi.Domain.Entities.List.List", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BoardId")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<int>("Position")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BoardId");
-
-                    b.ToTable("List", (string)null);
-                });
-
-            modelBuilder.Entity("TrelloApi.Domain.Entities.User.User", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<DateTime>("LastLogin")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Password")
-                        .IsRequired()
-                        .HasMaxLength(256)
-                        .HasColumnType("character varying(256)");
-
-                    b.Property<string>("Theme")
-                        .IsRequired()
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
-
-                    b.Property<string>("Username")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.ToTable("User", (string)null);
-                });
-
-            modelBuilder.Entity("TrelloApi.Domain.Entities.UserTask.UserTask", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TaskId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("UserId", "TaskId");
-
-                    b.HasIndex("TaskId");
-
-                    b.ToTable("UserTask", (string)null);
-                });
-
-            modelBuilder.Entity("TrelloApi.Domain.Label.Label", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("BoardId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Color")
-                        .IsRequired()
-                        .HasMaxLength(8)
-                        .HasColumnType("character varying(8)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BoardId");
-
-                    b.ToTable("Label", (string)null);
-                });
-
-            modelBuilder.Entity("TrelloApi.Domain.Task.Task", b =>
+            modelBuilder.Entity("TrelloApi.Domain.Entities.Card", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -238,41 +87,191 @@ namespace TrelloApi.Migrations
                         .HasColumnType("integer");
 
                     b.Property<string>("Priority")
+                        .HasMaxLength(16)
+                        .HasColumnType("character varying(16)");
+
+                    b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(32)
                         .HasColumnType("character varying(32)");
 
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasMaxLength(64)
-                        .HasColumnType("character varying(64)");
-
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ListId");
 
-                    b.ToTable("Task", (string)null);
+                    b.ToTable("Card", (string)null);
                 });
 
-            modelBuilder.Entity("TrelloApi.Domain.TaskLabel.TaskLabel", b =>
+            modelBuilder.Entity("TrelloApi.Domain.Entities.CardLabel", b =>
                 {
-                    b.Property<int>("TaskId")
+                    b.Property<int>("CardId")
                         .HasColumnType("integer");
 
                     b.Property<int>("LabelId")
                         .HasColumnType("integer");
 
-                    b.HasKey("TaskId", "LabelId");
+                    b.HasKey("CardId", "LabelId");
 
                     b.HasIndex("LabelId");
 
-                    b.ToTable("TaskLabel", (string)null);
+                    b.ToTable("CardLabel", (string)null);
                 });
 
-            modelBuilder.Entity("TrelloApi.Domain.UserBoard.UserBoard", b =>
+            modelBuilder.Entity("TrelloApi.Domain.Entities.Comment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AuthorId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CardId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Text")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("CardId");
+
+                    b.ToTable("Comment", (string)null);
+                });
+
+            modelBuilder.Entity("TrelloApi.Domain.Entities.Label", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BoardId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BoardId");
+
+                    b.ToTable("Label", (string)null);
+                });
+
+            modelBuilder.Entity("TrelloApi.Domain.Entities.List", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BoardId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BoardId");
+
+                    b.ToTable("List", (string)null);
+                });
+
+            modelBuilder.Entity("TrelloApi.Domain.Entities.User", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<DateTime>("LastLogin")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Theme")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Username")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("User", (string)null);
+                });
+
+            modelBuilder.Entity("TrelloApi.Domain.Entities.UserBoard", b =>
                 {
                     b.Property<int>("UserId")
                         .HasColumnType("integer");
@@ -292,58 +291,73 @@ namespace TrelloApi.Migrations
                     b.ToTable("UserBoard", (string)null);
                 });
 
-            modelBuilder.Entity("TrelloApi.Domain.Comment.Comment", b =>
+            modelBuilder.Entity("TrelloApi.Domain.Entities.UserCard", b =>
                 {
-                    b.HasOne("TrelloApi.Domain.Entities.User.User", "User")
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("CardId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserId", "CardId");
+
+                    b.HasIndex("CardId");
+
+                    b.ToTable("UserCard", (string)null);
+                });
+
+            modelBuilder.Entity("TrelloApi.Domain.Entities.Card", b =>
+                {
+                    b.HasOne("TrelloApi.Domain.Entities.List", "List")
+                        .WithMany("Cards")
+                        .HasForeignKey("ListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("List");
+                });
+
+            modelBuilder.Entity("TrelloApi.Domain.Entities.CardLabel", b =>
+                {
+                    b.HasOne("TrelloApi.Domain.Entities.Card", "Card")
+                        .WithMany("CardLabels")
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TrelloApi.Domain.Entities.Label", "Label")
+                        .WithMany("CardLabels")
+                        .HasForeignKey("LabelId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Card");
+
+                    b.Navigation("Label");
+                });
+
+            modelBuilder.Entity("TrelloApi.Domain.Entities.Comment", b =>
+                {
+                    b.HasOne("TrelloApi.Domain.Entities.User", "User")
                         .WithMany("Comments")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TrelloApi.Domain.Task.Task", "Task")
+                    b.HasOne("TrelloApi.Domain.Entities.Card", "Card")
                         .WithMany("Comments")
-                        .HasForeignKey("TaskId")
+                        .HasForeignKey("CardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Task");
+                    b.Navigation("Card");
 
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TrelloApi.Domain.Entities.List.List", b =>
+            modelBuilder.Entity("TrelloApi.Domain.Entities.Label", b =>
                 {
-                    b.HasOne("TrelloApi.Domain.Board.Board", "Board")
-                        .WithMany("Lists")
-                        .HasForeignKey("BoardId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Board");
-                });
-
-            modelBuilder.Entity("TrelloApi.Domain.Entities.UserTask.UserTask", b =>
-                {
-                    b.HasOne("TrelloApi.Domain.Task.Task", "Task")
-                        .WithMany()
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TrelloApi.Domain.Entities.User.User", "User")
-                        .WithMany("UserTasks")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Task");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("TrelloApi.Domain.Label.Label", b =>
-                {
-                    b.HasOne("TrelloApi.Domain.Board.Board", "Board")
+                    b.HasOne("TrelloApi.Domain.Entities.Board", "Board")
                         .WithMany("Labels")
                         .HasForeignKey("BoardId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -352,45 +366,26 @@ namespace TrelloApi.Migrations
                     b.Navigation("Board");
                 });
 
-            modelBuilder.Entity("TrelloApi.Domain.Task.Task", b =>
+            modelBuilder.Entity("TrelloApi.Domain.Entities.List", b =>
                 {
-                    b.HasOne("TrelloApi.Domain.Entities.List.List", "List")
-                        .WithMany("Tasks")
-                        .HasForeignKey("ListId")
+                    b.HasOne("TrelloApi.Domain.Entities.Board", "Board")
+                        .WithMany("Lists")
+                        .HasForeignKey("BoardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("List");
+                    b.Navigation("Board");
                 });
 
-            modelBuilder.Entity("TrelloApi.Domain.TaskLabel.TaskLabel", b =>
+            modelBuilder.Entity("TrelloApi.Domain.Entities.UserBoard", b =>
                 {
-                    b.HasOne("TrelloApi.Domain.Label.Label", "Label")
-                        .WithMany("TaskLabels")
-                        .HasForeignKey("LabelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("TrelloApi.Domain.Task.Task", "Task")
-                        .WithMany("TaskLabels")
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Label");
-
-                    b.Navigation("Task");
-                });
-
-            modelBuilder.Entity("TrelloApi.Domain.UserBoard.UserBoard", b =>
-                {
-                    b.HasOne("TrelloApi.Domain.Board.Board", "Board")
+                    b.HasOne("TrelloApi.Domain.Entities.Board", "Board")
                         .WithMany("UserBoards")
                         .HasForeignKey("BoardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("TrelloApi.Domain.Entities.User.User", "User")
+                    b.HasOne("TrelloApi.Domain.Entities.User", "User")
                         .WithMany("UserBoards")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -401,7 +396,26 @@ namespace TrelloApi.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("TrelloApi.Domain.Board.Board", b =>
+            modelBuilder.Entity("TrelloApi.Domain.Entities.UserCard", b =>
+                {
+                    b.HasOne("TrelloApi.Domain.Entities.Card", "Card")
+                        .WithMany()
+                        .HasForeignKey("CardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TrelloApi.Domain.Entities.User", "User")
+                        .WithMany("UserCards")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Card");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TrelloApi.Domain.Entities.Board", b =>
                 {
                     b.Navigation("Labels");
 
@@ -410,30 +424,30 @@ namespace TrelloApi.Migrations
                     b.Navigation("UserBoards");
                 });
 
-            modelBuilder.Entity("TrelloApi.Domain.Entities.List.List", b =>
+            modelBuilder.Entity("TrelloApi.Domain.Entities.Card", b =>
                 {
-                    b.Navigation("Tasks");
+                    b.Navigation("CardLabels");
+
+                    b.Navigation("Comments");
                 });
 
-            modelBuilder.Entity("TrelloApi.Domain.Entities.User.User", b =>
+            modelBuilder.Entity("TrelloApi.Domain.Entities.Label", b =>
+                {
+                    b.Navigation("CardLabels");
+                });
+
+            modelBuilder.Entity("TrelloApi.Domain.Entities.List", b =>
+                {
+                    b.Navigation("Cards");
+                });
+
+            modelBuilder.Entity("TrelloApi.Domain.Entities.User", b =>
                 {
                     b.Navigation("Comments");
 
                     b.Navigation("UserBoards");
 
-                    b.Navigation("UserTasks");
-                });
-
-            modelBuilder.Entity("TrelloApi.Domain.Label.Label", b =>
-                {
-                    b.Navigation("TaskLabels");
-                });
-
-            modelBuilder.Entity("TrelloApi.Domain.Task.Task", b =>
-                {
-                    b.Navigation("Comments");
-
-                    b.Navigation("TaskLabels");
+                    b.Navigation("UserCards");
                 });
 #pragma warning restore 612, 618
         }

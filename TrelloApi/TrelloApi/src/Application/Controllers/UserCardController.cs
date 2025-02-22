@@ -1,11 +1,16 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TrelloApi.Domain.DTOs;
-using TrelloApi.Domain.Interfaces.Services;
+using Microsoft.AspNetCore.RateLimiting;
+using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Domain.DTOs.User;
+using TrelloApi.Domain.DTOs.UserCard;
 
 namespace TrelloApi.Application.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize]
+[EnableRateLimiting("fixed")]
 public class UserCardController: BaseController
 {
     private readonly ILogger<UserCardController> _logger;
@@ -22,7 +27,7 @@ public class UserCardController: BaseController
     {
         try
         {
-            List<OutputUserDetailsDto> users = await _userCardService.GetUsersByCardId(cardId, UserId);
+            List<UserResponse> users = await _userCardService.GetUsersByCardId(cardId);
             _logger.LogDebug("Retrieved {Count} users for card {CardId}", users.Count, cardId);
             return Ok(users);
         }
@@ -34,23 +39,23 @@ public class UserCardController: BaseController
     }
     
     [HttpPost("card/{cardId:int}")]
-    public async Task<IActionResult> AddUserToCard(int cardId, [FromBody] AddUserCardDto addUserTaskDto)
+    public async Task<IActionResult> AddUserToCard(int cardId, [FromBody] AddUserCardDto dto)
     {
         try
         {
-            OutputUserCardDetailsDto? userCard = await _userCardService.AddUserToCard(cardId, addUserTaskDto, UserId);
+            UserCardResponse? userCard = await _userCardService.AddUserToCard(cardId, dto);
             if (userCard == null)
             {
-                _logger.LogError("Failed to add user {UserBoard} to card {CardId}",  addUserTaskDto.UserId, cardId);
+                _logger.LogError("Failed to add user {UserBoard} to card {CardId}",  dto.UserId, cardId);
                 return BadRequest(new { message = "Failed to add user." });
             }
             
-            _logger.LogInformation("User {UserBoard} added to card {CardId}", addUserTaskDto.UserId, cardId);
+            _logger.LogInformation("User {UserBoard} added to card {CardId}", dto.UserId, cardId);
             return CreatedAtAction(nameof(GetUsersByCardId), new { userId = userCard.UserId, taskId = userCard.CardId }, userCard);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error adding card {CardId} to user {UserId}", cardId, addUserTaskDto.UserId);
+            _logger.LogError(ex, "Error adding card {CardId} to user {UserId}", cardId, dto.UserId);
             return StatusCode(500, new { message = "An unexpected error occurred." });
         }
     }
@@ -60,7 +65,7 @@ public class UserCardController: BaseController
     {
         try
         {
-            Boolean isDeleted = await _userCardService.RemoveUserFromCard(userId, cardId, UserId);
+            Boolean isDeleted = await _userCardService.RemoveUserFromCard(userId, cardId);
             if (!isDeleted)
             {
                 _logger.LogDebug("User {UserId} for card {CardId} not found for deletion.", userId, cardId);

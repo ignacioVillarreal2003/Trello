@@ -1,14 +1,16 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TrelloApi.Application.Filters;
+using Microsoft.AspNetCore.RateLimiting;
+using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.Constants;
-using TrelloApi.Domain.DTOs;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Domain.DTOs.Board;
 
 namespace TrelloApi.Application.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[RequireAuthentication]
+[Authorize]
+[EnableRateLimiting("fixed")]
 public class BoardController : BaseController
 {
     private readonly ILogger<BoardController> _logger;
@@ -25,7 +27,7 @@ public class BoardController : BaseController
     {
         try
         {
-            OutputBoardDetailsDto? board = await _boardService.GetBoardById(boardId, UserId);
+            BoardResponse? board = await _boardService.GetBoardById(boardId);
             if (board == null)
             {
                 _logger.LogDebug("Board {BoardId} not found", boardId);
@@ -47,7 +49,7 @@ public class BoardController : BaseController
     {
         try
         {
-            List<OutputBoardDetailsDto> boards = await _boardService.GetBoardsByUserId(UserId);
+            List<BoardResponse> boards = await _boardService.GetBoardsByUserId(UserId);
             _logger.LogDebug("Retrieved {Count} boards for user {UserId}", boards.Count, UserId);
             return Ok(boards);
         }
@@ -79,7 +81,7 @@ public class BoardController : BaseController
     {
         try
         {
-            OutputBoardDetailsDto? board = await _boardService.AddBoard(dto, UserId);
+            BoardResponse? board = await _boardService.AddBoard(dto, UserId);
             if (board == null)
             {
                 _logger.LogError("Failed to add board for user {UserId}", UserId);
@@ -101,7 +103,7 @@ public class BoardController : BaseController
     {
         try
         {
-            OutputBoardDetailsDto? board = await _boardService.UpdateBoard(boardId, dto, UserId);
+            BoardResponse? board = await _boardService.UpdateBoard(boardId, dto);
             if (board == null)
             {
                 _logger.LogDebug("Board {BoardId} not found for update", boardId);
@@ -123,7 +125,7 @@ public class BoardController : BaseController
     {
         try
         {
-            bool isDeleted = await _boardService.DeleteBoard(boardId, UserId);
+            bool isDeleted = await _boardService.DeleteBoard(boardId);
             if (!isDeleted)
             {
                 _logger.LogDebug("Board {BoardId} not found for deletion", boardId);

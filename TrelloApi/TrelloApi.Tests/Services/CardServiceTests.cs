@@ -7,8 +7,7 @@ using System.Threading.Tasks;
 using TrelloApi.Application.Services;
 using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Infrastructure.Persistence.Interfaces;
 using Xunit;
 
 namespace TrelloApi.Tests.Services

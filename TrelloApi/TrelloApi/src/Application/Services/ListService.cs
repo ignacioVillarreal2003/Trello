@@ -1,9 +1,10 @@
 using AutoMapper;
 using Microsoft.IdentityModel.Tokens;
+using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.DTOs.List;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Infrastructure.Persistence.Interfaces;
 
 namespace TrelloApi.Application.Services;
 
@@ -12,17 +13,21 @@ public class ListService: BaseService, IListService
     private readonly ILogger<ListService> _logger;
     private readonly IListRepository _listRepository;
     
-    public ListService(IMapper mapper, IBoardAuthorizationService boardAuthorizationService,  ILogger<ListService> logger, IListRepository listRepository): base(mapper, boardAuthorizationService)
+    public ListService(IMapper mapper, 
+        IUnitOfWork unitOfWork,
+        ILogger<ListService> logger, 
+        IListRepository listRepository)
+        : base(mapper, unitOfWork)
     {
         _logger = logger;
         _listRepository = listRepository;
     }
     
-    public async Task<OutputListDetailsDto?> GetListById(int listId, int uid)
+    public async Task<ListResponse?> GetListById(int listId)
     {
         try
         {
-            List? list = await _listRepository.GetListById(listId);
+            List? list = await _listRepository.GetAsync(l => l.Id.Equals(listId));
             if (list == null)
             {
                 _logger.LogWarning("List {ListId} not found", listId);
@@ -30,7 +35,7 @@ public class ListService: BaseService, IListService
             }
 
             _logger.LogDebug("List {ListId} retrieved", listId);
-            return _mapper.Map<OutputListDetailsDto>(list);
+            return _mapper.Map<ListResponse>(list);
         }
         catch (Exception ex)
         {
@@ -39,13 +44,13 @@ public class ListService: BaseService, IListService
         }
     }
     
-    public async Task<List<OutputListDetailsDto>> GetListsByBoardId(int boardId, int uid)
+    public async Task<List<ListResponse>> GetListsByBoardId(int boardId)
     {
         try
         {
-            List<List> lists = await _listRepository.GetListsByBoardId(boardId);
+            List<List> lists = (await _listRepository.GetListAsync(l => l.BoardId.Equals(boardId))).ToList();
             _logger.LogDebug("Retrieved {Count} lists for board {BoardId}", lists.Count, boardId);
-            return _mapper.Map<List<OutputListDetailsDto>>(lists);
+            return _mapper.Map<List<ListResponse>>(lists);
         }
         catch (Exception ex)
         {
@@ -54,16 +59,17 @@ public class ListService: BaseService, IListService
         }
     }
 
-    public async Task<OutputListDetailsDto?> AddList(int boardId, AddListDto dto, int uid)
+    public async Task<ListResponse?> AddList(int boardId, AddListDto dto)
     {
         try
         {
             List list = new List(dto.Title, boardId, dto.Position);
             
-            await _listRepository.AddList(list);
+            await _listRepository.CreateAsync(list);
+            await _unitOfWork.CommitAsync();
 
             _logger.LogInformation("List added to board {BoardId}", boardId);
-            return _mapper.Map<OutputListDetailsDto>(list);
+            return _mapper.Map<ListResponse>(list);
         }
         catch (Exception ex)
         {
@@ -72,11 +78,11 @@ public class ListService: BaseService, IListService
         }
     }
 
-    public async Task<OutputListDetailsDto?> UpdateList(int listId, UpdateListDto dto, int uid)
+    public async Task<ListResponse?> UpdateList(int listId, UpdateListDto dto)
     {
         try
         {
-            List? list = await _listRepository.GetListById(listId);
+            List? list = await _listRepository.GetAsync(l => l.Id.Equals(listId));
             if (list == null)
             {
                 _logger.LogWarning("List {ListId} not found for update", listId);
@@ -91,13 +97,12 @@ public class ListService: BaseService, IListService
             {
                 list.Position = dto.Position.Value;
             }
+            
+            await _listRepository.UpdateAsync(list);
+            await _unitOfWork.CommitAsync();
 
-            list.UpdatedAt = DateTime.UtcNow;
-            
-            await _listRepository.UpdateList(list);
-            
             _logger.LogInformation("List {ListId} updated", listId);
-            return _mapper.Map<OutputListDetailsDto>(list);
+            return _mapper.Map<ListResponse>(list);
         }
         catch (Exception ex)
         {
@@ -106,19 +111,20 @@ public class ListService: BaseService, IListService
         }
     }
 
-    public async Task<Boolean> DeleteList(int listId, int uid)
+    public async Task<Boolean> DeleteList(int listId)
     {
         try
         {
-            List? list = await _listRepository.GetListById(listId);
+            List? list = await _listRepository.GetAsync(l => l.Id.Equals(listId));
             if (list == null)
             {
                 _logger.LogWarning("List {ListId} not found for deletion", listId);
                 return false;
             }
             
-            await _listRepository.DeleteList(list);
-            
+            await _listRepository.DeleteAsync(list);
+            await _unitOfWork.CommitAsync();
+
             _logger.LogInformation("List {ListId} deleted", listId);
             return true;
         }

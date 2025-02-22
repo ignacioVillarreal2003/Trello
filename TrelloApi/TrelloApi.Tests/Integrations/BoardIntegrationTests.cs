@@ -5,8 +5,10 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using TrelloApi.app;
+using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Application.Utils;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Infrastructure.Authentication;
+using TrelloApi.Infrastructure.Persistence.Data;
 
 namespace TrelloApi.Tests.Integrations;
 
@@ -23,7 +25,7 @@ public class BoardIntegrationTests : IClassFixture<CustomWebApplicationFactory<P
         _scope = factory.Services.CreateScope();
         _dbContext = _scope.ServiceProvider.GetRequiredService<TrelloContext>();
 
-        var jwtService = _scope.ServiceProvider.GetRequiredService<IJwt>();
+        var jwtService = _scope.ServiceProvider.GetRequiredService<IJwtService>();
         var token = jwtService.GenerateToken(1);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }

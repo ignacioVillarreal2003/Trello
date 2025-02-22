@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TrelloApi.Domain.Entities;
 
 [Table("Board")]
-public class Board
+public class Board: Entity
 {
-    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-    
     [StringLength(32), Required]
     public string Title { get; set; }
     
@@ -17,23 +14,16 @@ public class Board
 
     [StringLength(32), Required]
     public string Background { get; set; }
-    
-    [DataType(DataType.DateTime)]
-    public DateTime CreatedAt { get; set; }
-
-    [DataType(DataType.DateTime)]
-    public DateTime? UpdatedAt { get; set; }
-
     public bool IsArchived { get; set; }
 
     [DataType(DataType.DateTime)]
     public DateTime? ArchivedAt { get; set; }
     
-    public ICollection<List> Lists { get; set; } = new HashSet<List>();
+    public ICollection<List> Lists { get; set; }
 
-    public ICollection<UserBoard> UserBoards { get; set; } = new HashSet<UserBoard>();
+    public ICollection<UserBoard> UserBoards { get; set; }
 
-    public ICollection<Label> Labels { get; set; } = new HashSet<Label>();
+    public ICollection<Label> Labels { get; set; }
 
     public Board(string title, string background, string? description = null)
     {

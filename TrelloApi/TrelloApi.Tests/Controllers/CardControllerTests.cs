@@ -7,8 +7,8 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
 using TrelloApi.Application.Controllers;
+using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs; // OutputCardDetailsDto, AddCardDto, UpdateCardDto
-using TrelloApi.Domain.Interfaces.Services;
 
 namespace TrelloApi.Tests.Controllers
 {

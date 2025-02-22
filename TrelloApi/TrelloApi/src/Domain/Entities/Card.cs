@@ -4,11 +4,8 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TrelloApi.Domain.Entities;
 
 [Table("Card")]
-public class Card
+public class Card: Entity
 {
-    [Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-    
     [StringLength(32), Required]
     public string Title { get; set; }
     
@@ -23,19 +20,13 @@ public class Card
     
     public bool IsCompleted { get; set; }
     
-    [DataType(DataType.DateTime)]
-    public DateTime CreatedAt { get; set; }
-    
-    [DataType(DataType.DateTime)]
-    public DateTime? UpdatedAt { get; set; }
-    
     [ForeignKey("List"), Required]
     public int ListId { get; set; }
     public List List { get; set; }
     
-    public ICollection<Comment> Comments { get; set; } = new HashSet<Comment>();
+    public ICollection<Comment> Comments { get; set; }
     
-    public ICollection<CardLabel> CardLabels { get; set; } = new HashSet<CardLabel>();
+    public ICollection<CardLabel> CardLabels { get; set; }
     
     public Card(string title, string description, int listId, string? priority = null)
     {

@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
+using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Application.Utils;
 using TrelloApi.Domain.DTOs;
-using TrelloApi.Domain.Interfaces.Services;
-using TrelloApi.Infrastructure.Authentication;
 using Xunit;
 
 namespace TrelloApi.Tests.Controllers
@@ -16,14 +16,14 @@ namespace TrelloApi.Tests.Controllers
     public class UserControllerTests
     {
         private readonly Mock<IUserService> _mockUserService;
-        private readonly Mock<IJwt> _mockJwt;
+        private readonly Mock<IJwtService> _mockJwt;
         private readonly Mock<ILogger<UserController>> _mockLogger;
         private readonly UserController _controller;
 
         public UserControllerTests()
         {
             _mockUserService = new Mock<IUserService>();
-            _mockJwt = new Mock<IJwt>();
+            _mockJwt = new Mock<IJwtService>();
             _mockLogger = new Mock<ILogger<UserController>>();
             _controller = new UserController(_mockLogger.Object, _mockUserService.Object, _mockJwt.Object);
             SetUserId(1);

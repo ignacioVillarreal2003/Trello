@@ -7,8 +7,7 @@ using Xunit;
 using TrelloApi.Application.Services;
 using TrelloApi.Domain.DTOs;                // DTOs: OutputUserDetailsDto, AddUserCardDto, OutputUserCardDetailsDto
 using TrelloApi.Domain.Entities;             // Entidades: UserCard, User
-using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Infrastructure.Persistence.Interfaces;
 using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Services

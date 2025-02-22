@@ -1,14 +1,15 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TrelloApi.Application.Filters;
-using TrelloApi.Application.Services;
-using TrelloApi.Domain.DTOs;
-using TrelloApi.Domain.Interfaces.Services;
+using Microsoft.AspNetCore.RateLimiting;
+using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Domain.DTOs.List;
 
 namespace TrelloApi.Application.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[RequireAuthentication]
+[Authorize]
+[EnableRateLimiting("fixed")]
 public class ListController: BaseController
 {
     private readonly ILogger<ListController> _logger;
@@ -25,7 +26,7 @@ public class ListController: BaseController
     {
         try
         {
-            OutputListDetailsDto? list = await _listService.GetListById(listId, UserId);
+            ListResponse? list = await _listService.GetListById(listId);
             if (list == null)
             {
                 _logger.LogDebug("List {ListId} not found", listId);
@@ -47,7 +48,7 @@ public class ListController: BaseController
     {
         try
         {
-            List<OutputListDetailsDto> lists = await _listService.GetListsByBoardId(boardId, UserId);
+            List<ListResponse> lists = await _listService.GetListsByBoardId(boardId);
             _logger.LogDebug("Retrieved {Count} lists for board {BoardId}", lists.Count, boardId);
             return Ok(lists);
         }
@@ -63,7 +64,7 @@ public class ListController: BaseController
     {
         try
         {
-            OutputListDetailsDto? list = await _listService.AddList(boardId, dto, UserId);
+            ListResponse? list = await _listService.AddList(boardId, dto);
             if (list == null)
             {
                 _logger.LogError("Failed to add list to board {BoardId}", boardId);
@@ -85,7 +86,7 @@ public class ListController: BaseController
     {
         try
         {
-            OutputListDetailsDto? list = await _listService.UpdateList(listId, dto, UserId);
+            ListResponse? list = await _listService.UpdateList(listId, dto);
             if (list == null)
             {
                 _logger.LogDebug("List {ListId} not found for update", listId);
@@ -107,7 +108,7 @@ public class ListController: BaseController
     {
         try
         {
-            Boolean isDeleted = await _listService.DeleteList(listId, UserId);
+            Boolean isDeleted = await _listService.DeleteList(listId);
             if (!isDeleted)
             {
                 _logger.LogDebug("List {ListId} not found for deletion", listId);

@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 using Xunit;
 using TrelloApi.Application.Services;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Domain.Interfaces.Repositories;
-using TrelloApi.Domain.Interfaces.Services;
 using TrelloApi.Domain.Constants;           // Para RoleValues, si es necesario
-using TrelloApi.Domain.DTOs;                // Aquí se encuentran AddUserBoardDto y OutputUserBoardDetailsDto
+using TrelloApi.Domain.DTOs;
+using TrelloApi.Infrastructure.Persistence.Interfaces; // Aquí se encuentran AddUserBoardDto y OutputUserBoardDetailsDto
 using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Services

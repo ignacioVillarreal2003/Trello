@@ -1,14 +1,16 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TrelloApi.Application.Filters;
+using Microsoft.AspNetCore.RateLimiting;
+using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.Constants;
-using TrelloApi.Domain.DTOs;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Domain.DTOs.Label;
 
 namespace TrelloApi.Application.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-[RequireAuthentication]
+[Authorize]
+[EnableRateLimiting("fixed")]
 public class LabelController : BaseController
 {
     private readonly ILogger<LabelController> _logger;
@@ -25,7 +27,7 @@ public class LabelController : BaseController
     {
         try
         {
-            OutputLabelDetailsDto? label = await _labelService.GetLabelById(labelId, UserId);
+            LabelResponse? label = await _labelService.GetLabelById(labelId);
             if (label == null)
             {
                 _logger.LogDebug("Label {LabelId} not found", labelId);
@@ -47,7 +49,7 @@ public class LabelController : BaseController
     {
         try
         {
-            List<OutputLabelDetailsDto> labels = await _labelService.GetLabelsByBoardId(boardId, UserId);
+            List<LabelResponse> labels = await _labelService.GetLabelsByBoardId(boardId);
             _logger.LogDebug("Retrieved {Count} labels for board {BoardId}", labels.Count, boardId);
             return Ok(labels);
         }
@@ -79,7 +81,7 @@ public class LabelController : BaseController
     {
         try
         {
-            OutputLabelDetailsDto? label = await _labelService.AddLabel(boardId, dto, UserId);
+            LabelResponse? label = await _labelService.AddLabel(boardId, dto);
             if (label == null)
             {
                 _logger.LogError("Failed to add label to board {BoardId}", boardId);
@@ -101,7 +103,7 @@ public class LabelController : BaseController
     {
         try
         {
-            OutputLabelDetailsDto? label = await _labelService.UpdateLabel(labelId, dto, UserId);
+            LabelResponse? label = await _labelService.UpdateLabel(labelId, dto);
             if (label == null)
             {
                 _logger.LogDebug("Label {LabelId} not found for update", labelId);
@@ -123,7 +125,7 @@ public class LabelController : BaseController
     {
         try
         {
-            Boolean isDeleted = await _labelService.DeleteLabel(labelId, UserId);
+            Boolean isDeleted = await _labelService.DeleteLabel(labelId);
             if (!isDeleted)
             {
                 _logger.LogDebug("Label {LabelId} not found for deletion", labelId);

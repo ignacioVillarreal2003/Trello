@@ -1,16 +1,16 @@
 using AutoMapper;
-using TrelloApi.Domain.Interfaces.Services;
+using TrelloApi.Infrastructure.Persistence.Interfaces;
 
 namespace TrelloApi.Application.Services;
 
 public abstract class BaseService
 {
     protected readonly IMapper _mapper;
-    protected readonly IBoardAuthorizationService _boardAuthorizationService;
+    protected readonly IUnitOfWork _unitOfWork;
     
-    protected BaseService(IMapper mapper, IBoardAuthorizationService boardAuthorizationService)
+    protected BaseService(IMapper mapper, IUnitOfWork unitOfWork)
     {
         _mapper = mapper;
-        _boardAuthorizationService = boardAuthorizationService;
+        _unitOfWork = unitOfWork;
     }
 }

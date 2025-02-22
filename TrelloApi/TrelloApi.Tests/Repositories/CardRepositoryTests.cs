@@ -4,6 +4,8 @@ using Moq;
 using TrelloApi.app;
 using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Persistence;
+using TrelloApi.Infrastructure.Persistence.Data;
+using TrelloApi.Infrastructure.Persistence.Repositories;
 
 namespace TrelloApi.Tests.Repositories;
 
