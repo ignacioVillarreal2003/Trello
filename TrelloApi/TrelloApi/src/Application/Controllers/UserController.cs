@@ -73,18 +73,13 @@ public class UserController : BaseController
         }
     }
     
-    [HttpPost("register-user")]
+    [HttpPost("register")]
     public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto registerUserDto)
     {
         try
         {
-            UserResponse? user = await _userService.RegisterUser(registerUserDto);
-            if (user == null)
-            {
-                _logger.LogError("Failed to register user {Email}", registerUserDto.Email);
-                return BadRequest(new { message = "Failed to register user." });
-            }
-
+            UserResponse user = await _userService.RegisterUser(registerUserDto);
+            
             string accessToken = _jwtService.GenerateAccessToken(user.Id);
             string refreshToken = _jwtService.GenerateRefreshToken();
             await _jwtService.SaveRefreshToken(user.Id, refreshToken);
@@ -99,7 +94,7 @@ public class UserController : BaseController
         }
     }
 
-    [HttpPost("login-user")]
+    [HttpPost("login")]
     [EnableRateLimiting("block")]
     public async Task<IActionResult> LoginUser([FromBody] LoginUserDto loginUserDto)
     {
@@ -118,6 +113,11 @@ public class UserController : BaseController
             
             _logger.LogInformation("User {UserId} login", user.Id);
             return Ok (new { accessToken, refreshToken, user });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Invalid user credentials for {Email}", loginUserDto.Email);
+            return Unauthorized(new { message = "Invalid user credentials." });
         }
         catch (Exception ex)
         {

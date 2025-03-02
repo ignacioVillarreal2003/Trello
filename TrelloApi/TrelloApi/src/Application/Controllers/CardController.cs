@@ -61,7 +61,7 @@ public class CardController: BaseController
     }
     
     [HttpGet("priorities")]
-    public Task<IActionResult> GetBoardColors()
+    public Task<IActionResult> GetPriorities()
     {
         try
         {
@@ -81,13 +81,7 @@ public class CardController: BaseController
     {
         try
         {
-            CardResponse? card = await _cardService.AddCard(listId, dto);
-            if (card == null)
-            {
-                _logger.LogError("Failed to add card to list {ListId}", listId);
-                return BadRequest(new { message = "Failed to add card." });
-            }
-            
+            CardResponse card = await _cardService.AddCard(listId, dto);
             _logger.LogInformation("Card added to list {ListId}", listId);
             return CreatedAtAction(nameof(GetCardById), new { cardId = card.Id }, card);
         }

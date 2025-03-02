@@ -47,7 +47,7 @@ public class CommentService: BaseService, ICommentService
     {
         try
         {
-            List<Comment> comments = (await _commentRepository.GetListAsync(c => c.Id.Equals(cardId))).ToList();
+            List<Comment> comments = (await _commentRepository.GetListAsync(c => c.CardId.Equals(cardId))).ToList();
             _logger.LogDebug("Retrieved {Count} comments for card {CardId}", comments.Count, cardId);
             return _mapper.Map<List<CommentResponse>>(comments);
         }
@@ -58,7 +58,7 @@ public class CommentService: BaseService, ICommentService
         }
     }
 
-    public async Task<CommentResponse?> AddComment(int cardId, AddCommentDto dto, int userId)
+    public async Task<CommentResponse> AddComment(int cardId, AddCommentDto dto, int userId)
     {
         try
         {

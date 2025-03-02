@@ -64,13 +64,7 @@ public class ListController: BaseController
     {
         try
         {
-            ListResponse? list = await _listService.AddList(boardId, dto);
-            if (list == null)
-            {
-                _logger.LogError("Failed to add list to board {BoardId}", boardId);
-                return BadRequest(new { message = "Failed to add list." });
-            }
-            
+            ListResponse list = await _listService.AddList(boardId, dto);
             _logger.LogInformation("List added to board {BoardId}", boardId);
             return CreatedAtAction(nameof(GetListById), new { listId = list.Id }, list);
         }

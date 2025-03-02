@@ -6,6 +6,6 @@ namespace TrelloApi.Application.Services.Interfaces;
 public interface IUserBoardService
 {
     Task<List<UserResponse>> GetUsersByBoardId(int boardId);
-    Task<UserBoardResponse?> AddUserToBoard(int boardId, AddUserBoardDto dto);
+    Task<UserBoardResponse> AddUserToBoard(int boardId, AddUserBoardDto dto);
     Task<Boolean> RemoveUserFromBoard(int boardId, int userId);
 }

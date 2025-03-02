@@ -38,7 +38,7 @@ public class CardLabelService: BaseService, ICardLabelService
         }
     }
 
-    public async Task<CardLabelResponse?> AddLabelToCard(int cardId, AddCardLabelDto dto)
+    public async Task<CardLabelResponse> AddLabelToCard(int cardId, AddCardLabelDto dto)
     {
         try
         {

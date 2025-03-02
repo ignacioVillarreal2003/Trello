@@ -1,0 +1,525 @@
+.btn {
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 10px 15px;
+  transition-duration: .15s;
+  transition-property: background-color, border-color, box-shadow, color;
+  transition-timing-function: ease-in;
+}
+
+.s-tiny {
+  font-size: .75rem;
+  line-height: 1rem;
+}
+
+.s-small {
+  font-size: .9rem;
+  line-height: 1.2rem;
+}
+
+.s-medium {
+  font-size: 1.1rem;
+  line-height: 1.4rem;
+}
+
+.s-large {
+  font-size: 1.4rem;
+  line-height: 1.5rem;
+}
+
+.r-small {
+  border-radius: 5px;
+}
+
+.r-medium {
+  border-radius: 10px;
+}
+
+.r-large {
+  border-radius: 15px;
+}
+
+.a-free {
+  width: 100%;
+}
+
+.appearance-solid {}
+
+.appearance-solid:focus {
+  position: relative;
+  outline: none;
+}
+
+.appearance-solid.blue {
+  background-color: var(--color-blue-500);
+  color: white;
+  border-color: var(--color-blue-500);
+}
+
+.appearance-solid.blue:hover {
+  background-color: var(--color-blue-400);
+}
+
+.appearance-solid.blue:focus {
+  box-shadow: 0 0 0 .375rem var(--color-blue-transparent-300)
+}
+
+.appearance-solid.grey {
+  background-color: var(--color-grey-500);
+  color: black;
+  border-color: var(--color-grey-500);
+}
+
+.appearance-solid.grey:hover {
+  background-color: var(--color-grey-400);
+}
+
+.appearance-solid.grey:focus {
+  box-shadow: 0 0 0 .375rem var(--color-grey-transparent-300)
+}
+
+.appearance-solid.green {
+  background-color: var(--color-green-500);
+  color: white;
+  border-color: var(--color-green-500);
+}
+
+.appearance-solid.green:hover {
+  background-color: var(--color-green-400);
+}
+
+.appearance-solid.green:focus {
+  box-shadow: 0 0 0 .375rem var(--color-green-transparent-300)
+}
+
+.appearance-solid.skyblue {
+  background-color: var(--color-skyblue-500);
+  color: white;
+  border-color: var(--color-skyblue-500);
+}
+
+.appearance-solid.skyblue:hover {
+  background-color: var(--color-skyblue-400);
+}
+
+.appearance-solid.skyblue:focus {
+  box-shadow: 0 0 0 .375rem var(--color-skyblue-transparent-300)
+}
+
+.appearance-solid.red {
+  background-color: var(--color-red-500);
+  color: white;
+  border-color: var(--color-red-500);
+}
+
+.appearance-solid.red:hover {
+  background-color: var(--color-red-400);
+}
+
+.appearance-solid.red:focus {
+  box-shadow: 0 0 0 .375rem var(--color-red-transparent-300)
+}
+
+.appearance-solid.yellow {
+  background-color: var(--color-yellow-500);
+  color: white;
+  border-color: var(--color-yellow-500);
+}
+
+.appearance-solid.yellow:hover {
+  background-color: var(--color-yellow-400);
+}
+
+.appearance-solid.yellow:focus {
+  box-shadow: 0 0 0 .375rem var(--color-yellow-transparent-300)
+}
+
+.appearance-solid.orange {
+  background-color: var(--color-orange-500);
+  color: white;
+  border-color: var(--color-orange-500);
+}
+
+.appearance-solid.orange:hover {
+  background-color: var(--color-orange-400);
+}
+
+.appearance-solid.orange:focus {
+  box-shadow: 0 0 0 .375rem var(--color-orange-transparent-300)
+}
+
+/* OUTLINE */
+.appearance-outline {
+  border-style: solid;
+  border-width: .0625rem;
+}
+
+.appearance-outline.blue {
+  background-color: var(--color-blue-200);
+  border-color: var(--color-blue-500);
+  color: var(--color-blue-500);
+}
+
+.appearance-outline.blue:hover {
+  background-color: var(--color-blue-transparent-200);
+}
+
+.appearance-outline.blue:focus {
+  box-shadow: 0 0 0 .375rem var(--color-blue-transparent-300)
+}
+
+.appearance-outline.grey {
+  background-color: var(--color-grey-200);
+  border-color: var(--color-grey-500);
+  color: var(--color-grey-500);
+}
+
+.appearance-outline.grey:hover {
+  background-color: var(--color-grey-transparent-200);
+}
+
+.appearance-outline.grey:focus {
+  box-shadow: 0 0 0 .375rem var(--color-grey-transparent-300)
+}
+
+.appearance-outline.green {
+  background-color: var(--color-green-200);
+  border-color: var(--color-green-500);
+  color: var(--color-green-500);
+}
+
+.appearance-outline.green:hover {
+  background-color: var(--color-green-transparent-200);
+}
+
+.appearance-outline.green:focus {
+  box-shadow: 0 0 0 .375rem var(--color-green-transparent-300)
+}
+
+.appearance-outline.skyblue {
+  background-color: var(--color-skyblue-200);
+  border-color: var(--color-skyblue-500);
+  color: var(--color-skyblue-500);
+}
+
+.appearance-outline.skyblue:hover {
+  background-color: var(--color-skyblue-transparent-200);
+}
+
+.appearance-outline.skyblue:focus {
+  box-shadow: 0 0 0 .375rem var(--color-skyblue-transparent-300)
+}
+
+.appearance-outline.red {
+  background-color: var(--color-red-200);
+  border-color: var(--color-red-500);
+  color: var(--color-red-500);
+}
+
+.appearance-outline.red:hover {
+  background-color: var(--color-red-transparent-200);
+}
+
+.appearance-outline.red:focus {
+  box-shadow: 0 0 0 .375rem var(--color-red-transparent-300)
+}
+
+.appearance-outline.yellow {
+  background-color: var(--color-yellow-200);
+  border-color: var(--color-yellow-500);
+  color: var(--color-yellow-500);
+}
+
+.appearance-outline.yellow:hover {
+  background-color: var(--color-yellow-transparent-200);
+}
+
+.appearance-outline.yellow:focus {
+  box-shadow: 0 0 0 .375rem var(--color-yellow-transparent-300)
+}
+
+.appearance-outline.orange {
+  background-color: var(--color-orange-200);
+  border-color: var(--color-orange-500);
+  color: var(--color-orange-500);
+}
+
+.appearance-outline.orange:hover {
+  background-color: var(--color-orange-transparent-200);
+}
+
+.appearance-outline.orange:focus {
+  box-shadow: 0 0 0 .375rem var(--color-orange-transparent-300)
+}
+
+/* LIGHT */
+.appearance-light {}
+
+.appearance-light.blue {
+  color: var(--color-blue-500);
+}
+
+.appearance-light.blue:hover {
+  background-color: var(--color-blue-transparent-200);
+}
+
+.appearance-light.grey {
+  color: var(--color-grey-500);
+}
+
+.appearance-light.grey:hover {
+  background-color: var(--color-grey-transparent-400);
+}
+
+.appearance-light.green {
+  color: var(--color-green-500);
+}
+
+.appearance-light.green:hover {
+  background-color: var(--color-green-transparent-400);
+}
+
+.appearance-light.skyblue {
+  color: var(--color-skyblue-500);
+}
+
+.appearance-light.skyblue:hover {
+  background-color: var(--color-skyblue-transparent-400);
+}
+
+.appearance-light.red {
+  color: var(--color-red-500);
+}
+
+.appearance-light.red:hover {
+  background-color: var(--color-red-transparent-400);
+}
+
+.appearance-light.yellow {
+  color: var(--color-yellow-500);
+}
+
+.appearance-light.yellow:hover {
+  background-color: var(--color-yellow-transparent-400);
+}
+
+.appearance-light.orange {
+  color: var(--color-orange-500);
+}
+
+.appearance-light.orange:hover {
+  background-color: var(--color-orange-transparent-400);
+}
+
+/* BORDERED */
+.appearance-bordered {
+  border-style: solid;
+  border-width: 2px;
+}
+
+.appearance-bordered:hover {
+  opacity: 0.8;
+}
+
+.appearance-bordered.blue {
+  color: var(--color-blue-500);
+  border-color: var(--color-blue-600);
+}
+
+.appearance-bordered.grey {
+  color: var(--color-grey-500);
+  border-color: var(--color-grey-600);
+}
+
+.appearance-bordered.green {
+  color: var(--color-green-500);
+  border-color: var(--color-green-600);
+}
+
+.appearance-bordered.skyblue {
+  color: var(--color-skyblue-500);
+  border-color: var(--color-skyblue-600);
+}
+
+.appearance-bordered.red {
+  color: var(--color-red-500);
+  border-color: var(--color-red-600);
+}
+
+.appearance-bordered.yellow {
+  color: var(--color-yellow-500);
+  border-color: var(--color-yellow-600);
+}
+
+.appearance-bordered.orange {
+  color: var(--color-orange-500);
+  border-color: var(--color-orange-600);
+}
+
+/* FLAT */
+.appearance-flat {}
+
+.appearance-flat:hover {
+  opacity: 0.8;
+}
+
+.appearance-flat.blue {
+  color: var(--color-blue-500);
+  background-color: var(--color-blue-transparent-400);
+}
+
+.appearance-flat.grey {
+  color: var(--color-grey-500);
+  background-color: var(--color-grey-transparent-400);
+}
+
+.appearance-flat.green {
+  color: var(--color-green-500);
+  background-color: var(--color-green-transparent-400);
+}
+
+.appearance-flat.skyblue {
+  color: var(--color-skyblue-500);
+  background-color: var(--color-skyblue-transparent-400);
+}
+
+.appearance-flat.red {
+  color: var(--color-red-500);
+  background-color: var(--color-red-transparent-400);
+}
+
+.appearance-flat.yellow {
+  color: var(--color-yellow-500);
+  background-color: var(--color-yellow-transparent-400);
+}
+
+.appearance-flat.orange {
+  color: var(--color-orange-500);
+  background-color: var(--color-orange-transparent-400);
+}
+
+/* GHOST */
+.appearance-ghost {
+  border-style: solid;
+  border-width: 2px;
+}
+
+.appearance-ghost.blue {
+  color: var(--color-blue-500);
+  border-color: var(--color-blue-600);
+}
+
+.appearance-ghost.blue:hover {
+  color: white;
+  background-color: var(--color-blue-600);
+}
+
+.appearance-ghost.grey {
+  color: var(--color-grey-500);
+  border-color: var(--color-grey-600);
+}
+
+.appearance-ghost.grey:hover {
+  color: white;
+  background-color: var(--color-grey-600);
+}
+
+.appearance-ghost.green {
+  color: var(--color-green-500);
+  border-color: var(--color-green-600);
+}
+
+.appearance-ghost.green:hover {
+  color: white;
+  background-color: var(--color-green-600);
+}
+
+.appearance-ghost.skyblue {
+  color: var(--color-skyblue-500);
+  border-color: var(--color-skyblue-600);
+}
+
+.appearance-ghost.skyblue:hover {
+  color: white;
+  background-color: var(--color-skyblue-600);
+}
+
+.appearance-ghost.red {
+  color: var(--color-red-500);
+  border-color: var(--color-red-600);
+}
+
+.appearance-ghost.red:hover {
+  color: white;
+  background-color: var(--color-red-600);
+}
+
+.appearance-ghost.yellow {
+  color: var(--color-yellow-500);
+  border-color: var(--color-yellow-600);
+}
+
+.appearance-ghost.yellow:hover {
+  color: white;
+  background-color: var(--color-yellow-600);
+}
+
+.appearance-ghost.orange {
+  color: var(--color-orange-500);
+  border-color: var(--color-orange-600);
+}
+
+.appearance-ghost.orange:hover {
+  color: white;
+  background-color: var(--color-orange-600);
+}
+
+/* SHADOW */
+.appearance-shadow {}
+
+.appearance-shadow:hover {
+  opacity: 0.9;
+}
+
+.appearance-shadow.blue {
+  color: white;
+  background-color: var(--color-blue-500);
+  box-shadow: 0 10px 15px -3px var(--color-blue-300), 0 4px 6px -4px var(--color-blue-300);
+}
+
+.appearance-shadow.grey {
+  color: white;
+  background-color: var(--color-grey-500);
+  box-shadow: 0 10px 15px -3px var(--color-grey-300), 0 4px 6px -4px var(--color-grey-300);
+}
+
+.appearance-shadow.green {
+  color: white;
+  background-color: var(--color-green-500);
+  box-shadow: 0 10px 15px -3px var(--color-green-300), 0 4px 6px -4px var(--color-green-300);
+}
+
+.appearance-shadow.skyblue {
+  color: white;
+  background-color: var(--color-skyblue-500);
+  box-shadow: 0 10px 15px -3px var(--color-skyblue-300), 0 4px 6px -4px var(--color-skyblue-300);
+}
+
+.appearance-shadow.red {
+  color: white;
+  background-color: var(--color-red-500);
+  box-shadow: 0 10px 15px -3px var(--color-red-300), 0 4px 6px -4px var(--color-red-300);
+}
+
+.appearance-shadow.yellow {
+  color: white;
+  background-color: var(--color-yellow-500);
+  box-shadow: 0 10px 15px -3px var(--color-yellow-300), 0 4px 6px -4px var(--color-yellow-300);
+}
+
+.appearance-shadow.orange {
+  color: white;
+  background-color: var(--color-orange-500);
+  box-shadow: 0 10px 15px -3px var(--color-orange-300), 0 4px 6px -4px var(--color-orange-300);
+}

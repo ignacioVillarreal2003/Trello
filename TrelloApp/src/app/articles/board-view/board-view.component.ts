@@ -1,35 +1,25 @@
 import {Component, ElementRef, ViewChild} from '@angular/core';
 import { HeaderComponent } from '../header/header.component';
 import { NgForOf, NgIf, NgStyle } from '@angular/common';
-import { TaskViewComponent } from '../task-view/task-view.component';
 import { BoardMenuComponent } from '../board-menu/board-menu.component';
-import { OptionsBtnComponent } from '../../shared/buttons/options-btn/options-btn.component';
-import { CloseBtnComponent } from '../../shared/buttons/close-btn/close-btn.component';
-import { CreateTaskModalComponent } from '../modals/create-task-modal/create-task-modal.component';
 import { List } from '../../core/models/list';
 import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ListHttpService } from '../../core/services/http/list-http.service';
 import { AlertService } from '../../core/services/alert.service';
-import { CreateListModalComponent } from '../modals/create-list-modal/create-list-modal.component';
 import { CommunicationService } from '../../core/services/communication.service';
 import { CdkDragMove, DragDropModule, CdkDragDrop, moveItemInArray, transferArrayItem, CdkDropListGroup} from '@angular/cdk/drag-drop';
+import {BtnMenuComponent} from '../../shared/btn-menu/btn-menu.component';
 
 @Component({
   selector: 'app-board-view',
   imports: [
     HeaderComponent,
-    NgStyle,
-    NgIf,
-    TaskViewComponent,
     BoardMenuComponent,
-    OptionsBtnComponent,
-    CloseBtnComponent,
-    CreateTaskModalComponent,
     NgForOf,
-    CreateListModalComponent,
     DragDropModule,
     CdkDropListGroup,
+    BtnMenuComponent,
   ],
   templateUrl: './board-view.component.html',
   standalone: true,
@@ -41,7 +31,6 @@ export class BoardViewComponent {
   isOpenCreateTask: boolean = false;
   listId: number | undefined = undefined;
   isOpenTaskView: boolean = false;
-  isOpenBoardMenu: boolean = false;
   lists: List[] = [
     {
       title: "Lista 1",
@@ -157,8 +146,10 @@ export class BoardViewComponent {
     }
   }
 
-  switchBoardMenu(): void {
-    this.isOpenBoardMenu = !this.isOpenBoardMenu;
+  isOpenBoardMenu: boolean = false;
+
+  toggleBoardMenu(): void {
+    this.isOpenBoardMenu = true;
   }
 
   addList() {

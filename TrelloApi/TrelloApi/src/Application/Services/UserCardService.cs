@@ -38,7 +38,7 @@ public class UserCardService: BaseService, IUserCardService
         }
     }
 
-    public async Task<UserCardResponse?> AddUserToCard(int cardId, AddUserCardDto dto)
+    public async Task<UserCardResponse> AddUserToCard(int cardId, AddUserCardDto dto)
     {
         try
         {

@@ -1,14 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.DTOs;
-using Xunit;
+using TrelloApi.Domain.DTOs.List;
 
 namespace TrelloApi.Tests.Controllers
 {
@@ -28,212 +25,184 @@ namespace TrelloApi.Tests.Controllers
         
         private void SetUserId(int userId)
         {
-            var httpContext = new DefaultHttpContext();
-            httpContext.Items["UserId"] = userId;
+            var claims = new List<Claim>
+            {
+                new Claim("UserId", userId.ToString())
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+    
+            var httpContext = new DefaultHttpContext { User = principal };
             _controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
         }
         
         [Fact]
-        public async Task GetListById_ReturnsOk_WhenListFound()
+        public async Task GetListById_ShouldReturnsOk_WhenListFound()
         {
-            int userId = 1;
-            int listId = 1;
-            var outputList = new OutputListDetailsDto
+            const int listId = 1;
+            var response = new ListResponse
             {
                 Id = listId,
-                Title = "List 1",
+                Title = "title",
                 Position = 1,
                 BoardId = 1,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = null
             };
 
-            _mockListService.Setup(s => s.GetListById(listId, userId))
-                            .ReturnsAsync(outputList);
+            _mockListService.Setup(s => s.GetListById(listId)).ReturnsAsync(response);
 
             var result = await _controller.GetListById(listId);
             var okResult = Assert.IsType<OkObjectResult>(result);
+            
             Assert.Equal(200, okResult.StatusCode);
-
-            var returnedList = Assert.IsType<OutputListDetailsDto>(okResult.Value);
-            Assert.Equal(outputList.Id, returnedList.Id);
-            Assert.Equal(outputList.Title, returnedList.Title);
-            Assert.Equal(outputList.Position, returnedList.Position);
-            Assert.Equal(outputList.BoardId, returnedList.BoardId);
         }
         
         [Fact]
-        public async Task GetListById_ReturnsNotFound_WhenListNotFound()
+        public async Task GetListById_ShouldReturnsNotFound_WhenListNotFound()
         {
-            int userId = 1;
-            int listId = 1;
-            OutputListDetailsDto? outputList = null;
+            const int listId = 1;
             
-            _mockListService.Setup(s => s.GetListById(listId, userId))
-                            .ReturnsAsync(outputList);
+            _mockListService.Setup(s => s.GetListById(listId)).ReturnsAsync((ListResponse?)null);
 
             var result = await _controller.GetListById(listId);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            
             Assert.Equal(404, notFoundResult.StatusCode);
         }
         
         [Fact]
-        public async Task GetListsByBoardId_ReturnsOk_WithLists()
+        public async Task GetListsByBoardId_ShouldReturnsOk_WhenListsFound()
         {
-            int userId = 1;
-            int boardId = 1;
-            var lists = new List<OutputListDetailsDto>
+            const int boardId = 1;
+            var response = new List<ListResponse>
             {
-                new OutputListDetailsDto { Id = 1, Title = "List 1", Position = 1, BoardId = boardId, CreatedAt = DateTime.UtcNow },
-                new OutputListDetailsDto { Id = 2, Title = "List 2", Position = 2, BoardId = boardId, CreatedAt = DateTime.UtcNow }
+                new ListResponse { Id = 1, Title = "title 1", Position = 1, BoardId = boardId, CreatedAt = DateTime.UtcNow },
+                new ListResponse { Id = 2, Title = "title 2", Position = 2, BoardId = boardId, CreatedAt = DateTime.UtcNow }
             };
 
-            _mockListService.Setup(s => s.GetListsByBoardId(boardId, userId))
-                            .ReturnsAsync(lists);
+            _mockListService.Setup(s => s.GetListsByBoardId(boardId)).ReturnsAsync(response);
 
             var result = await _controller.GetListsByBoardId(boardId);
             var okResult = Assert.IsType<OkObjectResult>(result);
+            var value = Assert.IsType<List<ListResponse>>(okResult.Value);
+            
             Assert.Equal(200, okResult.StatusCode);
-
-            var returnedLists = Assert.IsType<List<OutputListDetailsDto>>(okResult.Value);
-            Assert.Equal(lists.Count, returnedLists.Count);
+            Assert.Equal(response.Count, value.Count);
         }
         
         [Fact]
-        public async Task GetListsByBoardId_ReturnsOk_WithEmptyList()
+        public async Task GetListsByBoardId_ShouldReturnsOk_WhenListsNotFound()
         {
-            int userId = 1;
-            int boardId = 1;
-            var lists = new List<OutputListDetailsDto>();
+            const int boardId = 1;
 
-            _mockListService.Setup(s => s.GetListsByBoardId(boardId, userId))
-                            .ReturnsAsync(lists);
+            _mockListService.Setup(s => s.GetListsByBoardId(boardId)).ReturnsAsync([]);
 
             var result = await _controller.GetListsByBoardId(boardId);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            Assert.Equal(200, okResult.StatusCode);
+            var value = Assert.IsType<List<ListResponse>>(okResult.Value);
 
-            var returnedLists = Assert.IsType<List<OutputListDetailsDto>>(okResult.Value);
-            Assert.Empty(returnedLists);
+            Assert.Equal(200, okResult.StatusCode);
+            Assert.Empty(value);
         }
         
         [Fact]
-        public async Task AddList_ReturnsCreated_WhenListIsAdded()
+        public async Task AddList_ShouldReturnsCreated_WhenAddedSuccessful()
         {
-            int userId = 1;
-            int boardId = 1;
-            var addListDto = new AddListDto { Title = "List 1", Position = 1 };
-            var outputList = new OutputListDetailsDto
+            const int boardId = 1;
+            var dto = new AddListDto { Title = "title", Position = 1 };
+            var response = new ListResponse
             {
                 Id = 1,
-                Title = "List 1",
-                Position = 1,
+                Title = dto.Title,
+                Position = dto.Position,
                 BoardId = boardId,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = null
             };
 
-            _mockListService.Setup(s => s.AddList(boardId, addListDto, userId))
-                            .ReturnsAsync(outputList);
+            _mockListService.Setup(s => s.AddList(boardId, dto)).ReturnsAsync(response);
 
-            var result = await _controller.AddList(boardId, addListDto);
+            var result = await _controller.AddList(boardId, dto);
             var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+            
             Assert.Equal(201, createdResult.StatusCode);
-
-            var returnedList = Assert.IsType<OutputListDetailsDto>(createdResult.Value);
-            Assert.Equal(outputList.Id, returnedList.Id);
-            Assert.Equal(outputList.Title, returnedList.Title);
-            Assert.Equal(outputList.Position, returnedList.Position);
-            Assert.Equal(outputList.BoardId, returnedList.BoardId);
         }
         
         [Fact]
-        public async Task AddList_ReturnsBadRequest_WhenListNotAdded()
+        public async Task AddList_ShouldReturnsBadRequest_WhenAddedUnsuccessful()
         {
-            int userId = 1;
-            int boardId = 1;
-            var addListDto = new AddListDto { Title = "List 1", Position = 1 };
-            OutputListDetailsDto? outputList = null;
+            const int boardId = 1;
+            var dto = new AddListDto { Title = "title", Position = 1 };
             
-            _mockListService.Setup(s => s.AddList(boardId, addListDto, userId))
-                            .ReturnsAsync(outputList);
+            _mockListService.Setup(s => s.AddList(boardId, dto)).ReturnsAsync((ListResponse?)null);
 
-            var result = await _controller.AddList(boardId, addListDto);
+            var result = await _controller.AddList(boardId, dto);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            
             Assert.Equal(400, badRequestResult.StatusCode);
         }
         
         [Fact]
-        public async Task UpdateList_ReturnsOk_WhenListIsUpdated()
+        public async Task UpdateList_ShouldReturnsOk_WhenUpdatedSuccessful()
         {
-            int userId = 1;
-            int listId = 1;
-            var updateListDto = new UpdateListDto { Title = "Updated List", Position = 2 };
-            var outputList = new OutputListDetailsDto
+            const int listId = 1;
+            var dto = new UpdateListDto { Title = "updated title" };
+            var response = new ListResponse
             {
                 Id = listId,
-                Title = "Updated List",
-                Position = 2,
+                Title = dto.Title,
+                Position = 1,
                 BoardId = 1,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
 
-            _mockListService.Setup(s => s.UpdateList(listId, updateListDto, userId))
-                            .ReturnsAsync(outputList);
+            _mockListService.Setup(s => s.UpdateList(listId, dto)).ReturnsAsync(response);
 
-            var result = await _controller.UpdateList(listId, updateListDto);
+            var result = await _controller.UpdateList(listId, dto);
             var okResult = Assert.IsType<OkObjectResult>(result);
+            
             Assert.Equal(200, okResult.StatusCode);
-
-            var returnedList = Assert.IsType<OutputListDetailsDto>(okResult.Value);
-            Assert.Equal(outputList.Id, returnedList.Id);
-            Assert.Equal(outputList.Title, returnedList.Title);
-            Assert.Equal(outputList.Position, returnedList.Position);
-            Assert.Equal(outputList.BoardId, returnedList.BoardId);
         }
         
         [Fact]
-        public async Task UpdateList_ReturnsNotFound_WhenListNotFound()
+        public async Task UpdateList_ShouldReturnsNotFound_WhenUpdatedUnsuccessful()
         {
-            int userId = 1;
-            int listId = 1;
-            var updateListDto = new UpdateListDto { Title = "Updated List", Position = 2 };
-            OutputListDetailsDto? outputList = null;
+            const int listId = 1;
+            var dto = new UpdateListDto { Title = "updated title" };
             
-            _mockListService.Setup(s => s.UpdateList(listId, updateListDto, userId))
-                            .ReturnsAsync(outputList);
+            _mockListService.Setup(s => s.UpdateList(listId, dto)).ReturnsAsync((ListResponse?)null);
 
-            var result = await _controller.UpdateList(listId, updateListDto);
+            var result = await _controller.UpdateList(listId, dto);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            
             Assert.Equal(404, notFoundResult.StatusCode);
         }
         
         [Fact]
-        public async Task DeleteList_ReturnsNoContent_WhenDeletionIsSuccessful()
+        public async Task DeleteList_ShouldReturnsNoContent_WhenDeletedSuccessful()
         {
-            int userId = 1;
-            int listId = 1;
+            const int listId = 1;
             
-            _mockListService.Setup(s => s.DeleteList(listId, userId))
-                            .ReturnsAsync(true);
+            _mockListService.Setup(s => s.DeleteList(listId)).ReturnsAsync(true);
 
             var result = await _controller.DeleteList(listId);
             var noContentResult = Assert.IsType<NoContentResult>(result);
+            
             Assert.Equal(204, noContentResult.StatusCode);
         }
         
         [Fact]
-        public async Task DeleteList_ReturnsNotFound_WhenDeletionFails()
+        public async Task DeleteList_ShouldReturnsNotFound_WhenDeletedUnsuccessful()
         {
-            int userId = 1;
-            int listId = 1;
+            const int listId = 1;
             
-            _mockListService.Setup(s => s.DeleteList(listId, userId))
-                            .ReturnsAsync(false);
+            _mockListService.Setup(s => s.DeleteList(listId)).ReturnsAsync(false);
 
             var result = await _controller.DeleteList(listId);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            
             Assert.Equal(404, notFoundResult.StatusCode);
         }
     }

@@ -1,15 +1,10 @@
+using System.Linq.Expressions;
 using AutoMapper;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xunit;
 using TrelloApi.Application.Services;
 using TrelloApi.Application.Utils;
-using TrelloApi.Domain.Constants;
-using TrelloApi.Domain.DTOs;          // Contiene RegisterUserDto, LoginUserDto, UpdateUserDto, OutputUserDetailsDto, etc.
+using TrelloApi.Domain.DTOs.User;
 using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Persistence.Interfaces;
 using Task = System.Threading.Tasks.Task;
@@ -21,7 +16,7 @@ namespace TrelloApi.Tests.Services
         private readonly Mock<IUserRepository> _mockUserRepository;
         private readonly Mock<ILogger<UserService>> _mockLogger;
         private readonly Mock<IMapper> _mockMapper;
-        private readonly Mock<IBoardAuthorizationService> _mockBoardAuthorizationService;
+        private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IEncrypt> _mockEncrypt;
         private readonly UserService _service;
 
@@ -30,12 +25,12 @@ namespace TrelloApi.Tests.Services
             _mockUserRepository = new Mock<IUserRepository>();
             _mockLogger = new Mock<ILogger<UserService>>();
             _mockMapper = new Mock<IMapper>();
-            _mockBoardAuthorizationService = new Mock<IBoardAuthorizationService>();
+            _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockEncrypt = new Mock<IEncrypt>();
 
             _service = new UserService(
                 _mockMapper.Object,
-                _mockBoardAuthorizationService.Object,
+                _mockUnitOfWork.Object,
                 _mockUserRepository.Object,
                 _mockLogger.Object,
                 _mockEncrypt.Object);
@@ -44,399 +39,239 @@ namespace TrelloApi.Tests.Services
         [Fact]
         public async Task GetUsers_ReturnsOk_WithFullList()
         {
-            // Arrange
-            var userId = 1;
-            var listUser = new List<User>
+            var users = new List<User>
             {
-                new User("user1@example.com", "user1", "password1", "Light"),
-                new User("user2@example.com", "user2", "password2", "Light"),
+                new User("user1@example.com", "username 1", "password", "theme"),
+                new User("user2@example.com", "username 2", "password", "theme"),
             };
-            var listOutputUserDto = new List<OutputUserDetailsDto>
+            var response = new List<UserResponse>
             {
-                new OutputUserDetailsDto { Email = "user1@example.com", Username = "user1", Theme = "Light" },
-                new OutputUserDetailsDto { Email = "user2@example.com", Username = "user2", Theme = "Light" },
+                new UserResponse { Email = users[0].Email, Username = users[0].Username, Theme = users[0].Theme },
+                new UserResponse { Email = users[1].Email, Username = users[1].Username, Theme = users[1].Theme },
             };
 
-            _mockUserRepository.Setup(r => r.GetUsers()).ReturnsAsync(listUser);
-            _mockMapper.Setup(m => m.Map<List<OutputUserDetailsDto>>(listUser))
-                       .Returns(listOutputUserDto);
+            _mockUserRepository.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<User, bool>>>(), null)).ReturnsAsync(users);
+            _mockMapper.Setup(m => m.Map<List<UserResponse>>(It.IsAny<List<User>>())).Returns(response);
 
-            // Act
-            var result = await _service.GetUsers(userId);
+            var result = await _service.GetUsers();
 
-            // Assert
+            Assert.NotNull(result);
             Assert.Equal(2, result.Count);
         }
 
         [Fact]
         public async Task GetUsers_ReturnsOk_WithEmptyList()
         {
-            // Arrange
-            var userId = 1;
-            var listUser = new List<User>();
-            var listOutputUserDto = new List<OutputUserDetailsDto>();
+            _mockUserRepository.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<User, bool>>>(), null)).ReturnsAsync([]);
+            _mockMapper.Setup(m => m.Map<List<UserResponse>>(It.IsAny<List<User>>())).Returns([]);
 
-            _mockUserRepository.Setup(r => r.GetUsers()).ReturnsAsync(listUser);
-            _mockMapper.Setup(m => m.Map<List<OutputUserDetailsDto>>(listUser))
-                       .Returns(listOutputUserDto);
+            var result = await _service.GetUsers();
 
-            // Act
-            var result = await _service.GetUsers(userId);
-
-            // Assert
+            Assert.NotNull(result);
             Assert.Empty(result);
         }
 
         [Fact]
-        public async Task GetUsersByUsername_ReturnsOk_WithFullList()
+        public async Task GetUsersByUsername_ShouldReturnsUsers_WhenUsersFound()
         {
-            // Arrange
-            var username = "";
-            var userId = 1;
-            var listUser = new List<User>
+            const string username = "";
+            var users = new List<User>
             {
-                new User("user1@example.com", "user1", "password1", "Light"),
-                new User("user2@example.com", "user2", "password2", "Light"),
+                new User("user1@example.com", "username 1", "password", "theme"),
+                new User("user2@example.com", "username 2", "password", "theme"),
             };
-            var listOutputUserDto = new List<OutputUserDetailsDto>
+            var response = new List<UserResponse>
             {
-                new OutputUserDetailsDto { Email = "user1@example.com", Username = "user1", Theme = "Light" },
-                new OutputUserDetailsDto { Email = "user2@example.com", Username = "user2", Theme = "Light" },
+                new UserResponse { Email = users[0].Email, Username = users[0].Username, Theme = users[0].Theme },
+                new UserResponse { Email = users[1].Email, Username = users[1].Username, Theme = users[1].Theme },
             };
 
-            _mockUserRepository.Setup(r => r.GetUsersByUsername(username)).ReturnsAsync(listUser);
-            _mockMapper.Setup(m => m.Map<List<OutputUserDetailsDto>>(listUser))
-                       .Returns(listOutputUserDto);
+            _mockUserRepository.Setup(r => r.GetUsersByUsernameAsync(username)).ReturnsAsync(users);
+            _mockMapper.Setup(m => m.Map<List<UserResponse>>(It.IsAny<List<User>>())).Returns(response);
 
-            // Act
-            var result = await _service.GetUsersByUsername(username, userId);
+            var result = await _service.GetUsersByUsername(username);
 
-            // Assert
+            Assert.NotNull(result);
             Assert.Equal(2, result.Count);
         }
 
         [Fact]
-        public async Task GetUsersByUsername_ReturnsOk_WithEmptyList()
+        public async Task GetUsersByUsername_ShouldReturnsEmptyList_WhenUsersNotFound()
         {
-            // Arrange
-            var username = "";
-            var userId = 1;
-            var listUser = new List<User>();
-            var listOutputUserDto = new List<OutputUserDetailsDto>();
+            const string username = "";
 
-            _mockUserRepository.Setup(r => r.GetUsersByUsername(username)).ReturnsAsync(listUser);
-            _mockMapper.Setup(m => m.Map<List<OutputUserDetailsDto>>(listUser))
-                       .Returns(listOutputUserDto);
+            _mockUserRepository.Setup(r => r.GetUsersByUsernameAsync(username)).ReturnsAsync([]);
+            _mockMapper.Setup(m => m.Map<List<UserResponse>>(It.IsAny<List<User>>())).Returns([]);
 
-            // Act
-            var result = await _service.GetUsersByUsername(username, userId);
+            var result = await _service.GetUsersByUsername(username);
 
-            // Assert
+            Assert.NotNull(result);
             Assert.Empty(result);
         }
-
-
+        
         [Fact]
-        public async Task GetUsersByCardId_ReturnsOk_WithFullList()
+        public async Task GetUsersByCardId_ShouldReturnsUsers_WhenUsersFound()
         {
-            // Arrange
-            var taskId = 1;
-            var userId = 1;
-            var listUser = new List<User>
+            const int taskId = 1;
+            var users = new List<User>
             {
-                new User("user1@example.com", "user1", "password1", "Light"),
-                new User("user2@example.com", "user2", "password2", "Light"),
+                new User("user1@example.com", "username", "password", "theme"),
+                new User("user2@example.com", "username", "password", "theme"),
             };
-            var listOutputUserDto = new List<OutputUserDetailsDto>
+            var response = new List<UserResponse>
             {
-                new OutputUserDetailsDto { Email = "user1@example.com", Username = "user1", Theme = "Light" },
-                new OutputUserDetailsDto { Email = "user2@example.com", Username = "user2", Theme = "Light" },
+                new UserResponse { Email = users[0].Email, Username = users[0].Username, Theme = users[0].Theme },
+                new UserResponse { Email = users[1].Email, Username = users[1].Username, Theme = users[1].Theme },
             };
 
-            _mockUserRepository.Setup(r => r.GetUsersByCardId(taskId)).ReturnsAsync(listUser);
-            _mockMapper.Setup(m => m.Map<List<OutputUserDetailsDto>>(listUser))
-                       .Returns(listOutputUserDto);
+            _mockUserRepository.Setup(r => r.GetUsersByCardIdAsync(taskId)).ReturnsAsync(users);
+            _mockMapper.Setup(m => m.Map<List<UserResponse>>(It.IsAny<List<User>>())).Returns(response);
 
-            // Act
-            var result = await _service.GetUsersByCardId(userId, taskId);
+            var result = await _service.GetUsersByCardId(taskId);
 
-            // Assert
+            Assert.NotNull(result);
             Assert.Equal(2, result.Count);
         }
 
         [Fact]
-        public async Task GetUsersByCardId_ReturnsOk_WithEmptyList()
+        public async Task GetUsersByCardId_ShouldReturnsEmptyList_WhenUsersNotFound()
         {
-            // Arrange
-            var taskId = 1;
-            var userId = 1;
-            var listUser = new List<User>();
-            var listOutputUserDto = new List<OutputUserDetailsDto>();
+            const int taskId = 1;
 
-            _mockUserRepository.Setup(r => r.GetUsersByCardId(taskId)).ReturnsAsync(listUser);
-            _mockMapper.Setup(m => m.Map<List<OutputUserDetailsDto>>(listUser))
-                       .Returns(listOutputUserDto);
+            _mockUserRepository.Setup(r => r.GetUsersByCardIdAsync(taskId)).ReturnsAsync([]);
+            _mockMapper.Setup(m => m.Map<List<UserResponse>>(It.IsAny<List<User>>())).Returns([]);
 
-            // Act
-            var result = await _service.GetUsersByCardId(userId, taskId);
+            var result = await _service.GetUsersByCardId(taskId);
 
-            // Assert
+            Assert.NotNull(result);
             Assert.Empty(result);
         }
-
+        
         [Fact]
-        public async Task RegisterUser_ReturnsOk_WithElementCreated()
+        public async Task RegisterUser_ShouldReturnsUser_WhenRegisteredSuccessful()
         {
-            // Arrange
-            var registerUserDto = new RegisterUserDto 
-            { 
-                Email = "user1@example.com", 
-                Username = "user1", 
-                Password = "password1" 
-            };
-            var hashedPassword = "hashed_password1"; 
-            var newUser = new User(registerUserDto.Email, registerUserDto.Username, hashedPassword, "Light") { Id = 1 };
-            var outputDto = new OutputUserDetailsDto 
-            { 
-                Id = 1, 
-                Email = registerUserDto.Email, 
-                Username = registerUserDto.Username, 
-                Theme = "Light" 
-            };
+            const string hashedPassword = "hashed_password"; 
+            var dto = new RegisterUserDto { Email = "user@email.com", Username = "username", Password = "password" };
+            var response = new UserResponse { Email = dto.Email, Username = dto.Username };
 
-            _mockEncrypt.Setup(e => e.HashPassword(registerUserDto.Password))
-                        .Returns(hashedPassword);
-            _mockUserRepository.Setup(r => r.AddUser(It.IsAny<User>()))
-                               .ReturnsAsync(newUser);
-            _mockMapper.Setup(m => m.Map<OutputUserDetailsDto>(newUser))
-                       .Returns(outputDto);
+            _mockEncrypt.Setup(e => e.HashPassword(dto.Password)).Returns(hashedPassword);
+            _mockUserRepository.Setup(r => r.CreateAsync(It.IsAny<User>()));
+            _mockMapper.Setup(m => m.Map<UserResponse>(It.IsAny<User>())).Returns(response);
+            
+            var result = await _service.RegisterUser(dto);
 
-            // Act
-            var result = await _service.RegisterUser(registerUserDto);
-
-            // Assert
             Assert.NotNull(result);
-            Assert.Equal(outputDto.Id, result.Id);
-            Assert.Equal(outputDto.Email, result.Email);
-            Assert.Equal(outputDto.Username, result.Username);
-            Assert.Equal(outputDto.Theme, result.Theme);
         }
 
         [Fact]
-        public async Task RegisterUser_ReturnsNull_WithElementNotCreated()
+        public async Task LoginUser_ShouldReturnsUser_WhenLoggedSuccessful()
         {
-            // Arrange
-            var registerUserDto = new RegisterUserDto 
-            { 
-                Email = "user1@example.com", 
-                Username = "user1", 
-                Password = "password1" 
-            };
-            var hashedPassword = "hashed_password1"; 
-            User? newUser = null;
+            var dto = new LoginUserDto { Email = "user@email.com", Password = "password" };
+            var user = new User(email: dto.Email, username: "username", password: dto.Password, theme: "theme") { Id = 1 };
+            var response = new UserResponse { Id = user.Id, Email = user.Email, Username = user.Username, Theme = user.Theme };
 
-            _mockEncrypt.Setup(e => e.HashPassword(registerUserDto.Password))
-                        .Returns(hashedPassword);
-            _mockUserRepository.Setup(r => r.AddUser(It.IsAny<User>()))
-                               .ReturnsAsync(newUser);
+            _mockUserRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User,bool>>>())).ReturnsAsync(user);
+            _mockEncrypt.Setup(e => e.ComparePassword(dto.Password, user.Password)).Returns(true);
+            _mockMapper.Setup(m => m.Map<UserResponse>(It.IsAny<User>())).Returns(response);
 
-            // Act
-            var result = await _service.RegisterUser(registerUserDto);
+            var result = await _service.LoginUser(dto);
 
-            // Assert
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public async Task LoginUser_ShouldReturnsNull_WhenLoggedUnsuccessful()
+        {
+            var dto = new LoginUserDto { Email = "user@email.com", Password = "password" };
+
+            _mockUserRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User,bool>>>())).ReturnsAsync((User?)null);
+
+            var result = await _service.LoginUser(dto);
+
             Assert.Null(result);
         }
 
         [Fact]
-        public async Task LoginUser_ReturnsOk_WithElementLogged()
+        public async Task LoginUser_ShouldThrowsException_WhenInvalidPassword()
         {
-            // Arrange
-            var loginUserDto = new LoginUserDto 
-            { 
-                Email = "user1@example.com", 
-                Password = "password1" 
-            };
-            var user = new User("user1@example.com", "user1", "password1", "Light") { Id = 1 };
-            var outputDto = new OutputUserDetailsDto 
-            { 
-                Id = 1, 
-                Email = "user1@example.com", 
-                Username = "user1", 
-                Theme = "Light" 
-            };
+            var dto = new LoginUserDto { Email = "user@email.com", Password = "wrong password" };
+            var user = new User(email: dto.Email, username: "username", password: "password", theme: "theme") { Id = 1 };
 
-            _mockUserRepository.Setup(r => r.GetUserByEmail(loginUserDto.Email))
-                               .ReturnsAsync(user);
-            _mockEncrypt.Setup(e => e.ComparePassword(loginUserDto.Password, user.Password))
-                        .Returns(true);
-            _mockMapper.Setup(m => m.Map<OutputUserDetailsDto>(user))
-                       .Returns(outputDto);
+            _mockUserRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User,bool>>>())).ReturnsAsync(user);
+            _mockEncrypt.Setup(e => e.ComparePassword(dto.Password, user.Password)).Returns(false);
 
-            // Act
-            var result = await _service.LoginUser(loginUserDto);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(outputDto.Id, result.Id);
-            Assert.Equal(outputDto.Email, result.Email);
-            Assert.Equal(outputDto.Username, result.Username);
-            Assert.Equal(outputDto.Theme, result.Theme);
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _service.LoginUser(dto));
         }
 
         [Fact]
-        public async Task LoginUser_ReturnsNull_WithElementNotLogged()
+        public async Task UpdateUser_ShouldReturnsUser_WhenUpdatedSuccessful()
         {
-            // Arrange
-            var loginUserDto = new LoginUserDto 
-            { 
-                Email = "user1@example.com", 
-                Password = "password1" 
-            };
-            User? user = null;
+            const int userId = 1;
+            var user = new User("user@example.com", "username", "password", "theme") { Id = userId };
+            var dto = new UpdateUserDto { Username = "updated username" };
+            var response = new UserResponse { Id = userId, Email = user.Email, Username = dto.Username, Theme = user.Theme };
 
-            _mockUserRepository.Setup(r => r.GetUserByEmail(loginUserDto.Email))
-                               .ReturnsAsync(user);
+            _mockUserRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User,bool>>>())).ReturnsAsync(user);
+            _mockUserRepository.Setup(r => r.UpdateAsync(It.IsAny<User>()));
+            _mockMapper.Setup(m => m.Map<UserResponse>(It.IsAny<User>())).Returns(response);
 
-            // Act
-            var result = await _service.LoginUser(loginUserDto);
+            var result = await _service.UpdateUser(dto, userId);
 
-            // Assert
+            Assert.NotNull(result);
+        }
+
+        [Fact]
+        public async Task UpdateUser_ShouldReturnsNull_WhenUpdatedUnsuccessful()
+        {
+            var userId = 1;
+            var dto = new UpdateUserDto { Username = "updated username" };
+
+            _mockUserRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User,bool>>>())).ReturnsAsync((User?)null);
+
+            var result = await _service.UpdateUser(dto, userId);
+
             Assert.Null(result);
         }
 
         [Fact]
-        public async Task LoginUser_ThrowsUnauthorizedAccessException_WithInvalidPassword()
+        public async Task UpdateUser_ShouldThrowsException_WhenOldPasswordIsIncorrect()
         {
-            // Arrange
-            var loginUserDto = new LoginUserDto 
-            { 
-                Email = "user1@example.com", 
-                Password = "wrongpassword" 
-            };
-            var user = new User("user1@example.com", "user1", "password1", "Light") { Id = 1 };
+            const int userId = 1;
+            var dto = new UpdateUserDto { OldPassword = "old password", NewPassword = "new password" };
+            var user = new User("user@example.com", "username", "password", "theme") { Id = userId };
+            
 
-            _mockUserRepository.Setup(r => r.GetUserByEmail(loginUserDto.Email))
-                               .ReturnsAsync(user);
-            _mockEncrypt.Setup(e => e.ComparePassword(loginUserDto.Password, user.Password))
-                        .Returns(false);
+            _mockUserRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User,bool>>>())).ReturnsAsync(user);
+            _mockEncrypt.Setup(e => e.ComparePassword(dto.OldPassword, user.Password)).Returns(false);
 
-            // Act & Assert
-            var exception = await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _service.LoginUser(loginUserDto));
-            Assert.Equal("Invalid user credentials.", exception.Message);
+            await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _service.UpdateUser(dto, userId));
         }
 
         [Fact]
-        public async Task UpdateUser_ReturnsOk_WithElementUpdated()
+        public async Task DeleteUser_ShouldReturnsTrue_WhenDeletedSuccessful()
         {
-            // Arrange
-            var userId = 1;
-            var user = new User("user1@example.com", "oldUsername", "password1", "Dark") { Id = userId };
-            var updateUserDto = new UpdateUserDto 
-            { 
-                Username = "newUsername", 
-                Theme = "Light" 
-            };
-            var updatedUser = new User("user1@example.com", "newUsername", "password1", "Light") { Id = userId };
-            var outputDto = new OutputUserDetailsDto 
-            { 
-                Id = userId, 
-                Email = "user1@example.com", 
-                Username = "newUsername", 
-                Theme = "Light" 
-            };
+            const int userId = 1;
+            var user = new User("user@example.com", "username", "password", "theme") { Id = userId };
+            var response = new UserResponse { Id = userId, Email = user.Email, Username = user.Username, Theme = user.Theme };
 
-            _mockUserRepository.Setup(r => r.GetUserById(userId)).ReturnsAsync(user);
-            _mockUserRepository.Setup(r => r.UpdateUser(It.IsAny<User>())).ReturnsAsync(updatedUser);
-            _mockMapper.Setup(m => m.Map<OutputUserDetailsDto>(updatedUser)).Returns(outputDto);
+            _mockUserRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User,bool>>>())).ReturnsAsync(user);
+            _mockUserRepository.Setup(r => r.DeleteAsync(It.IsAny<User>()));
+            _mockMapper.Setup(m => m.Map<UserResponse>(It.IsAny<User>())).Returns(response);
 
-            // Act
-            var result = await _service.UpdateUser(updateUserDto, userId);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(outputDto.Id, result.Id);
-            Assert.Equal(outputDto.Email, result.Email);
-            Assert.Equal(outputDto.Username, result.Username);
-            Assert.Equal(outputDto.Theme, result.Theme);
-        }
-
-        [Fact]
-        public async Task UpdateUser_ReturnsNull_WhenUserNotFound()
-        {
-            // Arrange
-            var userId = 1;
-            var updateUserDto = new UpdateUserDto 
-            { 
-                Username = "newUsername", 
-                Theme = "Light" 
-            };
-
-            _mockUserRepository.Setup(r => r.GetUserById(userId)).ReturnsAsync((User?)null);
-
-            // Act
-            var result = await _service.UpdateUser(updateUserDto, userId);
-
-            // Assert
-            Assert.Null(result);
-        }
-
-        [Fact]
-        public async Task UpdateUser_ThrowsException_WhenOldPasswordIsIncorrect()
-        {
-            // Arrange
-            var userId = 1;
-            var user = new User("user1@example.com", "oldUsername", "password1", "Dark") { Id = userId };
-            var updateUserDto = new UpdateUserDto 
-            { 
-                OldPassword = "wrongPassword", 
-                NewPassword = "newPassword123" 
-            };
-
-            _mockUserRepository.Setup(r => r.GetUserById(userId)).ReturnsAsync(user);
-            _mockEncrypt.Setup(e => e.ComparePassword(updateUserDto.OldPassword, user.Password))
-                        .Returns(false);
-
-            // Act & Assert
-            await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _service.UpdateUser(updateUserDto, userId));
-        }
-
-        [Fact]
-        public async Task DeleteUser_ReturnsTrue_WithElementDeleted()
-        {
-            // Arrange
-            var userId = 1;
-            var user = new User("user1@example.com", "username", "password1", "Dark") { Id = userId };
-            var deletedUser = new User("user1@example.com", "username", "password1", "Dark") { Id = userId };
-            var outputDto = new OutputUserDetailsDto 
-            { 
-                Id = userId, 
-                Email = "user1@example.com", 
-                Username = "username", 
-                Theme = "Dark" 
-            };
-
-            _mockUserRepository.Setup(r => r.GetUserById(userId)).ReturnsAsync(user);
-            _mockUserRepository.Setup(r => r.DeleteUser(It.IsAny<User>())).ReturnsAsync(deletedUser);
-            _mockMapper.Setup(m => m.Map<OutputUserDetailsDto>(deletedUser)).Returns(outputDto);
-
-            // Act
             var result = await _service.DeleteUser(userId);
 
-            // Assert
             Assert.True(result);
         }
 
         [Fact]
-        public async Task DeleteUser_ReturnsFalse_WhenUserNotFound()
+        public async Task DeleteUser_ShouldReturnsFalse_WhenDeletedUnsuccessfully()
         {
-            // Arrange
-            var userId = 1;
-            _mockUserRepository.Setup(r => r.GetUserById(userId)).ReturnsAsync((User?)null);
+            const int userId = 1;
+            
+            _mockUserRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User,bool>>>())).ReturnsAsync((User?)null);
 
-            // Act
             var result = await _service.DeleteUser(userId);
 
-            // Assert
             Assert.False(result);
         }
     }

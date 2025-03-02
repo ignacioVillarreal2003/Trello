@@ -1,189 +1,115 @@
+using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Services;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.DTOs.CardLabel;
+using TrelloApi.Domain.DTOs.Label;
 using TrelloApi.Infrastructure.Persistence.Interfaces;
 
-namespace TrelloApi.Tests.Services
+namespace TrelloApi.Tests.Services;
+
+public class CardLabelServiceTests
 {
-    public class CardLabelServiceTests
+    private readonly Mock<ICardLabelRepository> _mockCardLabelRepository;
+    private readonly Mock<ILogger<CardLabelService>> _mockLogger;
+    private readonly Mock<IMapper> _mockMapper;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
+    private readonly CardLabelService _service;
+
+    public CardLabelServiceTests()
     {
-        private readonly Mock<ICardLabelRepository> _mockCardLabelRepository;
-        private readonly Mock<ILogger<CardLabelService>> _mockLogger;
-        private readonly Mock<IMapper> _mockMapper;
-        private readonly Mock<IBoardAuthorizationService> _mockBoardAuthorizationService;
-        private readonly CardLabelService _service;
+        _mockCardLabelRepository = new Mock<ICardLabelRepository>();
+        _mockLogger = new Mock<ILogger<CardLabelService>>();
+        _mockMapper = new Mock<IMapper>();
+        _mockUnitOfWork = new Mock<IUnitOfWork>();
+        
+        _service = new CardLabelService(
+            _mockMapper.Object,
+            _mockUnitOfWork.Object,
+            _mockLogger.Object,
+            _mockCardLabelRepository.Object);
+    }
 
-        public CardLabelServiceTests()
+    [Fact]
+    public async Task GetLabelsByCardId_ShouldReturnsLabels_WhenLabelsFound()
+    {
+        const int cardId = 1;
+        var labels = new List<Label>
         {
-            _mockCardLabelRepository = new Mock<ICardLabelRepository>();
-            _mockLogger = new Mock<ILogger<CardLabelService>>();
-            _mockMapper = new Mock<IMapper>();
-            _mockBoardAuthorizationService = new Mock<IBoardAuthorizationService>();
-
-            _service = new CardLabelService(
-                _mockMapper.Object,
-                _mockBoardAuthorizationService.Object,
-                _mockLogger.Object,
-                _mockCardLabelRepository.Object);
-        }
-
-        [Fact]
-        public async Task GetLabelsByCardId_ReturnsListOfOutputLabelDetailsDto_WhenLabelsExist()
+            new Label("title", "color", 1),
+            new Label("title", "color", 1)
+        };
+        var response = new List<LabelResponse>
         {
-            // Arrange
-            int cardId = 1, uid = 1;
-            var labels = new List<Label>
-            {
-                new Label("title", "color", 1) // Completar según la implementación real de Label
-            };
-            var outputDtos = new List<OutputLabelDetailsDto>
-            {
-                new OutputLabelDetailsDto() // Completar propiedades según sea necesario
-            };
+            new LabelResponse { Id = 0, Title = labels[0].Title, Color = labels[0].Color, BoardId = labels[0].BoardId},
+            new LabelResponse { Id = 1, Title = labels[1].Title, Color = labels[1].Color, BoardId = labels[1].BoardId}
+        };
 
-            _mockCardLabelRepository
-                .Setup(r => r.GetLabelsByCardId(cardId))
-                .ReturnsAsync(labels);
-            _mockMapper
-                .Setup(m => m.Map<List<OutputLabelDetailsDto>>(labels))
-                .Returns(outputDtos);
+        _mockCardLabelRepository.Setup(r => r.GetLabelsByCardIdAsync(cardId)).ReturnsAsync(labels);
+        _mockMapper.Setup(m => m.Map<List<LabelResponse>>(It.IsAny<List<Label>>())).Returns(response);
 
-            // Act
-            var result = await _service.GetLabelsByCardId(cardId, uid);
+        var result = await _service.GetLabelsByCardId(cardId);
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(outputDtos.Count, result.Count);
-            // Opcional: comparar propiedades de cada DTO
-        }
+        Assert.NotNull(result);
+        Assert.Equal(response.Count, result.Count);
+    }
 
-        [Fact]
-        public async Task GetLabelsByCardId_ReturnsEmptyList_WhenNoLabelsExist()
-        {
-            // Arrange
-            int cardId = 1, uid = 1;
-            var labels = new List<Label>();
-            var outputDtos = new List<OutputLabelDetailsDto>();
+    [Fact]
+    public async Task GetLabelsByCardId_ShouldReturnsEmptyList_WhenLabelsNotFound()
+    {
+        const int cardId = 1;
 
-            _mockCardLabelRepository
-                .Setup(r => r.GetLabelsByCardId(cardId))
-                .ReturnsAsync(labels);
-            _mockMapper
-                .Setup(m => m.Map<List<OutputLabelDetailsDto>>(labels))
-                .Returns(outputDtos);
+        _mockCardLabelRepository.Setup(r => r.GetLabelsByCardIdAsync(cardId)).ReturnsAsync([]);
+        _mockMapper.Setup(m => m.Map<List<LabelResponse>>(It.IsAny<List<Label>>())).Returns([]);
 
-            // Act
-            var result = await _service.GetLabelsByCardId(cardId, uid);
+        var result = await _service.GetLabelsByCardId(cardId);
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.Empty(result);
-        }
+        Assert.NotNull(result);
+        Assert.Empty(result);
+    }
 
-        [Fact]
-        public async Task AddLabelToCard_ReturnsOutputCardLabelDetailsDto_WhenLabelIsAdded()
-        {
-            // Arrange
-            int cardId = 1, uid = 1;
-            var addDto = new AddCardLabelDto { LabelId = 1 };
-            var newCardLabel = new CardLabel(cardId, addDto.LabelId);
-            var outputDto = new OutputCardLabelDetailsDto
-            {
-                // Asigna las propiedades según la implementación (por ejemplo, CardId, LabelId, etc.)
-            };
+    [Fact]
+    public async Task AddLabelToCard_ShouldReturnsCardLabel_WhenAddedSuccessful()
+    {
+        const int cardId = 1;
+        var dto = new AddCardLabelDto { LabelId = 1 };
+        var response = new CardLabelResponse{ CardId = cardId, LabelId = dto.LabelId };
 
-            _mockCardLabelRepository
-                .Setup(r => r.AddCardLabel(It.IsAny<CardLabel>()))
-                ;
-            _mockMapper
-                .Setup(m => m.Map<OutputCardLabelDetailsDto>(newCardLabel))
-                .Returns(outputDto);
+        _mockCardLabelRepository.Setup(r => r.CreateAsync(It.IsAny<CardLabel>()));
+        _mockMapper.Setup(m => m.Map<CardLabelResponse>(It.IsAny<CardLabel>())).Returns(response);
 
-            // Act
-            var result = await _service.AddLabelToCard(cardId, addDto, uid);
+        var result = await _service.AddLabelToCard(cardId, dto);
 
-            // Assert
-            Assert.NotNull(result);
-            // Ejemplo de comprobación (ajustar según las propiedades reales)
-            // Assert.Equal(outputDto.CardId, result.CardId);
-            // Assert.Equal(outputDto.LabelId, result.LabelId);
-        }
+        Assert.NotNull(result);
+    }
 
-        [Fact]
-        public async Task AddLabelToCard_ReturnsNull_WhenRepositoryReturnsNull()
-        {
-            // Arrange
-            int cardId = 1, uid = 1;
-            var addDto = new AddCardLabelDto { LabelId = 1 };
+    [Fact]
+    public async Task RemoveLabelFromCard_ShouldReturnsTrue_WhenDeletedSuccessful()
+    {
+        const int cardId = 1, labelId = 1;
+        var cardLabel = new CardLabel(cardId, labelId);
+        
+        _mockCardLabelRepository.Setup(r => r
+            .GetAsync(It.IsAny<Expression<Func<CardLabel, bool>>>())).ReturnsAsync(cardLabel);
+        _mockCardLabelRepository.Setup(r => r.DeleteAsync(It.IsAny<CardLabel>()));
 
-            _mockCardLabelRepository
-                .Setup(r => r.AddCardLabel(It.IsAny<CardLabel>()))
-                ;
+        var result = await _service.RemoveLabelFromCard(cardId, labelId);
 
-            // Act
-            var result = await _service.AddLabelToCard(cardId, addDto, uid);
+        Assert.True(result);
+    }
 
-            // Assert
-            Assert.Null(result);
-        }
+    [Fact]
+    public async Task RemoveLabelFromCard_ShouldReturnsFalse_WhenDeletedUnsuccessful()
+    {
+        const int cardId = 1, labelId = 1;
+        
+        _mockCardLabelRepository.Setup(r => 
+            r.GetAsync(It.IsAny<Expression<Func<CardLabel, bool>>>())).ReturnsAsync((CardLabel?)null);
 
-        [Fact]
-        public async Task RemoveLabelFromCard_ReturnsTrue_WhenDeletionIsSuccessful()
-        {
-            // Arrange
-            int cardId = 1, labelId = 1, uid = 1;
-            var existingCardLabel = new CardLabel(cardId, labelId);
-            _mockCardLabelRepository
-                .Setup(r => r.GetCardLabelById(cardId, labelId))
-                .ReturnsAsync(existingCardLabel);
-            _mockCardLabelRepository
-                .Setup(r => r.DeleteCardLabel(existingCardLabel))
-                ;
+        var result = await _service.RemoveLabelFromCard(cardId, labelId);
 
-            // Act
-            var result = await _service.RemoveLabelFromCard(cardId, labelId, uid);
-
-            // Assert
-            Assert.True(result);
-        }
-
-        [Fact]
-        public async Task RemoveLabelFromCard_ReturnsFalse_WhenLabelNotFound()
-        {
-            // Arrange
-            int cardId = 1, labelId = 1, uid = 1;
-            _mockCardLabelRepository
-                .Setup(r => r.GetCardLabelById(cardId, labelId))
-                .ReturnsAsync((CardLabel?)null);
-
-            // Act
-            var result = await _service.RemoveLabelFromCard(cardId, labelId, uid);
-
-            // Assert
-            Assert.False(result);
-        }
-
-        [Fact]
-        public async Task RemoveLabelFromCard_ReturnsFalse_WhenDeletionFails()
-        {
-            // Arrange
-            int cardId = 1, labelId = 1, uid = 1;
-            var existingCardLabel = new CardLabel(cardId, labelId);
-            _mockCardLabelRepository
-                .Setup(r => r.GetCardLabelById(cardId, labelId))
-                .ReturnsAsync(existingCardLabel);
-            _mockCardLabelRepository
-                .Setup(r => r.DeleteCardLabel(existingCardLabel))
-                ;
-
-            // Act
-            var result = await _service.RemoveLabelFromCard(cardId, labelId, uid);
-
-            // Assert
-            Assert.False(result);
-        }
+        Assert.False(result);
     }
 }

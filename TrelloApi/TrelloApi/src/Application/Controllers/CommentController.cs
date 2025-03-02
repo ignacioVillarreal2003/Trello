@@ -64,13 +64,7 @@ public class CommentController: BaseController
     {
         try
         {
-            CommentResponse? comment = await _commentService.AddComment(cardId, dto, UserId);
-            if (comment == null)
-            {
-                _logger.LogError("Failed to add comment to card {CardId}", cardId);
-                return BadRequest(new { message = "Failed to add comment." });
-            }
-
+            CommentResponse comment = await _commentService.AddComment(cardId, dto, UserId);
             _logger.LogInformation("Comment added to card {CardId}", cardId);
             return CreatedAtAction(nameof(GetCommentById), new { commentId = comment.Id }, comment);
         }

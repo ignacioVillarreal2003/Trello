@@ -39,7 +39,7 @@ public class UserBoardService: BaseService, IUserBoardService
         }
     }
 
-    public async Task<UserBoardResponse?> AddUserToBoard(int boardId, AddUserBoardDto dto)
+    public async Task<UserBoardResponse> AddUserToBoard(int boardId, AddUserBoardDto dto)
     {
         try
         {

@@ -1,19 +1,16 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Moq;
-using TrelloApi.app;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Infrastructure.Persistence;
 using TrelloApi.Infrastructure.Persistence.Data;
+using TrelloApi.Infrastructure.Persistence.Interfaces;
 using TrelloApi.Infrastructure.Persistence.Repositories;
 
 namespace TrelloApi.Tests.Repositories;
 
 public class CardRepositoryTests
 {
-    private readonly CardRepository _repository;
+    private readonly ICardRepository _repository;
     private readonly TrelloContext _context;
-    private readonly Mock<ILogger<CardRepository>> _mockLogger;
+    private readonly IUnitOfWork _unitOfWork;
 
     public CardRepositoryTests()
     {
@@ -22,20 +19,20 @@ public class CardRepositoryTests
             .Options;
 
         _context = new TrelloContext(options);
-        _mockLogger = new Mock<ILogger<CardRepository>>();
-        _repository = new CardRepository(_context, _mockLogger.Object);
+        _unitOfWork = new FakeUnitOfWork(_context);
+        _repository = new CardRepository(_unitOfWork);
     }
 
     [Fact]
     public async Task GetCardById_ShouldReturnCard_WhenCardExists()
     {
         int cardId = 1;
-        var card = new Card(title: "title", description: "description", listId: 1) { Id = cardId };
+        var card = new Card("title", "description", listId: 1) { Id = cardId };
 
         _context.Cards.Add(card);
         await _context.SaveChangesAsync();
 
-        var result = await _repository.GetCardById(cardId);
+        var result = await _repository.GetAsync(c => c.Id == cardId);
 
         Assert.NotNull(result);
         Assert.Equal(cardId, result.Id);
@@ -46,7 +43,7 @@ public class CardRepositoryTests
     {
         int cardId = 1;
 
-        var result = await _repository.GetCardById(cardId);
+        var result = await _repository.GetAsync(c => c.Id == cardId);
 
         Assert.Null(result);
     }
@@ -55,16 +52,16 @@ public class CardRepositoryTests
     public async Task GetCardsByListId_ShouldReturnCards_WhenListHasCards()
     {
         int listId = 1;
-        var card1 = new Card(title: "title1", description: "description1", listId: listId) { Id = 1 };
-        var card2 = new Card(title: "title2", description: "description2", listId: listId) { Id = 2 };
+        var card1 = new Card("title1", "description1", listId) { Id = 1 };
+        var card2 = new Card("title2", "description2", listId) { Id = 2 };
 
         _context.Cards.AddRange(card1, card2);
         await _context.SaveChangesAsync();
 
-        var result = await _repository.GetCardsByListId(listId);
+        var result = await _repository.GetListAsync(c => c.ListId == listId);
 
         Assert.NotNull(result);
-        Assert.Equal(2, result.Count);
+        Assert.Equal(2, result.Count());
     }
 
     [Fact]
@@ -72,7 +69,7 @@ public class CardRepositoryTests
     {
         int listId = 1;
 
-        var result = await _repository.GetCardsByListId(listId);
+        var result = await _repository.GetListAsync(c => c.ListId == listId);
 
         Assert.Empty(result);
     }
@@ -80,9 +77,11 @@ public class CardRepositoryTests
     [Fact]
     public async Task AddCard_ShouldPersistCard_WhenAddedSuccessfully()
     {
-        var card = new Card(title: "title", description: "description", listId: 1);
+        var card = new Card("title", "description", listId: 1);
 
-        await _repository.AddCard(card);
+        await _repository.CreateAsync(card);
+        await _unitOfWork.CommitAsync();
+
         var result = await _context.Cards.FindAsync(card.Id);
 
         Assert.NotNull(result);
@@ -92,13 +91,15 @@ public class CardRepositoryTests
     [Fact]
     public async Task UpdateCard_ShouldPersistChanges_WhenUpdateIsSuccessful()
     {
-        var card = new Card(title: "title", description: "description", listId: 1);
+        var card = new Card("title", "description", listId: 1);
 
         _context.Cards.Add(card);
         await _context.SaveChangesAsync();
 
         card.Title = "updated title";
-        await _repository.UpdateCard(card);
+        await _repository.UpdateAsync(card);
+        await _unitOfWork.CommitAsync();
+
         var result = await _context.Cards.FindAsync(card.Id);
 
         Assert.NotNull(result);
@@ -108,12 +109,13 @@ public class CardRepositoryTests
     [Fact]
     public async Task DeleteCard_ShouldRemoveCard_WhenCardExists()
     {
-        var card = new Card(title: "title", description: "description", listId: 1);
+        var card = new Card("title", "description", listId: 1);
 
         _context.Cards.Add(card);
         await _context.SaveChangesAsync();
 
-        await _repository.DeleteCard(card);
+        await _repository.DeleteAsync(card);
+        await _unitOfWork.CommitAsync();
 
         var result = await _context.Cards.FindAsync(card.Id);
 

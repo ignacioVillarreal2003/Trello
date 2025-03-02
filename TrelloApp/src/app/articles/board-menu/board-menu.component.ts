@@ -4,31 +4,37 @@ import {AlertService} from '../../core/services/alert.service';
 import {BoardHttpService} from '../../core/services/http/board-http.service';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {BoardLabelHttpService} from '../../core/services/http/board-label-http.service';
-import {BackBtnComponent} from '../../shared/buttons/back-btn/back-btn.component';
-import {CloseBtnComponent} from '../../shared/buttons/close-btn/close-btn.component';
 import {ResourcesService} from '../../core/services/resources.service';
 import {CommunicationService} from '../../core/services/communication.service';
+import {BtnComponent} from '../../shared/btn/btn.component';
+import {BtnBackComponent} from '../../shared/btn-back/btn-back.component';
+import {BtnCloseComponent} from '../../shared/btn-close/btn-close.component';
 
 @Component({
   selector: 'app-board-menu',
   imports: [
     NgIf,
-    NgForOf,
-    NgStyle,
-    BackBtnComponent,
-    CloseBtnComponent
+    BtnComponent,
+    BtnBackComponent,
+    BtnCloseComponent
   ],
   templateUrl: './board-menu.component.html',
   standalone: true,
   styleUrl: './board-menu.component.css'
 })
 export class BoardMenuComponent {
-  @Input() isOpen: boolean = false;
+  @Input() isOpen = false;
+  @Output() public isClose = new EventEmitter<void>();
+
+  onClose() {
+    this.isOpen = false;
+    this.isClose.emit();
+  }
+
   mode: 'menu' | 'background' | 'label' | 'friend' = 'menu';
   backgrounds: string[] = [];
   colors: string[] = [];
   @Input() boardId: number | undefined = undefined;
-  @Output() close: EventEmitter<void> = new EventEmitter<void>();
 
   constructor(private resourcesService: ResourcesService,
               private alertService: AlertService,
@@ -104,9 +110,5 @@ export class BoardMenuComponent {
     } else {
       this.alertService.ErrorMessage('Please verify the data entered.')
     }
-  }
-
-  onClose(): void {
-    this.close.emit();
   }
 }

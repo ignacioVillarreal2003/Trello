@@ -1,14 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.DTOs;
-using Xunit;
+using TrelloApi.Domain.DTOs.User;
+using TrelloApi.Domain.DTOs.UserBoard;
 
 namespace TrelloApi.Tests.Controllers
 {
@@ -28,124 +26,104 @@ namespace TrelloApi.Tests.Controllers
         
         private void SetUserId(int userId)
         {
-            var httpContext = new DefaultHttpContext();
-            httpContext.Items["UserId"] = userId;
+            var claims = new List<Claim>
+            {
+                new Claim("UserId", userId.ToString())
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+    
+            var httpContext = new DefaultHttpContext { User = principal };
             _controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
         }
-        
-        // --- Tests para GET ---
+
         [Fact]
-        public async Task GetUsersByBoardId_ReturnsOk_WithUsersFound()
+        public async Task GetUsersByBoardId_ShouldReturnsOk_WithUsersFound()
         {
-            int currentUserId = 1;
-            int boardId = 1;
-            var users = new List<OutputUserDetailsDto>
+            const int boardId = 1;
+            var response = new List<UserResponse>
             {
-                new OutputUserDetailsDto { Id = 1, Email = "user1@test.com", Username = "user1", Theme = "light" },
-                new OutputUserDetailsDto { Id = 2, Email = "user2@test.com", Username = "user2", Theme = "dark" }
+                new UserResponse { Id = 1, Email = "email1@test.com", Username = "username 1", Theme = "theme" },
+                new UserResponse { Id = 2, Email = "email1@test.com", Username = "username 2", Theme = "theme" }
             };
 
-            _mockUserBoardService
-                .Setup(s => s.GetUsersByBoardId(boardId, currentUserId))
-                .ReturnsAsync(users);
+            _mockUserBoardService.Setup(s => s.GetUsersByBoardId(boardId)).ReturnsAsync(response);
 
             var result = await _controller.GetUsersByBoardId(boardId);
             var okResult = Assert.IsType<OkObjectResult>(result);
+            var value = Assert.IsType<List<UserResponse>>(okResult.Value);
+            
             Assert.Equal(200, okResult.StatusCode);
-
-            var returnedUsers = Assert.IsType<List<OutputUserDetailsDto>>(okResult.Value);
-            Assert.Equal(users.Count, returnedUsers.Count);
+            Assert.Equal(response.Count, value.Count);
         }
         
         [Fact]
-        public async Task GetUsersByBoardId_ReturnsOk_WithEmptyList()
+        public async Task GetUsersByBoardId_ShouldReturnsOk_WithUsersNotFound()
         {
-            int currentUserId = 1;
-            int boardId = 1;
-            var users = new List<OutputUserDetailsDto>();
+            const int boardId = 1;
 
-            _mockUserBoardService
-                .Setup(s => s.GetUsersByBoardId(boardId, currentUserId))
-                .ReturnsAsync(users);
+            _mockUserBoardService.Setup(s => s.GetUsersByBoardId(boardId)).ReturnsAsync([]);
 
             var result = await _controller.GetUsersByBoardId(boardId);
             var okResult = Assert.IsType<OkObjectResult>(result);
+            var value = Assert.IsType<List<UserResponse>>(okResult.Value);
+            
             Assert.Equal(200, okResult.StatusCode);
-
-            var returnedUsers = Assert.IsType<List<OutputUserDetailsDto>>(okResult.Value);
-            Assert.Empty(returnedUsers);
+            Assert.Empty(value);
         }
         
-        // --- Tests para POST ---
         [Fact]
-        public async Task AddUserToBoard_ReturnsCreated_WhenUserIsAdded()
+        public async Task AddUserToBoard_ShouldReturnsCreated_WhenAddedSuccessful()
         {
-            int currentUserId = 1;
-            int boardId = 1;
-            // Suponemos que para agregar un usuario a un board se usa el DTO AddUserBoardDto
-            // y que el servicio retorna un OutputUserBoardDetailsDto.
-            var addUserBoardDto = new AddUserBoardDto { UserId = 2, Role = "Member" };
-            var outputUserBoard = new OutputUserBoardDetailsDto { UserId = 2, BoardId = boardId };
+            const int boardId = 1;
+            var dto = new AddUserBoardDto { UserId = 1, Role = "role" };
+            var response = new UserBoardResponse { UserId = dto.UserId, BoardId = boardId, Role = dto.Role };
 
-            _mockUserBoardService
-                .Setup(s => s.AddUserToBoard(boardId, addUserBoardDto, currentUserId))
-                .ReturnsAsync(outputUserBoard);
+            _mockUserBoardService.Setup(s => s.AddUserToBoard(boardId, dto)).ReturnsAsync(response);
 
-            var result = await _controller.AddUserToBoard(boardId, addUserBoardDto);
+            var result = await _controller.AddUserToBoard(boardId, dto);
             var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+            
             Assert.Equal(201, createdResult.StatusCode);
-
-            var returnedUserBoard = Assert.IsType<OutputUserBoardDetailsDto>(createdResult.Value);
-            Assert.Equal(outputUserBoard.UserId, returnedUserBoard.UserId);
-            Assert.Equal(outputUserBoard.BoardId, returnedUserBoard.BoardId);
         }
         
         [Fact]
-        public async Task AddUserToBoard_ReturnsBadRequest_WhenUserNotAdded()
+        public async Task AddUserToBoard_ShouldReturnsBadRequest_WhenAddedUnsuccessful()
         {
-            int currentUserId = 1;
-            int boardId = 1;
-            var addUserBoardDto = new AddUserBoardDto { UserId = 2, Role = "Member" };
+            const int boardId = 1;
+            var dto = new AddUserBoardDto { UserId = 1, Role = "role" };
 
-            _mockUserBoardService
-                .Setup(s => s.AddUserToBoard(boardId, addUserBoardDto, currentUserId))
-                .ReturnsAsync((OutputUserBoardDetailsDto?)null);
+            _mockUserBoardService.Setup(s => s.AddUserToBoard(boardId, dto)).ReturnsAsync((UserBoardResponse?)null);
 
-            var result = await _controller.AddUserToBoard(boardId, addUserBoardDto);
+            var result = await _controller.AddUserToBoard(boardId, dto);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            
             Assert.Equal(400, badRequestResult.StatusCode);
         }
         
-        // --- Tests para DELETE ---
         [Fact]
-        public async Task RemoveUserFromBoard_ReturnsNoContent_WhenDeletionIsSuccessful()
+        public async Task RemoveUserFromBoard_ShouldReturnsNoContent_WhenDeletedSuccessful()
         {
-            int currentUserId = 1;
-            int boardId = 1;
-            int userIdToRemove = 2;
+            const int boardId = 1, userId = 2;
 
-            _mockUserBoardService
-                .Setup(s => s.RemoveUserFromBoard(boardId, userIdToRemove, currentUserId))
-                .ReturnsAsync(true);
+            _mockUserBoardService.Setup(s => s.RemoveUserFromBoard(boardId, userId)).ReturnsAsync(true);
 
-            var result = await _controller.RemoveUserFromBoard(boardId, userIdToRemove);
+            var result = await _controller.RemoveUserFromBoard(boardId, userId);
             var noContentResult = Assert.IsType<NoContentResult>(result);
+            
             Assert.Equal(204, noContentResult.StatusCode);
         }
         
         [Fact]
-        public async Task RemoveUserFromBoard_ReturnsNotFound_WhenDeletionFails()
+        public async Task RemoveUserFromBoard_ShouldReturnsNotFound_WhenDeletedUnsuccessful()
         {
-            int currentUserId = 1;
-            int boardId = 1;
-            int userIdToRemove = 2;
+            const int boardId = 1, userId = 2;
 
-            _mockUserBoardService
-                .Setup(s => s.RemoveUserFromBoard(boardId, userIdToRemove, currentUserId))
-                .ReturnsAsync(false);
+            _mockUserBoardService.Setup(s => s.RemoveUserFromBoard(boardId, userId)).ReturnsAsync(false);
 
-            var result = await _controller.RemoveUserFromBoard(boardId, userIdToRemove);
+            var result = await _controller.RemoveUserFromBoard(boardId, userId);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            
             Assert.Equal(404, notFoundResult.StatusCode);
         }
     }

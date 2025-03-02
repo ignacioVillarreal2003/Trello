@@ -1,293 +1,170 @@
+using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Services;
-using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.DTOs.Label;
 using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Persistence.Interfaces;
 
-namespace TrelloApi.Tests.Services
+namespace TrelloApi.Tests.Services;
+
+public class LabelServiceTests
 {
-    public class LabelServiceTests
+    private readonly Mock<ILabelRepository> _mockLabelRepository;
+    private readonly Mock<ILogger<LabelService>> _mockLogger;
+    private readonly Mock<IMapper> _mockMapper;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
+    private readonly LabelService _service;
+
+    public LabelServiceTests()
     {
-        private readonly Mock<ILabelRepository> _mockLabelRepository;
-        private readonly Mock<ILogger<LabelService>> _mockLogger;
-        private readonly Mock<IMapper> _mockMapper;
-        private readonly Mock<IBoardAuthorizationService> _mockBoardAuthorizationService;
-        private readonly LabelService _service;
+        _mockLabelRepository = new Mock<ILabelRepository>();
+        _mockLogger = new Mock<ILogger<LabelService>>();
+        _mockMapper = new Mock<IMapper>();
+        _mockUnitOfWork = new Mock<IUnitOfWork>();
 
-        public LabelServiceTests()
-        {
-            _mockLabelRepository = new Mock<ILabelRepository>();
-            _mockLogger = new Mock<ILogger<LabelService>>();
-            _mockMapper = new Mock<IMapper>();
-            _mockBoardAuthorizationService = new Mock<IBoardAuthorizationService>();
+        _service = new LabelService(
+            _mockMapper.Object,
+            _mockUnitOfWork.Object,
+            _mockLogger.Object,
+            _mockLabelRepository.Object);
+    }
+    
+    [Fact]
+    public async Task GetLabelById_ShouldReturnsLabel_WhenLabelFound()
+    {
+        const int labelId = 1;
+        var label = new Label(title: "title", color: "color", boardId: 1) { Id = labelId };
+        var response = new LabelResponse { Id = label.Id, Title = label.Title, Color = label.Color };
 
-            _service = new LabelService(
-                _mockMapper.Object,
-                _mockBoardAuthorizationService.Object,
-                _mockLogger.Object,
-                _mockLabelRepository.Object);
-        }
+        _mockLabelRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Label, bool>>>())).ReturnsAsync(label);
+        _mockMapper.Setup(m => m.Map<LabelResponse>(label)).Returns(response);
+
+        var result = await _service.GetLabelById(labelId);
+
+        Assert.NotNull(result);
+    }
+
+    [Fact]
+    public async Task GetLabelById_ShouldReturnsNull_WhenLabelNotFound()
+    {
+        const int labelId = 1;
         
-        [Fact]
-        public async Task GetLabelById_ReturnsOutputLabelDetailsDto_WhenLabelExists()
+        _mockLabelRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Label, bool>>>())).ReturnsAsync((Label?)null);
+
+        var result = await _service.GetLabelById(labelId);
+
+        Assert.Null(result);
+    }
+    
+    [Fact]
+    public async Task GetLabelsByBoardId_ShouldReturnsLabels_WhenLabelsFound()
+    {
+        const int boardId = 1;
+        var labels = new List<Label>
         {
-            // Arrange
-            int labelId = 1, userId = 1;
-            var label = new Label(title: "Label 1", color: "Blue", boardId: 1) { Id = labelId };
-            var outputLabelDetailsDto = new OutputLabelDetailsDto 
-            { 
-                Id = label.Id, 
-                Title = label.Title, 
-                Color = label.Color 
-            };
-
-            _mockLabelRepository.Setup(r => r.GetLabelById(labelId))
-                                .ReturnsAsync(label);
-            _mockMapper.Setup(m => m.Map<OutputLabelDetailsDto>(label))
-                       .Returns(outputLabelDetailsDto);
-
-            // Act
-            var result = await _service.GetLabelById(labelId, userId);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(outputLabelDetailsDto.Id, result.Id);
-            Assert.Equal(outputLabelDetailsDto.Title, result.Title);
-            Assert.Equal(outputLabelDetailsDto.Color, result.Color);
-        }
-
-        [Fact]
-        public async Task GetLabelById_ReturnsNull_WhenLabelDoesNotExist()
+            new Label(title: "title 1", color: "color", boardId: boardId) { Id = 1 },
+            new Label(title: "title 2", color: "color", boardId: boardId) { Id = 2 }
+        };
+        var response = new List<LabelResponse>
         {
-            // Arrange
-            int labelId = 1, userId = 1;
-            _mockLabelRepository.Setup(r => r.GetLabelById(labelId))
-                                .ReturnsAsync((Label?)null);
+            new LabelResponse { Id = labels[0].Id, Title = labels[0].Title, Color = labels[0].Color },
+            new LabelResponse { Id = labels[1].Id, Title = labels[1].Title, Color = labels[1].Color }
+        };
 
-            // Act
-            var result = await _service.GetLabelById(labelId, userId);
+        _mockLabelRepository.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Label, bool>>>(), null)).ReturnsAsync(labels);
+        _mockMapper.Setup(m => m.Map<List<LabelResponse>>(It.IsAny<List<Label>>())).Returns(response);
 
-            // Assert
-            Assert.Null(result);
-        }
+        var result = await _service.GetLabelsByBoardId(boardId);
+
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+    }
+
+    [Fact]
+    public async Task GetLabelsByBoardId_ShouldReturnsEmptyList_WhenLabelsNotFound()
+    {
+        const int boardId = 1;
         
-        [Fact]
-        public async Task GetLabelsByBoardId_ReturnsListOfOutputLabelDetailsDto_WhenLabelsExist()
-        {
-            // Arrange
-            int boardId = 1, userId = 1;
-            var labels = new List<Label>
-            {
-                new Label(title: "Label 1", color: "Blue", boardId: boardId) { Id = 1 },
-                new Label(title: "Label 2", color: "Green", boardId: boardId) { Id = 2 }
-            };
-            var outputLabelDetailsDtos = new List<OutputLabelDetailsDto>
-            {
-                new OutputLabelDetailsDto { Id = labels[0].Id, Title = labels[0].Title, Color = labels[0].Color },
-                new OutputLabelDetailsDto { Id = labels[1].Id, Title = labels[1].Title, Color = labels[1].Color }
-            };
+        _mockLabelRepository.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Label, bool>>>(), null)).ReturnsAsync([]);
+        _mockMapper.Setup(m => m.Map<List<LabelResponse>>(It.IsAny<List<Label>>())).Returns([]);
 
-            _mockLabelRepository.Setup(r => r.GetLabelsByBoardId(boardId))
-                                .ReturnsAsync(labels);
-            _mockMapper.Setup(m => m.Map<List<OutputLabelDetailsDto>>(labels))
-                       .Returns(outputLabelDetailsDtos);
+        var result = await _service.GetLabelsByBoardId(boardId);
 
-            // Act
-            var result = await _service.GetLabelsByBoardId(boardId, userId);
+        Assert.NotNull(result);
+        Assert.Empty(result);
+    }
+    
+    [Fact]
+    public async Task AddLabel_ShouldReturnsLabel_WhenAddedSuccessfully()
+    {
+        const int boardId = 1;
+        var dto = new AddLabelDto { Title = "title", Color = "color" };
+        var label = new Label(title: dto.Title, color: dto.Color, boardId: boardId) { Id = 1 };
+        var response = new LabelResponse { Id = label.Id, Title = label.Title, Color = label.Color };
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count);
-            Assert.Equal(outputLabelDetailsDtos[0].Id, result[0].Id);
-            Assert.Equal(outputLabelDetailsDtos[1].Id, result[1].Id);
-        }
+        _mockLabelRepository.Setup(r => r.CreateAsync(It.IsAny<Label>())).ReturnsAsync(label);
+        _mockMapper.Setup(m => m.Map<LabelResponse>(It.IsAny<Label>())).Returns(response);
 
-        [Fact]
-        public async Task GetLabelsByBoardId_ReturnsEmptyList_WhenNoLabelsExist()
-        {
-            // Arrange
-            int boardId = 1, userId = 1;
-            _mockLabelRepository.Setup(r => r.GetLabelsByBoardId(boardId))
-                                .ReturnsAsync(new List<Label>());
-            _mockMapper.Setup(m => m.Map<List<OutputLabelDetailsDto>>(It.IsAny<List<Label>>()))
-                       .Returns(new List<OutputLabelDetailsDto>());
+        var result = await _service.AddLabel(boardId, dto);
 
-            // Act
-            var result = await _service.GetLabelsByBoardId(boardId, userId);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Empty(result);
-        }
+        Assert.NotNull(result);
+    }
+    
+    [Fact]
+    public async Task UpdateLabel_ShouldReturnsLabel_WhenUpdatedSuccessful()
+    {
+        const int labelId = 1;
+        var label = new Label(title: "title", color: "color", boardId: 1) { Id = labelId };
+        var dto = new UpdateLabelDto { Title = "updated title" };
+        var response = new LabelResponse { Id = label.Id, Title = dto.Title, Color = label.Color, BoardId = label.BoardId };
         
-        [Fact]
-        public async Task AddLabel_ReturnsOutputLabelDetailsDto_WhenLabelIsAdded()
-        {
-            // Arrange
-            int boardId = 1, userId = 1;
-            var addLabelDto = new AddLabelDto { Title = "New Label", Color = "Blue" };
-            var newLabel = new Label(title: addLabelDto.Title, color: addLabelDto.Color, boardId: boardId) { Id = 1 };
-            var outputLabelDetailsDto = new OutputLabelDetailsDto 
-            { 
-                Id = newLabel.Id, 
-                Title = newLabel.Title, 
-                Color = newLabel.Color 
-            };
-
-            _mockLabelRepository.Setup(r => r.AddLabel(It.IsAny<Label>()))
-                                .ReturnsAsync(newLabel);
-            _mockMapper.Setup(m => m.Map<OutputLabelDetailsDto>(newLabel))
-                       .Returns(outputLabelDetailsDto);
-
-            // Act
-            var result = await _service.AddLabel(boardId, addLabelDto, userId);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(outputLabelDetailsDto.Id, result.Id);
-            Assert.Equal(outputLabelDetailsDto.Title, result.Title);
-            Assert.Equal(outputLabelDetailsDto.Color, result.Color);
-        }
-
-        [Fact]
-        public async Task AddLabel_ReturnsNull_WhenRepositoryReturnsNull()
-        {
-            // Arrange
-            int boardId = 1, userId = 1;
-            var addLabelDto = new AddLabelDto { Title = "New Label", Color = "Blue" };
-
-            _mockLabelRepository.Setup(r => r.AddLabel(It.IsAny<Label>()))
-                                .ReturnsAsync((Label?)null);
-
-            // Act
-            var result = await _service.AddLabel(boardId, addLabelDto, userId);
-
-            // Assert
-            Assert.Null(result);
-        }
+        _mockLabelRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Label, bool>>>())).ReturnsAsync(label);
+        _mockLabelRepository.Setup(r => r.UpdateAsync(It.IsAny<Label>()));
+        _mockMapper.Setup(m => m.Map<LabelResponse>(It.IsAny<Label>())).Returns(response);
         
-        [Fact]
-        public async Task UpdateLabel_ReturnsOutputLabelDetailsDto_WhenUpdateIsSuccessful()
-        {
-            // Arrange
-            int labelId = 1, userId = 1;
-            var existingLabel = new Label(title: "Old Title", color: "Blue", boardId: 1) { Id = labelId };
-            var updateLabelDto = new UpdateLabelDto { Title = "New Title", Color = "Green" };
-            var updatedLabel = new Label(title: updateLabelDto.Title, color: updateLabelDto.Color, boardId: existingLabel.BoardId) { Id = existingLabel.Id };
-            var outputLabelDetailsDto = new OutputLabelDetailsDto 
-            { 
-                Id = updatedLabel.Id, 
-                Title = updatedLabel.Title, 
-                Color = updatedLabel.Color 
-            };
+        var result = await _service.UpdateLabel(labelId, dto);
 
-            _mockLabelRepository.Setup(r => r.GetLabelById(labelId))
-                                .ReturnsAsync(existingLabel);
-            _mockLabelRepository.Setup(r => r.UpdateLabel(existingLabel))
-                                .ReturnsAsync(updatedLabel);
-            _mockMapper.Setup(m => m.Map<OutputLabelDetailsDto>(updatedLabel))
-                       .Returns(outputLabelDetailsDto);
+        Assert.NotNull(result);
+    }
 
-            // Act
-            var result = await _service.UpdateLabel(labelId, updateLabelDto, userId);
+    [Fact]
+    public async Task UpdateLabel_ShouldReturnsNull_WhenUpdatedUnsuccessful()
+    {
+        const int labelId = 1;
+        var dto = new UpdateLabelDto { Title = "title", Color = "color" };
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(outputLabelDetailsDto.Id, result.Id);
-            Assert.Equal(outputLabelDetailsDto.Title, result.Title);
-            Assert.Equal(outputLabelDetailsDto.Color, result.Color);
-        }
+        _mockLabelRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Label, bool>>>())).ReturnsAsync((Label?)null);
 
-        [Fact]
-        public async Task UpdateLabel_ReturnsNull_WhenLabelNotFound()
-        {
-            // Arrange
-            int labelId = 1, userId = 1;
-            var updateLabelDto = new UpdateLabelDto { Title = "New Title", Color = "Green" };
+        var result = await _service.UpdateLabel(labelId, dto);
 
-            _mockLabelRepository.Setup(r => r.GetLabelById(labelId))
-                                .ReturnsAsync((Label?)null);
+        Assert.Null(result);
+    }
+    
+    [Fact]
+    public async Task DeleteLabel_ShouldReturnsTrue_WhenDeletedSuccessful()
+    {
+        const int labelId = 1;
+        var label = new Label(title: "title", color: "color", boardId: 1) { Id = labelId };
 
-            // Act
-            var result = await _service.UpdateLabel(labelId, updateLabelDto, userId);
+        _mockLabelRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Label, bool>>>())).ReturnsAsync(label);
+        _mockLabelRepository.Setup(r => r.DeleteAsync(It.IsAny<Label>()));
 
-            // Assert
-            Assert.Null(result);
-        }
+        var result = await _service.DeleteLabel(labelId);
 
-        [Fact]
-        public async Task UpdateLabel_ReturnsNull_WhenUpdateFails()
-        {
-            // Arrange
-            int labelId = 1, userId = 1;
-            var existingLabel = new Label(title: "Old Title", color: "Blue", boardId: 1) { Id = labelId };
-            var updateLabelDto = new UpdateLabelDto { Title = "New Title", Color = "Green" };
+        Assert.True(result);
+    }
 
-            _mockLabelRepository.Setup(r => r.GetLabelById(labelId))
-                                .ReturnsAsync(existingLabel);
-            _mockLabelRepository.Setup(r => r.UpdateLabel(existingLabel))
-                                .ReturnsAsync((Label?)null);
-
-            // Act
-            var result = await _service.UpdateLabel(labelId, updateLabelDto, userId);
-
-            // Assert
-            Assert.Null(result);
-        }
+    [Fact]
+    public async Task DeleteLabel_ShouldReturnsFalse_WhenDeletedUnsuccessful()
+    {
+        const int labelId = 1;
         
-        [Fact]
-        public async Task DeleteLabel_ReturnsTrue_WhenDeletionIsSuccessful()
-        {
-            // Arrange
-            int labelId = 1, userId = 1;
-            var existingLabel = new Label(title: "Old Title", color: "Blue", boardId: 1) { Id = labelId };
+        _mockLabelRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Label, bool>>>())).ReturnsAsync((Label?)null);
 
-            _mockLabelRepository.Setup(r => r.GetLabelById(labelId))
-                                .ReturnsAsync(existingLabel);
-            _mockLabelRepository.Setup(r => r.DeleteLabel(existingLabel))
-                                .ReturnsAsync(true);
+        var result = await _service.DeleteLabel(labelId);
 
-            // Act
-            var result = await _service.DeleteLabel(labelId, userId);
-
-            // Assert
-            Assert.True(result);
-        }
-
-        [Fact]
-        public async Task DeleteLabel_ReturnsFalse_WhenLabelNotFound()
-        {
-            // Arrange
-            int labelId = 1, userId = 1;
-            _mockLabelRepository.Setup(r => r.GetLabelById(labelId))
-                                .ReturnsAsync((Label?)null);
-
-            // Act
-            var result = await _service.DeleteLabel(labelId, userId);
-
-            // Assert
-            Assert.False(result);
-        }
-
-        [Fact]
-        public async Task DeleteLabel_ReturnsFalse_WhenDeletionFails()
-        {
-            // Arrange
-            int labelId = 1, userId = 1;
-            var existingLabel = new Label(title: "Old Title", color: "Blue", boardId: 1) { Id = labelId };
-
-            _mockLabelRepository.Setup(r => r.GetLabelById(labelId))
-                                .ReturnsAsync(existingLabel);
-            _mockLabelRepository.Setup(r => r.DeleteLabel(existingLabel))
-                                .ReturnsAsync(false);
-
-            // Act
-            var result = await _service.DeleteLabel(labelId, userId);
-
-            // Assert
-            Assert.False(result);
-        }
+        Assert.False(result);
     }
 }

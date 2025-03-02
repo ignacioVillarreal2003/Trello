@@ -15,8 +15,5 @@ public class AddLabelDtoValidator : AbstractValidator<AddLabelDto>
             .MaximumLength(8).WithMessage("The color should be of maximum 8 characters")
             .Must(color => LabelColorValues.LabelColorsAllowed.Contains(color))
             .WithMessage($"The color must bo one of: {string.Join(", ", LabelColorValues.LabelColorsAllowed)}");
-
-        RuleFor(label => label.BoardId)
-            .NotEmpty().WithMessage("The boardId is required");
     }
 }

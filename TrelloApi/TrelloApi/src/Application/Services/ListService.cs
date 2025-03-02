@@ -59,7 +59,7 @@ public class ListService: BaseService, IListService
         }
     }
 
-    public async Task<ListResponse?> AddList(int boardId, AddListDto dto)
+    public async Task<ListResponse> AddList(int boardId, AddListDto dto)
     {
         try
         {

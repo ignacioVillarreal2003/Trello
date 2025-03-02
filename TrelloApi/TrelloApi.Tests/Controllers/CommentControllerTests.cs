@@ -1,10 +1,11 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.DTOs.Comment;
 
 namespace TrelloApi.Tests.Controllers
 {
@@ -25,231 +26,180 @@ namespace TrelloApi.Tests.Controllers
         
         private void SetUserId(int userId)
         {
-            var httpContext = new DefaultHttpContext();
-            httpContext.Items["UserId"] = userId;
+            var claims = new List<Claim>
+            {
+                new Claim("UserId", userId.ToString())
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+    
+            var httpContext = new DefaultHttpContext { User = principal };
             _controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
         }
         
         [Fact]
-        public async Task GetCommentById_ReturnsOk_WhenCommentFound()
+        public async Task GetCommentById_ShouldReturnsOk_WhenCommentFound()
         {
-            int userId = 1;
-            int commentId = 1;
-            var outputComment = new OutputCommentDetailsDto 
+            const int commentId = 1;
+            var response = new CommentResponse 
             { 
                 Id = commentId, 
-                Text = "Comment 1", 
-                Date = new DateTime(1, 1, 1), 
-                CardId = 10, 
+                Text = "text", 
+                CardId = 1, 
                 AuthorId = 1 
             };
 
-            _mockCommentService
-                .Setup(s => s.GetCommentById(commentId, userId))
-                .ReturnsAsync(outputComment);
+            _mockCommentService.Setup(s => s.GetCommentById(commentId)).ReturnsAsync(response);
 
             var result = await _controller.GetCommentById(commentId);
             var okResult = Assert.IsType<OkObjectResult>(result);
+            
             Assert.Equal(200, okResult.StatusCode);
-
-            var returnedComment = Assert.IsType<OutputCommentDetailsDto>(okResult.Value);
-            Assert.Equal(outputComment.Id, returnedComment.Id);
-            Assert.Equal(outputComment.Text, returnedComment.Text);
-            Assert.Equal(outputComment.Date, returnedComment.Date);
-            Assert.Equal(outputComment.CardId, returnedComment.CardId);
-            Assert.Equal(outputComment.AuthorId, returnedComment.AuthorId);
         }
         
         [Fact]
-        public async Task GetCommentById_ReturnsNotFound_WhenCommentNotFound()
+        public async Task GetCommentById_ShouldReturnsNotFound_WhenCommentNotFound()
         {
-            int userId = 1;
-            int commentId = 1;
-            OutputCommentDetailsDto? outputComment = null;
+            const int commentId = 1;
             
-            _mockCommentService
-                .Setup(s => s.GetCommentById(commentId, userId))
-                .ReturnsAsync(outputComment);
+            _mockCommentService.Setup(s => s.GetCommentById(commentId)).ReturnsAsync((CommentResponse?)null);
 
             var result = await _controller.GetCommentById(commentId);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            
             Assert.Equal(404, notFoundResult.StatusCode);
         }
         
         [Fact]
-        public async Task GetCommentsByCardId_ReturnsOk_WithComments()
+        public async Task GetCommentsByCardId_ShouldReturnsOk_WithCommentsFound()
         {
-            int userId = 1;
-            int cardId = 1;
-            var comments = new List<OutputCommentDetailsDto>
+            const int cardId = 1;
+            var response = new List<CommentResponse>
             {
-                new OutputCommentDetailsDto { Id = 1, Text = "Comment 1", Date = new DateTime(), CardId = cardId, AuthorId = 1 },
-                new OutputCommentDetailsDto { Id = 2, Text = "Comment 2", Date = new DateTime(), CardId = cardId, AuthorId = 2 }
+                new CommentResponse { Id = 1, Text = "text 1", CardId = cardId, AuthorId = 1 },
+                new CommentResponse { Id = 2, Text = "text 2", CardId = cardId, AuthorId = 2 }
             };
             
-            _mockCommentService
-                .Setup(s => s.GetCommentsByCardId(cardId, userId))
-                .ReturnsAsync(comments);
+            _mockCommentService.Setup(s => s.GetCommentsByCardId(cardId)).ReturnsAsync(response);
 
             var result = await _controller.GetCommentsByCardId(cardId);
             var okResult = Assert.IsType<OkObjectResult>(result);
+            var value = Assert.IsType<List<CommentResponse>>(okResult.Value);
+            
             Assert.Equal(200, okResult.StatusCode);
-
-            var returnedComments = Assert.IsType<List<OutputCommentDetailsDto>>(okResult.Value);
-            Assert.Equal(2, returnedComments.Count);
+            Assert.Equal(response.Count, value.Count);
         }
         
         [Fact]
-        public async Task GetCommentsByCardId_ReturnsOk_WithEmptyList()
+        public async Task GetCommentsByCardId_ShouldReturnsOk_WithCommentsNotFound()
         {
-            int userId = 1;
-            int cardId = 1;
-            var comments = new List<OutputCommentDetailsDto>();
+            const int cardId = 1;
             
-            _mockCommentService
-                .Setup(s => s.GetCommentsByCardId(cardId, userId))
-                .ReturnsAsync(comments);
+            _mockCommentService.Setup(s => s.GetCommentsByCardId(cardId)).ReturnsAsync([]);
 
             var result = await _controller.GetCommentsByCardId(cardId);
             var okResult = Assert.IsType<OkObjectResult>(result);
+            var value = Assert.IsType<List<CommentResponse>>(okResult.Value);
+            
             Assert.Equal(200, okResult.StatusCode);
-
-            var returnedComments = Assert.IsType<List<OutputCommentDetailsDto>>(okResult.Value);
-            Assert.Empty(returnedComments);
+            Assert.Empty(value);
         }
         
         [Fact]
-        public async Task AddComment_ReturnsCreated_WhenCommentIsAdded()
+        public async Task AddComment_ShouldReturnsCreated_WhenCommentIsAdded()
         {
-            int userId = 1;
-            int cardId = 1;
-            var addCommentDto = new AddCommentDto 
+            const int userId = 1, cardId = 1;
+            var dto = new AddCommentDto { Text = "text" };
+            var response = new CommentResponse 
             { 
-                Text = "New Comment", 
-                CardId = cardId, 
-                AuthorId = 1 
-            };
-            var outputComment = new OutputCommentDetailsDto 
-            { 
-                Id = 2, 
-                Text = "New Comment", 
-                Date = new DateTime(), 
+                Id = 1, 
+                Text = dto.Text, 
                 CardId = cardId, 
                 AuthorId = 1 
             };
             
-            _mockCommentService
-                .Setup(s => s.AddComment(cardId, addCommentDto, userId))
-                .ReturnsAsync(outputComment);
+            _mockCommentService.Setup(s => s.AddComment(cardId, dto, userId)).ReturnsAsync(response);
 
-            var result = await _controller.AddComment(cardId, addCommentDto);
+            var result = await _controller.AddComment(cardId, dto);
             var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+            
             Assert.Equal(201, createdResult.StatusCode);
-
-            var returnedComment = Assert.IsType<OutputCommentDetailsDto>(createdResult.Value);
-            Assert.Equal(outputComment.Id, returnedComment.Id);
-            Assert.Equal(outputComment.Text, returnedComment.Text);
-            Assert.Equal(outputComment.Date, returnedComment.Date);
-            Assert.Equal(outputComment.CardId, returnedComment.CardId);
-            Assert.Equal(outputComment.AuthorId, returnedComment.AuthorId);
         }
         
         [Fact]
-        public async Task AddComment_ReturnsBadRequest_WhenCommentIsNotAdded()
+        public async Task AddComment_ShouldReturnsBadRequest_WhenAddedUnsuccessful()
         {
-            int userId = 1;
-            int cardId = 1;
-            var addCommentDto = new AddCommentDto 
-            { 
-                Text = "New Comment", 
-                CardId = cardId, 
-                AuthorId = 1 
-            };
+            const int userId = 1, cardId = 1;
+            var dto = new AddCommentDto { Text = "text", };
             
-            _mockCommentService
-                .Setup(s => s.AddComment(cardId, addCommentDto, userId))
-                .ReturnsAsync((OutputCommentDetailsDto?)null);
+            _mockCommentService.Setup(s => s.AddComment(cardId, dto, userId)).ReturnsAsync((CommentResponse?)null);
 
-            var result = await _controller.AddComment(cardId, addCommentDto);
+            var result = await _controller.AddComment(cardId, dto);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            
             Assert.Equal(400, badRequestResult.StatusCode);
         }
         
         [Fact]
-        public async Task UpdateComment_ReturnsOk_WhenCommentIsUpdated()
+        public async Task UpdateComment_ShouldReturnsOk_WhenUpdatedSuccessful()
         {
-            int userId = 1;
-            int commentId = 1;
-            var updateCommentDto = new UpdateCommentDto { Text = "Updated Comment" };
-            var outputComment = new OutputCommentDetailsDto 
+            const int commentId = 1;
+            var dto = new UpdateCommentDto { Text = "updated text" };
+            var response = new CommentResponse 
             { 
                 Id = commentId, 
-                Text = "Updated Comment", 
-                Date = new DateTime(), 
+                Text = dto.Text, 
                 CardId = 1, 
                 AuthorId = 1 
             };
             
-            _mockCommentService
-                .Setup(s => s.UpdateComment(commentId, updateCommentDto, userId))
-                .ReturnsAsync(outputComment);
+            _mockCommentService.Setup(s => s.UpdateComment(commentId, dto)).ReturnsAsync(response);
 
-            var result = await _controller.UpdateComment(commentId, updateCommentDto);
+            var result = await _controller.UpdateComment(commentId, dto);
             var okResult = Assert.IsType<OkObjectResult>(result);
+            
             Assert.Equal(200, okResult.StatusCode);
-
-            var returnedComment = Assert.IsType<OutputCommentDetailsDto>(okResult.Value);
-            Assert.Equal(outputComment.Id, returnedComment.Id);
-            Assert.Equal(outputComment.Text, returnedComment.Text);
-            Assert.Equal(outputComment.Date, returnedComment.Date);
-            Assert.Equal(outputComment.CardId, returnedComment.CardId);
-            Assert.Equal(outputComment.AuthorId, returnedComment.AuthorId);
         }
         
         [Fact]
-        public async Task UpdateComment_ReturnsNotFound_WhenCommentNotFound()
+        public async Task UpdateComment_ShouldReturnsNotFound_WhenUpdatedUnsuccessful()
         {
-            int userId = 1;
-            int commentId = 1;
-            var updateCommentDto = new UpdateCommentDto { Text = "Updated Comment" };
-            OutputCommentDetailsDto? outputComment = null;
+            const int commentId = 1;
+            var updateCommentDto = new UpdateCommentDto { Text = "updated text" };
             
-            _mockCommentService
-                .Setup(s => s.UpdateComment(commentId, updateCommentDto, userId))
-                .ReturnsAsync(outputComment);
+            _mockCommentService.Setup(s => s.UpdateComment(commentId, updateCommentDto)).ReturnsAsync((CommentResponse?)null);
 
             var result = await _controller.UpdateComment(commentId, updateCommentDto);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            
             Assert.Equal(404, notFoundResult.StatusCode);
         }
         
         [Fact]
-        public async Task DeleteComment_ReturnsNoContent_WhenDeletionIsSuccessful()
+        public async Task DeleteComment_ShouldReturnsNoContent_WhenDeletedSuccessful()
         {
-            int userId = 1;
-            int commentId = 1;
+            const int commentId = 1;
             
             _mockCommentService
-                .Setup(s => s.DeleteComment(commentId, userId))
+                .Setup(s => s.DeleteComment(commentId))
                 .ReturnsAsync(true);
 
             var result = await _controller.DeleteComment(commentId);
             var noContentResult = Assert.IsType<NoContentResult>(result);
+            
             Assert.Equal(204, noContentResult.StatusCode);
         }
         
         [Fact]
-        public async Task DeleteComment_ReturnsNotFound_WhenDeletionFails()
+        public async Task DeleteComment_ShouldReturnsNotFound_WhenDeletedUnsuccessful()
         {
-            int userId = 1;
-            int commentId = 1;
+            const int commentId = 1;
             
-            _mockCommentService
-                .Setup(s => s.DeleteComment(commentId, userId))
-                .ReturnsAsync(false);
+            _mockCommentService.Setup(s => s.DeleteComment(commentId)).ReturnsAsync(false);
 
             var result = await _controller.DeleteComment(commentId);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            
             Assert.Equal(404, notFoundResult.StatusCode);
         }
     }

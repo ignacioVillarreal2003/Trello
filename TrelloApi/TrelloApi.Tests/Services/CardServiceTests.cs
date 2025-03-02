@@ -1,300 +1,169 @@
+using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using TrelloApi.Application.Services;
-using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.DTOs.Card;
 using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Persistence.Interfaces;
-using Xunit;
 
-namespace TrelloApi.Tests.Services
+namespace TrelloApi.Tests.Services;
+
+public class CardServiceTests
 {
-    public class CardServiceTests
+    private readonly Mock<ICardRepository> _mockCardRepository;
+    private readonly Mock<ILogger<CardService>> _mockLogger;
+    private readonly Mock<IMapper> _mockMapper;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
+    private readonly CardService _service;
+
+    public CardServiceTests()
     {
-        private readonly Mock<ICardRepository> _mockCardRepository;
-        private readonly Mock<ILogger<CardService>> _mockLogger;
-        private readonly Mock<IMapper> _mockMapper;
-        private readonly Mock<IBoardAuthorizationService> _mockBoardAuthorizationService;
-        private readonly CardService _service;
-
-        public CardServiceTests()
-        {
-            _mockCardRepository = new Mock<ICardRepository>();
-            _mockLogger = new Mock<ILogger<CardService>>();
-            _mockMapper = new Mock<IMapper>();
-            _mockBoardAuthorizationService = new Mock<IBoardAuthorizationService>();
-
-            _service = new CardService(
-                _mockMapper.Object,
-                _mockBoardAuthorizationService.Object,
-                _mockLogger.Object,
-                _mockCardRepository.Object);
-        }
+        _mockCardRepository = new Mock<ICardRepository>();
+        _mockLogger = new Mock<ILogger<CardService>>();
+        _mockMapper = new Mock<IMapper>();
+        _mockUnitOfWork = new Mock<IUnitOfWork>();
         
-        [Fact]
-        public async Task GetCardById_ReturnsOutputCardDetailsDto_WhenCardExists()
-        {
-            // Arrange
-            int cardId = 1, userId = 1;
-            var card = new Card("Card Title", "Card Description", listId: 1, priority: "Medium") { Id = cardId };
-            var outputDto = new OutputCardDetailsDto
-            {
-                // Ajusta las propiedades según tu implementación
-                Id = card.Id,
-                Title = card.Title,
-                Description = card.Description,
-                Priority = card.Priority
-            };
-
-            _mockCardRepository.Setup(r => r.GetCardById(cardId))
-                               .ReturnsAsync(card);
-            _mockMapper.Setup(m => m.Map<OutputCardDetailsDto>(card))
-                       .Returns(outputDto);
-
-            // Act
-            var result = await _service.GetCardById(cardId, userId);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(outputDto.Id, result.Id);
-            Assert.Equal(outputDto.Title, result.Title);
-            Assert.Equal(outputDto.Description, result.Description);
-            Assert.Equal(outputDto.Priority, result.Priority);
-        }
+        _service = new CardService(
+            _mockMapper.Object,
+            _mockUnitOfWork.Object,
+            _mockLogger.Object,
+            _mockCardRepository.Object);
+    }
+    
+    [Fact]
+    public async Task GetCardById_ShouldReturnsCard_WhenCardFound()
+    {
+        const int cardId = 1;
+        var card = new Card("title", "description", listId: 1, priority: "priority") { Id = cardId };
+        var response = new CardResponse
+            { Id = 1, Title = card.Title, Description = card.Description, Priority = card.Priority };
         
-        [Fact]
-        public async Task GetCardById_ReturnsNull_WhenCardDoesNotExist()
-        {
-            // Arrange
-            int cardId = 1, userId = 1;
-            _mockCardRepository.Setup(r => r.GetCardById(cardId))
-                               .ReturnsAsync((Card?)null);
+        _mockCardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Card, bool>>>())).ReturnsAsync(card);
+        _mockMapper.Setup(m => m.Map<CardResponse>(It.IsAny<Card>())).Returns(response);
 
-            // Act
-            var result = await _service.GetCardById(cardId, userId);
+        var result = await _service.GetCardById(cardId);
 
-            // Assert
-            Assert.Null(result);
-        }
-
-        [Fact]
-        public async Task GetCardsByListId_ReturnsListOfOutputCardDetailsDto_WhenCardsExist()
-        {
-            // Arrange
-            int listId = 1, userId = 1;
-            var cards = new List<Card>
-            {
-                new Card("Card 1", "Description 1", listId, "Medium") { Id = 1 },
-                new Card("Card 2", "Description 2", listId, "High") { Id = 2 }
-            };
-            var outputDtos = new List<OutputCardDetailsDto>
-            {
-                new OutputCardDetailsDto { Id = 1, Title = "Card 1", Description = "Description 1", Priority = "Medium" },
-                new OutputCardDetailsDto { Id = 2, Title = "Card 2", Description = "Description 2", Priority = "High" }
-            };
-
-            _mockCardRepository.Setup(r => r.GetCardsByListId(listId))
-                               .ReturnsAsync(cards);
-            _mockMapper.Setup(m => m.Map<List<OutputCardDetailsDto>>(cards))
-                       .Returns(outputDtos);
-
-            // Act
-            var result = await _service.GetCardsByListId(listId, userId);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(outputDtos.Count, result.Count);
-        }
-
-        [Fact]
-        public async Task GetCardsByListId_ReturnsEmptyList_WhenNoCardsExist()
-        {
-            // Arrange
-            int listId = 1, userId = 1;
-            var cards = new List<Card>();
-            var outputDtos = new List<OutputCardDetailsDto>();
-
-            _mockCardRepository.Setup(r => r.GetCardsByListId(listId))
-                               .ReturnsAsync(cards);
-            _mockMapper.Setup(m => m.Map<List<OutputCardDetailsDto>>(cards))
-                       .Returns(outputDtos);
-
-            // Act
-            var result = await _service.GetCardsByListId(listId, userId);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Empty(result);
-        }
+        Assert.NotNull(result);
+    }
+    
+    [Fact]
+    public async Task GetCardById_ShouldReturnsNull_WhenCardNotFound()
+    {
+        const int cardId = 1;
         
-        [Fact]
-        public async Task AddCard_ReturnsOutputCardDetailsDto_WhenCardIsAdded()
+        _mockCardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Card, bool>>>())).ReturnsAsync((Card?)null);
+
+        var result = await _service.GetCardById(cardId);
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task GetCardsByListId_ShouldReturnsCards_WhenCardsFound()
+    {
+        const int listId = 1;
+        var cards = new List<Card>
         {
-            // Arrange
-            int listId = 1, userId = 1;
-            var addCardDto = new AddCardDto { Title = "New Card", Description = "New Description", Priority = "Low" };
-            var newCard = new Card(addCardDto.Title, addCardDto.Description, listId, addCardDto.Priority) { Id = 1 };
-            var outputDto = new OutputCardDetailsDto
-            {
-                Id = newCard.Id,
-                Title = newCard.Title,
-                Description = newCard.Description,
-                Priority = newCard.Priority
-            };
-
-            _mockCardRepository.Setup(r => r.AddCard(It.IsAny<Card>()));
-            _mockMapper.Setup(m => m.Map<OutputCardDetailsDto>(newCard))
-                       .Returns(outputDto);
-
-            // Act
-            var result = await _service.AddCard(listId, addCardDto, userId);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(outputDto.Id, result.Id);
-            Assert.Equal(outputDto.Title, result.Title);
-            Assert.Equal(outputDto.Description, result.Description);
-            Assert.Equal(outputDto.Priority, result.Priority);
-        }
-
-        [Fact]
-        public async Task AddCard_ReturnsNull_WhenRepositoryReturnsNull()
+            new Card("title 1", "description 1", listId, "priority") { Id = 1 },
+            new Card("title 2", "description 2", listId, "priority") { Id = 2 }
+        };
+        var response = new List<CardResponse>
         {
-            // Arrange
-            int listId = 1, userId = 1;
-            var addCardDto = new AddCardDto { Title = "New Card", Description = "New Description", Priority = "Low" };
-
-            _mockCardRepository.Setup(r => r.AddCard(It.IsAny<Card>()));
-
-            // Act
-            var result = await _service.AddCard(listId, addCardDto, userId);
-
-            // Assert
-            Assert.Null(result);
-        }
+            new CardResponse { Id = 1, Title = cards[0].Title, Description = cards[0].Description, Priority = cards[0].Priority },
+            new CardResponse { Id = 2, Title = cards[1].Title, Description = cards[1].Description, Priority = cards[1].Priority }
+        };
         
-        [Fact]
-        public async Task UpdateCard_ReturnsOutputCardDetailsDto_WhenUpdateIsSuccessful()
-        {
-            // Arrange
-            int cardId = 1, userId = 1;
-            var existingCard = new Card("Old Title", "Old Description", listId: 1, priority: "Medium") { Id = cardId };
-            var updateCardDto = new UpdateCardDto { Title = "New Title", Description = "New Description", Priority = "High" };
-            // Simula la actualización: se crean una nueva instancia con las propiedades actualizadas.
-            var updatedCard = new Card(updateCardDto.Title, updateCardDto.Description, existingCard.ListId, updateCardDto.Priority) { Id = cardId };
-            var outputDto = new OutputCardDetailsDto
-            {
-                Id = updatedCard.Id,
-                Title = updatedCard.Title,
-                Description = updatedCard.Description,
-                Priority = updatedCard.Priority
-            };
+        _mockCardRepository.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Card, bool>>>(), null)).ReturnsAsync(cards);
+        _mockMapper.Setup(m => m.Map<List<CardResponse>>(It.IsAny<List<Card>>())).Returns(response);
+        var result = await _service.GetCardsByListId(listId);
 
-            _mockCardRepository.Setup(r => r.GetCardById(cardId))
-                               .ReturnsAsync(existingCard);
-            _mockCardRepository.Setup(r => r.UpdateCard(existingCard));
-            _mockMapper.Setup(m => m.Map<OutputCardDetailsDto>(updatedCard))
-                       .Returns(outputDto);
+        Assert.NotNull(result);
+        Assert.Equal(response.Count, result.Count);
+    }
 
-            // Act
-            var result = await _service.UpdateCard(cardId, updateCardDto, userId);
+    [Fact]
+    public async Task GetCardsByListId_ShouldReturnsEmptyList_WhenCardsNotFound()
+    {
+        const int listId = 1;
 
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(outputDto.Id, result.Id);
-            Assert.Equal(outputDto.Title, result.Title);
-            Assert.Equal(outputDto.Description, result.Description);
-            Assert.Equal(outputDto.Priority, result.Priority);
-        }
+        _mockCardRepository.Setup(r => r.GetListAsync(It.IsAny<Expression<Func<Card, bool>>>(), null)).ReturnsAsync([]);
+        _mockMapper.Setup(m => m.Map<List<CardResponse>>(It.IsAny<List<Card>>())).Returns([]);
 
-        [Fact]
-        public async Task UpdateCard_ReturnsNull_WhenCardNotFound()
-        {
-            // Arrange
-            int cardId = 1, userId = 1;
-            var updateCardDto = new UpdateCardDto { Title = "New Title" };
+        var result = await _service.GetCardsByListId(listId);
 
-            _mockCardRepository.Setup(r => r.GetCardById(cardId))
-                               .ReturnsAsync((Card?)null);
+        Assert.NotNull(result);
+        Assert.Empty(result);
+    }
 
-            // Act
-            var result = await _service.UpdateCard(cardId, updateCardDto, userId);
-
-            // Assert
-            Assert.Null(result);
-        }
-
-        [Fact]
-        public async Task UpdateCard_ReturnsNull_WhenUpdateFails()
-        {
-            // Arrange
-            int cardId = 1, userId = 1;
-            var existingCard = new Card("Old Title", "Old Description", listId: 1, priority: "Medium") { Id = cardId };
-            var updateCardDto = new UpdateCardDto { Title = "New Title" };
-
-            _mockCardRepository.Setup(r => r.GetCardById(cardId))
-                               .ReturnsAsync(existingCard);
-            _mockCardRepository.Setup(r => r.UpdateCard(existingCard));
-
-            // Act
-            var result = await _service.UpdateCard(cardId, updateCardDto, userId);
-
-            // Assert
-            Assert.Null(result);
-        }
+    [Fact]
+    public async Task AddCard_ShouldReturnsCard_WhenAddedSuccessful()
+    {
+        const int listId = 1;
+        var dto = new AddCardDto { Title = "title", Description = "description", Priority = "priority" };
+        var response = new CardResponse { Id = 1, Title = dto.Title, Description = dto.Description, Priority = dto.Priority };
         
-        [Fact]
-        public async Task DeleteCard_ReturnsTrue_WhenDeletionIsSuccessful()
-        {
-            // Arrange
-            int cardId = 1, userId = 1;
-            var existingCard = new Card("Title", "Description", listId: 1, priority: "Medium") { Id = cardId };
+        _mockCardRepository.Setup(r => r.CreateAsync(It.IsAny<Card>()));
+        _mockMapper.Setup(m => m.Map<CardResponse>(It.IsAny<Card>())).Returns(response);
+        
+        var result = await _service.AddCard(listId, dto);
 
-            _mockCardRepository.Setup(r => r.GetCardById(cardId))
-                               .ReturnsAsync(existingCard);
-            _mockCardRepository.Setup(r => r.DeleteCard(existingCard));
+        Assert.NotNull(result);
+    }
+    
+    [Fact]
+    public async Task UpdateCard_ShouldReturnsCard_WhenUpdatedSuccessful()
+    {
+        const int cardId = 1;
+        var card = new Card("title", "description", listId: 1, priority: "priority") { Id = cardId };
+        var dto = new UpdateCardDto { Title = "updated title" };
+        var response = new CardResponse { Id = cardId, Title = dto.Title, Description = card.Description, Priority = card.Priority, ListId = card.ListId };
 
-            // Act
-            var result = await _service.DeleteCard(cardId, userId);
+        _mockCardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Card, bool>>>())).ReturnsAsync(card);
+        _mockCardRepository.Setup(r => r.UpdateAsync(It.IsAny<Card>()));
+        _mockMapper.Setup(m => m.Map<CardResponse>(It.IsAny<Card>())).Returns(response);
 
-            // Assert
-            Assert.True(result);
-        }
+        var result = await _service.UpdateCard(cardId, dto);
 
-        [Fact]
-        public async Task DeleteCard_ReturnsFalse_WhenCardNotFound()
-        {
-            // Arrange
-            int cardId = 1, userId = 1;
-            _mockCardRepository.Setup(r => r.GetCardById(cardId))
-                               .ReturnsAsync((Card?)null);
+        Assert.NotNull(result);
+    }
 
-            // Act
-            var result = await _service.DeleteCard(cardId, userId);
+    [Fact]
+    public async Task UpdateCard_ShouldReturnsNull_WhenUpdatedUnsuccessful()
+    {
+        const int cardId = 1;
+        var dto = new UpdateCardDto { Title = "updated title" };
 
-            // Assert
-            Assert.False(result);
-        }
+        _mockCardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Card, bool>>>())).ReturnsAsync((Card?)null);
+        
+        var result = await _service.UpdateCard(cardId, dto);
 
-        [Fact]
-        public async Task DeleteCard_ReturnsFalse_WhenDeletionFails()
-        {
-            // Arrange
-            int cardId = 1, userId = 1;
-            var existingCard = new Card("Title", "Description", listId: 1, priority: "Medium") { Id = cardId };
+        Assert.Null(result);
+    }
+    
+    [Fact]
+    public async Task DeleteCard_ShouldReturnsTrue_WhenDeletedSuccessful()
+    {
+        const int cardId = 1;
+        var card = new Card("title", "description", listId: 1, priority: "priority") { Id = cardId };
 
-            _mockCardRepository.Setup(r => r.GetCardById(cardId))
-                               .ReturnsAsync(existingCard);
-            _mockCardRepository.Setup(r => r.DeleteCard(existingCard));
+        _mockCardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Card, bool>>>())).ReturnsAsync(card);
+        _mockCardRepository.Setup(r => r.DeleteAsync(It.IsAny<Card>()));
 
-            // Act
-            var result = await _service.DeleteCard(cardId, userId);
+        var result = await _service.DeleteCard(cardId);
 
-            // Assert
-            Assert.False(result);
-        }
+        Assert.True(result);
+    }
+
+    [Fact]
+    public async Task DeleteCard_ShouldReturnsFalse_WhenDeletedUnsuccessful()
+    {
+        const int cardId = 1;
+
+        _mockCardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Card, bool>>>())).ReturnsAsync((Card?)null);
+
+        var result = await _service.DeleteCard(cardId);
+
+        Assert.False(result);
     }
 }

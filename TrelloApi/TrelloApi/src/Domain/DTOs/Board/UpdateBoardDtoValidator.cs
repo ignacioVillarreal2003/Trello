@@ -15,7 +15,7 @@ public class UpdateBoardDtoValidator : AbstractValidator<UpdateBoardDto>
 
         RuleFor(board => board.Background)
             .MaximumLength(32).WithMessage("The background should be of maximum 32 characters")
-            .Must(background => BoardBackgroundValues.BoardBackgroundsAllowed.Contains(background))
+            .Must(background => background == null || BoardBackgroundValues.BoardBackgroundsAllowed.Contains(background))
             .WithMessage($"The background must bo one of: {string.Join(", ", BoardBackgroundValues.BoardBackgroundsAllowed)}");
     }
 }

@@ -1,4 +1,6 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Application.Utils;
 using TrelloApi.Domain.Constants;
@@ -72,7 +74,7 @@ public class UserService: BaseService, IUserService
         }
     }
     
-    public async Task<UserResponse?> RegisterUser(RegisterUserDto dto)
+    public async Task<UserResponse> RegisterUser(RegisterUserDto dto)
     {
         try
         {
@@ -103,7 +105,6 @@ public class UserService: BaseService, IUserService
 
             if (!_encrypt.ComparePassword(dto.Password, user.Password))
             {
-                _logger.LogWarning("Invalid user credentials for user {Email}.", dto.Email);
                 throw new UnauthorizedAccessException("Invalid user credentials.");
             }
 

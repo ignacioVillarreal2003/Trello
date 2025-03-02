@@ -1,13 +1,12 @@
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
 using Microsoft.Extensions.DependencyInjection;
-using TrelloApi.app;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Application.Utils;
+using TrelloApi.Domain.DTOs.Comment;
 using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Persistence.Data;
-using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Integrations;
 
@@ -25,14 +24,15 @@ public class CommentIntegrationTests: IClassFixture<CustomWebApplicationFactory<
         _dbContext = _scope.ServiceProvider.GetRequiredService<TrelloContext>();
 
         var jwtService = _scope.ServiceProvider.GetRequiredService<IJwtService>();
-        var token = jwtService.GenerateToken(1);
+        var token = jwtService.GenerateAccessToken(1);
         _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
     }
 
     [Fact]
-    public async Task GetCommentById_ReturnsOk_WhenCommentExists()
+    public async Task GetCommentById_ShouldReturnsComment_WhenCommentFound()
     {
-        var comment = new Comment(text: "title", cardId: 1, authorId: 1);
+        var comment = new Comment(text: "text", cardId: 1, authorId: 1);
+        
         _dbContext.Comments.Add(comment);
         await _dbContext.SaveChangesAsync();
         
@@ -42,104 +42,110 @@ public class CommentIntegrationTests: IClassFixture<CustomWebApplicationFactory<
     }
     
     [Fact]
-    public async Task GetCommentById_ReturnsNotFound_WhenCommentNotExists()
+    public async Task GetCommentById_ShouldReturnsNotFound_WhenCommentNotFound()
     {
-        var commentId = 1;
+        const int commentId = 1;
+        
         var response = await _client.GetAsync($"/Comment/{commentId}");
         
         Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
     
     [Fact]
-    public async Task GetCommentsByCardId_ReturnsOk_WithCommentList()
+    public async Task GetCommentsByCardId_ShouldReturnsComments_WhenCommentsFound()
     {
-        var cardId = 1;
-        var comment1 = new Comment(text: "title 1", cardId: 1, authorId: 1);
-        var comment2 = new Comment(text: "title 2", cardId: 1, authorId: 1);
+        const int cardId = 1;
+        var comment1 = new Comment(text: "text 1", cardId: 1, authorId: 1);
+        var comment2 = new Comment(text: "text 2", cardId: 1, authorId: 1);
+        
         _dbContext.Comments.Add(comment1);
         _dbContext.Comments.Add(comment2);
         await _dbContext.SaveChangesAsync();
         
-        var response = await _client.GetAsync($"/Comment/task/{cardId}");
+        var response = await _client.GetAsync($"/Comment/card/{cardId}");
         
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        
+        var body = await response.Content.ReadAsStringAsync();
+        var comments = JsonSerializer.Deserialize<List<CommentResponse>>(body);
+
+        Assert.NotNull(comments);
+        Assert.Equal(2, comments.Count);
     }
     
     [Fact]
-    public async Task GetComments_ReturnsOk_WithEmptyCommentList()
+    public async Task GetCommentsByCardId_ShouldReturnsEmptyList_WhenCommentsNotFound()
     {
-        var cardId = 1;
+        const int cardId = 1;
         
-        var response = await _client.GetAsync($"/Comment/task/{cardId}");
-        
+        var response = await _client.GetAsync($"/Comment/card/{cardId}");
+
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        
+        var body = await response.Content.ReadAsStringAsync();
+        var comments = JsonSerializer.Deserialize<List<CommentResponse>>(body);
+        
+        Assert.NotNull(comments);
+        Assert.Empty(comments);
     }
     
     [Fact]
-    public async Task AddComment_ReturnsCreated_WhenCommentIsAdded()
+    public async Task AddComment_ShouldReturnsCreated_WhenAddedSuccessful()
     {
-        var cardId = 1;
-        var addCommentDto = new { Text = "Test Comment", AuthorId = 1 };
-        var response = await _client.PostAsJsonAsync($"/Comment/task/{cardId}", addCommentDto);
+        const int cardId = 1;
+        var dto = new { Text = "text", AuthorId = 1 };
+        
+        var response = await _client.PostAsJsonAsync($"/Comment/card/{cardId}", dto);
         
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
     }
     
     [Fact]
-    public async Task AddComment_ReturnsNotCreated_WhenCommentIsNotAdded()
+    public async Task UpdateComment_ShouldReturnsOk_WhenUpdatedSuccessful()
     {
-        var cardId = 1;
-        var addCommentDto = new { Text = "Test Comment" };
+        var comment = new Comment(text: "text", cardId: 1, authorId: 1);
         
-        var response = await _client.PostAsJsonAsync($"/Comment/task/{cardId}", addCommentDto);
-        
-        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-    }
-    
-    [Fact]
-    public async Task UpdateComment_ReturnsOk_WhenCommentIsUpdated()
-    {
-        var comment = new Comment(text: "title", cardId: 1, authorId: 1);
         _dbContext.Comments.Add(comment);
         await _dbContext.SaveChangesAsync();
         
-        var updateCommentDto = new { text = "Updated Comment" };
+        var dto = new { text = "updated text" };
         
-        var response = await _client.PutAsJsonAsync($"/Comment/{comment.Id}", updateCommentDto);
+        var response = await _client.PutAsJsonAsync($"/Comment/{comment.Id}", dto);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
     }
     
     [Fact]
-    public async Task UpdateComment_ReturnsOk_WhenCommentIsNotUpdated()
+    public async Task UpdateComment_ShouldReturnsBadRequest_WhenUpdatedUnsuccessful()
     {
-        var commentId = 1;
-        var updateCommentDto = new { title = "Updated Comment" };
+        const int commentId = 1;
+        var dto = new { title = "updated title" };
         
-        var response = await _client.PutAsJsonAsync($"/Comment/{commentId}", updateCommentDto);
+        var response = await _client.PutAsJsonAsync($"/Comment/{commentId}", dto);
         
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
     }
     
     [Fact]
-    public async Task DeleteComment_ReturnsOk_WhenCommentIsDeleted()
+    public async Task DeleteComment_ShouldReturnsNoContent_WhenDeletedSuccessful()
     {
-        var comment = new Comment(text: "title", cardId: 1, authorId: 1);
+        var comment = new Comment(text: "text", cardId: 1, authorId: 1);
+        
         _dbContext.Comments.Add(comment);
         await _dbContext.SaveChangesAsync();
         
         var response = await _client.DeleteAsync($"/Comment/{comment.Id}");
         
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
     }
     
     [Fact]
-    public async Task DeleteComment_ReturnsNotFound_WhenCommentIsNotDeleted()
+    public async Task DeleteComment_ShouldReturnsNotFound_WhenDeletedUnsuccessful()
     {
-        var commentId = 1;
+        const int commentId = 1;
         
         var response = await _client.DeleteAsync($"/Comment/{commentId}");
         
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

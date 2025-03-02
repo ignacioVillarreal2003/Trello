@@ -1,20 +1,16 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using Moq;
-using TrelloApi.app;
 using TrelloApi.Domain.Entities;
-using TrelloApi.Infrastructure.Persistence;
 using TrelloApi.Infrastructure.Persistence.Data;
+using TrelloApi.Infrastructure.Persistence.Interfaces;
 using TrelloApi.Infrastructure.Persistence.Repositories;
-using Task = System.Threading.Tasks.Task;
 
 namespace TrelloApi.Tests.Repositories;
 
 public class CommentRepositoryTests
 {
-    private readonly CommentRepository _repository;
+    private readonly ICommentRepository _repository;
     private readonly TrelloContext _context;
-    private readonly Mock<ILogger<CommentRepository>> _mockLogger;
+    private readonly IUnitOfWork _unitOfWork;
 
     public CommentRepositoryTests()
     {
@@ -23,20 +19,20 @@ public class CommentRepositoryTests
             .Options;
 
         _context = new TrelloContext(options);
-        _mockLogger = new Mock<ILogger<CommentRepository>>();
-        _repository = new CommentRepository(_context, _mockLogger.Object);
+        _unitOfWork = new FakeUnitOfWork(_context);
+        _repository = new CommentRepository(_unitOfWork);
     }
     
     [Fact]
     public async Task GetCommentById_ShouldReturnComment_WhenCommentExists()
     {
         int commentId = 1;
-        var comment = new Comment(text: "text", cardId: 1, authorId: 1) { Id = commentId };
+        var comment = new Comment("text", cardId: 1, authorId: 1) { Id = commentId };
         
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.GetCommentById(commentId);
+        var result = await _repository.GetAsync(c => c.Id == commentId);
         
         Assert.NotNull(result);
         Assert.Equal(commentId, result.Id);
@@ -47,7 +43,7 @@ public class CommentRepositoryTests
     {
         int commentId = 1;
         
-        var result = await _repository.GetCommentById(commentId);
+        var result = await _repository.GetAsync(c => c.Id == commentId);
         
         Assert.Null(result);
     }
@@ -56,16 +52,16 @@ public class CommentRepositoryTests
     public async Task GetCommentsByCardId_ShouldReturnComments_WhenCardHasComments()
     {
         int cardId = 1;
-        var comment1 = new Comment(text: "text 1", cardId: 1, authorId: 1) { Id = 1 };
-        var comment2 = new Comment(text: "text 2", cardId: 1, authorId: 1) { Id = 2 };
+        var comment1 = new Comment("text 1", cardId, authorId: 1) { Id = 1 };
+        var comment2 = new Comment("text 2", cardId, authorId: 1) { Id = 2 };
 
         _context.Comments.AddRange(comment1, comment2);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.GetCommentsByCardId(cardId);
+        var result = await _repository.GetListAsync(c => c.CardId == cardId);
         
         Assert.NotNull(result);
-        Assert.Equal(2, result.Count);
+        Assert.Equal(2, result.Count());
     }
 
     [Fact]
@@ -73,7 +69,7 @@ public class CommentRepositoryTests
     {
         int cardId = 1;
         
-        var result = await _repository.GetCommentsByCardId(cardId);
+        var result = await _repository.GetListAsync(c => c.CardId == cardId);
         
         Assert.NotNull(result);
         Assert.Empty(result);
@@ -82,9 +78,11 @@ public class CommentRepositoryTests
     [Fact]
     public async Task AddComment_ShouldPersistComment_WhenAddedSuccessfully()
     {
-        var comment = new Comment(text: "text", cardId: 1, authorId: 1 ) { Id = 1 };
+        var comment = new Comment("text", cardId: 1, authorId: 1) { Id = 1 };
         
-        await _repository.AddComment(comment);
+        await _repository.CreateAsync(comment);
+        await _unitOfWork.CommitAsync();
+        
         var result = await _context.Comments.FindAsync(comment.Id);
 
         Assert.NotNull(result);
@@ -94,28 +92,32 @@ public class CommentRepositoryTests
     [Fact]
     public async Task UpdateComment_ShouldPersistChanges_WhenUpdateIsSuccessful()
     {
-        var comment = new Comment(text: "text", cardId: 1, authorId: 1 ) { Id = 1 };
+        var comment = new Comment("text", cardId: 1, authorId: 1) { Id = 1 };
 
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
         
         comment.Text = "updated text";
-        await _repository.UpdateComment(comment);
+        await _repository.UpdateAsync(comment);
+        await _unitOfWork.CommitAsync();
+        
         var result = await _context.Comments.FindAsync(comment.Id);
 
         Assert.NotNull(result);
-        Assert.Equal(comment.Text, result.Text);
+        Assert.Equal("updated text", result.Text);
     }
 
     [Fact]
     public async Task DeleteComment_ShouldRemoveComment_WhenCommentExists()
     {
-        var comment = new Comment(text: "text", cardId: 1, authorId: 1 ) { Id = 1 };
+        var comment = new Comment("text", cardId: 1, authorId: 1) { Id = 1 };
 
         _context.Comments.Add(comment);
         await _context.SaveChangesAsync();
         
-        await _repository.DeleteComment(comment);
+        await _repository.DeleteAsync(comment);
+        await _unitOfWork.CommitAsync();
+        
         var result = await _context.Comments.FindAsync(comment.Id);
 
         Assert.Null(result);

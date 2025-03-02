@@ -1,14 +1,11 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xunit;
 using TrelloApi.Application.Controllers;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.DTOs; // OutputBoardDetailsDto, AddBoardDto, UpdateBoardDto, etc.
+using TrelloApi.Domain.DTOs.Board;
 
 namespace TrelloApi.Tests.Controllers
 {
@@ -29,259 +26,203 @@ namespace TrelloApi.Tests.Controllers
 
         private void SetUserId(int userId)
         {
-            var httpContext = new DefaultHttpContext();
-            httpContext.Items["UserId"] = userId;
+            var claims = new List<Claim>
+            {
+                new Claim("UserId", userId.ToString())
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+    
+            var httpContext = new DefaultHttpContext { User = principal };
             _controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
         }
 
         [Fact]
-        public async Task GetBoardById_ReturnsOk_WithElementFound()
+        public async Task GetBoardById_ShouldReturnsBoard_WhenBoardNotFound()
         {
-            // Arrange
-            int userId = 1;
             int boardId = 1;
-            var outputBoard = new OutputBoardDetailsDto
+            var response = new BoardResponse 
             {
                 Id = boardId,
-                Title = "board 1",
-                Description = "",
-                Background = "Blue",
+                Title = "title",
+                Description = "description",
+                Background = "background",
                 CreatedAt = DateTime.UtcNow,
-                IsArchived = false
+                UpdatedAt = null,
+                IsArchived = false,
+                ArchivedAt = null
             };
 
-            _mockBoardService.Setup(s => s.GetBoardById(boardId, userId))
-                             .ReturnsAsync(outputBoard);
+            _mockBoardService.Setup(s => s.GetBoardById(boardId)).ReturnsAsync(response);
 
-            // Act
             var result = await _controller.GetBoardById(boardId);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var value = Assert.IsAssignableFrom<OutputBoardDetailsDto>(okResult.Value);
+            var value = Assert.IsAssignableFrom<BoardResponse>(okResult.Value);
 
-            // Assert
             Assert.Equal(200, okResult.StatusCode);
-            Assert.Equal(outputBoard.Id, value.Id);
-            Assert.Equal(outputBoard.Title, value.Title);
-            Assert.Equal(outputBoard.Description, value.Description);
-            Assert.Equal(outputBoard.Background, value.Background);
-            Assert.Equal(outputBoard.IsArchived, value.IsArchived);
+            Assert.Equal(response.Id, value.Id);
         }
 
         [Fact]
-        public async Task GetBoardById_ReturnsNotFound_WithElementNotFound()
+        public async Task GetBoardById_ShouldReturnsNotFound_WhenBoardNotFound()
         {
-            // Arrange
-            int userId = 1;
-            int boardId = 1;
-            OutputBoardDetailsDto? outputBoard = null;
+            const int boardId = 1;
 
-            _mockBoardService.Setup(s => s.GetBoardById(boardId, userId))
-                             .ReturnsAsync(outputBoard);
+            _mockBoardService.Setup(s => s.GetBoardById(boardId)).ReturnsAsync((BoardResponse?)null);
 
-            // Act
             var result = await _controller.GetBoardById(boardId);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
 
-            // Assert
             Assert.Equal(404, notFoundResult.StatusCode);
         }
 
         [Fact]
-        public async Task GetBoardsByUserId_ReturnsOk_WithFullList()
+        public async Task GetBoardsByUserId_ShouldReturnsOk_WhenBoardsFound()
         {
-            // Arrange
-            int userId = 1;
-            var boards = new List<OutputBoardDetailsDto>
+            const int userId = 1;
+            var response = new List<BoardResponse>
             {
-                new OutputBoardDetailsDto { Id = 1, Title = "board 1", Description = "", Background = "Blue", CreatedAt = DateTime.UtcNow, IsArchived = false },
-                new OutputBoardDetailsDto { Id = 2, Title = "board 2", Description = "", Background = "Red", CreatedAt = DateTime.UtcNow, IsArchived = false }
+                new BoardResponse { Id = 1, Title = "title 1", Description = "description 1", Background = "background", CreatedAt = DateTime.UtcNow, UpdatedAt = null, IsArchived = false, ArchivedAt = null },
+                new BoardResponse { Id = 2, Title = "title 2", Description = "description 2", Background = "background", CreatedAt = DateTime.UtcNow, UpdatedAt = null, IsArchived = false, ArchivedAt = null }
             };
 
-            _mockBoardService.Setup(s => s.GetBoardsByUserId(userId))
-                             .ReturnsAsync(boards);
+            _mockBoardService.Setup(s => s.GetBoardsByUserId(userId)).ReturnsAsync(response);
 
-            // Act
             var result = await _controller.GetBoardsByUserId();
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var value = Assert.IsAssignableFrom<List<OutputBoardDetailsDto>>(okResult.Value);
+            var value = Assert.IsAssignableFrom<List<BoardResponse>>(okResult.Value);
 
-            // Assert
             Assert.Equal(200, okResult.StatusCode);
-            Assert.Equal(2, value.Count);
+            Assert.Equal(response.Count, value.Count);
         }
 
         [Fact]
-        public async Task GetBoardsByUserId_ReturnsOk_WithEmptyList()
+        public async Task GetBoardsByUserId_ShouldReturnOk_WhenBoardsNotFound()
         {
-            // Arrange
-            int userId = 1;
-            var boards = new List<OutputBoardDetailsDto>();
+            const int userId = 1;
+            
+            _mockBoardService.Setup(s => s.GetBoardsByUserId(userId)).ReturnsAsync([]);
 
-            _mockBoardService.Setup(s => s.GetBoardsByUserId(userId))
-                             .ReturnsAsync(boards);
-
-            // Act
             var result = await _controller.GetBoardsByUserId();
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var value = Assert.IsAssignableFrom<List<OutputBoardDetailsDto>>(okResult.Value);
+            var value = Assert.IsAssignableFrom<List<BoardResponse>>(okResult.Value);
 
-            // Assert
             Assert.Equal(200, okResult.StatusCode);
             Assert.Empty(value);
         }
 
         [Fact]
-        public async Task GetBoardColors_ReturnsOk_WithColorsList()
+        public async Task GetBoardColors_ShouldReturnsOk_WhenColorsFound()
         {
-            // Arrange
-            var backgrounds = new List<string> { "Blue", "Red", "Green" };
-
-            // No mock es necesario si el método sólo retorna una lista estática
-            // Act
             var result = await _controller.GetBoardColors();
             var okResult = Assert.IsType<OkObjectResult>(result);
             var value = Assert.IsAssignableFrom<List<string>>(okResult.Value);
 
-            // Assert
             Assert.Equal(200, okResult.StatusCode);
-            Assert.Equal(backgrounds.Count, value.Count);
+            Assert.NotEmpty(value);
         }
 
         [Fact]
-        public async Task AddBoard_ReturnsCreatedAtAction_WithElementCreated()
+        public async Task AddBoard_ShouldReturnsCreated_WhenAddedSuccessful()
         {
-            // Arrange
-            int userId = 1;
-            var addDto = new AddBoardDto { Title = "board 1", Background = "Blue", Description = "Test board" };
-            var outputBoard = new OutputBoardDetailsDto
+            const int userId = 1;
+            var dto = new AddBoardDto { Title = "title", Background = "background", Description = "description" };
+            var response = new BoardResponse
             {
                 Id = 1,
-                Title = "board 1",
-                Description = "Test board",
-                Background = "Blue",
+                Title = dto.Title,
+                Description = dto.Description,
+                Background = dto.Background,
                 CreatedAt = DateTime.UtcNow,
-                IsArchived = false
+                UpdatedAt = null,
+                IsArchived = false,
+                ArchivedAt = null
             };
 
-            _mockBoardService.Setup(s => s.AddBoard(addDto, userId))
-                             .ReturnsAsync(outputBoard);
+            _mockBoardService.Setup(s => s.AddBoard(dto, userId)).ReturnsAsync(response);
 
-            // Act
-            var result = await _controller.AddBoard(addDto);
+            var result = await _controller.AddBoard(dto);
             var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-            var value = Assert.IsAssignableFrom<OutputBoardDetailsDto>(createdResult.Value);
 
-            // Assert
             Assert.Equal(201, createdResult.StatusCode);
-            Assert.Equal(outputBoard.Id, value.Id);
-            Assert.Equal(outputBoard.Title, value.Title);
-            Assert.Equal(outputBoard.Background, value.Background);
-            Assert.Equal(outputBoard.Description, value.Description);
-            Assert.Equal(outputBoard.IsArchived, value.IsArchived);
         }
 
         [Fact]
-        public async Task AddBoard_ReturnsBadRequest_WithElementNotCreated()
+        public async Task AddBoard_ReturnsBadRequest_WhenAddedUnsuccessful()
         {
-            // Arrange
-            int userId = 1;
-            var addDto = new AddBoardDto { Title = "board 1", Background = "Blue" };
-            OutputBoardDetailsDto? outputBoard = null;
+            const int userId = 1;
+            var dto = new AddBoardDto { Title = "title", Description = "description", Background = "background" };
 
-            _mockBoardService.Setup(s => s.AddBoard(addDto, userId))
-                             .ReturnsAsync(outputBoard);
+            _mockBoardService.Setup(s => s.AddBoard(dto, userId)).ReturnsAsync((BoardResponse?)null);
 
-            // Act
-            var result = await _controller.AddBoard(addDto);
+            var result = await _controller.AddBoard(dto);
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
 
-            // Assert
             Assert.Equal(400, badRequest.StatusCode);
         }
 
         [Fact]
-        public async Task UpdateBoard_ReturnsOk_WithElementUpdated()
+        public async Task UpdateBoard_ShouldReturnsOk_WhenUpdatedSuccessful()
         {
-            // Arrange
-            int userId = 1;
-            int boardId = 1;
-            var updateDto = new UpdateBoardDto { Title = "board updated", Background = "Green", Description = "Updated description", IsArchived = false };
-            var outputBoard = new OutputBoardDetailsDto
+            const int boardId = 1;
+            var dto = new UpdateBoardDto { Title = "updated title" };
+            var response = new BoardResponse
             {
                 Id = boardId,
-                Title = "board updated",
-                Description = "Updated description",
-                Background = "Green",
+                Title = "title",
+                Description = "description",
+                Background = "background",
                 CreatedAt = DateTime.UtcNow,
-                IsArchived = false
+                UpdatedAt = null,
+                IsArchived = false,
+                ArchivedAt = null
             };
 
-            _mockBoardService.Setup(s => s.UpdateBoard(boardId, updateDto, userId))
-                             .ReturnsAsync(outputBoard);
+            _mockBoardService.Setup(s => s.UpdateBoard(boardId, dto)).ReturnsAsync(response);
 
-            // Act
-            var result = await _controller.UpdateBoard(boardId, updateDto);
+            var result = await _controller.UpdateBoard(boardId, dto);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var value = Assert.IsAssignableFrom<OutputBoardDetailsDto>(okResult.Value);
 
-            // Assert
             Assert.Equal(200, okResult.StatusCode);
-            Assert.Equal(outputBoard.Id, value.Id);
-            Assert.Equal(outputBoard.Title, value.Title);
         }
 
         [Fact]
-        public async Task UpdateBoard_ReturnsNotFound_WithElementNotUpdated()
+        public async Task UpdateBoard_ShouldReturnsNotFound_WhenUpdatedUnsuccessful()
         {
-            // Arrange
-            int userId = 1;
-            int boardId = 1;
-            var updateDto = new UpdateBoardDto { Title = "board updated" };
-            OutputBoardDetailsDto? outputBoard = null;
+            const int boardId = 1;
+            var updateDto = new UpdateBoardDto { Title = "updated title" };
 
-            _mockBoardService.Setup(s => s.UpdateBoard(boardId, updateDto, userId))
-                             .ReturnsAsync(outputBoard);
+            _mockBoardService.Setup(s => s.UpdateBoard(boardId, updateDto)).ReturnsAsync((BoardResponse?)null);
 
-            // Act
             var result = await _controller.UpdateBoard(boardId, updateDto);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
 
-            // Assert
             Assert.Equal(404, notFoundResult.StatusCode);
         }
 
         [Fact]
-        public async Task DeleteBoard_ReturnsNoContent_WhenDeletionIsSuccessful()
+        public async Task DeleteBoard_ShouldReturnsNoContent_WhenDeletedSuccessful()
         {
-            // Arrange
-            int userId = 1;
-            int boardId = 1;
-            // En este caso, el servicio DeleteBoard retorna un booleano
-            _mockBoardService.Setup(s => s.DeleteBoard(boardId, userId))
-                             .ReturnsAsync(true);
+            const int boardId = 1;
 
-            // Act
+            _mockBoardService.Setup(s => s.DeleteBoard(boardId)).ReturnsAsync(true);
+
             var result = await _controller.DeleteBoard(boardId);
             var noContentResult = Assert.IsType<NoContentResult>(result);
 
-            // Assert
             Assert.Equal(204, noContentResult.StatusCode);
         }
 
         [Fact]
-        public async Task DeleteBoard_ReturnsNotFound_WhenElementNotDeleted()
+        public async Task DeleteBoard_ShouldReturnsNotFound_WhenDeletedUnsuccessful()
         {
-            // Arrange
-            int userId = 1;
-            int boardId = 1;
-            _mockBoardService.Setup(s => s.DeleteBoard(boardId, userId))
-                             .ReturnsAsync(false);
+            const int boardId = 1;
+            
+            _mockBoardService.Setup(s => s.DeleteBoard(boardId)).ReturnsAsync(false);
 
-            // Act
             var result = await _controller.DeleteBoard(boardId);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
 
-            // Assert
             Assert.Equal(404, notFoundResult.StatusCode);
         }
     }

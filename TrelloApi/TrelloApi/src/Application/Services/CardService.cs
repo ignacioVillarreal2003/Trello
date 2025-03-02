@@ -60,7 +60,7 @@ public class CardService: BaseService, ICardService
         }
     }
 
-    public async Task<CardResponse?> AddCard(int listId, AddCardDto dto)
+    public async Task<CardResponse> AddCard(int listId, AddCardDto dto)
     {
         try
         {

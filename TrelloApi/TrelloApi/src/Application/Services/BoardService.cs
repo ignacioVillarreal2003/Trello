@@ -61,7 +61,7 @@ public class BoardService: BaseService, IBoardService
         }
     }
 
-    public async Task<BoardResponse?> AddBoard(AddBoardDto dto, int userId)
+    public async Task<BoardResponse> AddBoard(AddBoardDto dto, int userId)
     {
         try
         {

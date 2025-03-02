@@ -1,14 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.DTOs;
-using Xunit;
+using TrelloApi.Domain.DTOs.User;
+using TrelloApi.Domain.DTOs.UserCard;
 
 namespace TrelloApi.Tests.Controllers
 {
@@ -28,122 +26,104 @@ namespace TrelloApi.Tests.Controllers
         
         private void SetUserId(int userId)
         {
-            var httpContext = new DefaultHttpContext();
-            httpContext.Items["UserId"] = userId;
+            var claims = new List<Claim>
+            {
+                new Claim("UserId", userId.ToString())
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+    
+            var httpContext = new DefaultHttpContext { User = principal };
             _controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
         }
         
-        // Test para obtener los usuarios asignados a una tarjeta
         [Fact]
-        public async Task GetUsersByCardId_ReturnsOk_WithUsersFound()
+        public async Task GetUsersByCardId_ShouldReturnsOk_WhenUsersFound()
         {
-            int currentUserId = 1;
-            int cardId = 1;
-            var users = new List<OutputUserDetailsDto>
+            const int cardId = 1;
+            var response = new List<UserResponse>
             {
-                new OutputUserDetailsDto { Id = 1, Email = "user1@test.com", Username = "user1", Theme = "light" },
-                new OutputUserDetailsDto { Id = 2, Email = "user2@test.com", Username = "user2", Theme = "dark" }
+                new UserResponse { Id = 1, Email = "email1@test.com", Username = "username 1", Theme = "theme" },
+                new UserResponse { Id = 2, Email = "email2@test.com", Username = "username 2", Theme = "theme" }
             };
 
-            _mockUserCardService
-                .Setup(s => s.GetUsersByCardId(cardId, currentUserId))
-                .ReturnsAsync(users);
+            _mockUserCardService.Setup(s => s.GetUsersByCardId(cardId)).ReturnsAsync(response);
 
             var result = await _controller.GetUsersByCardId(cardId);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            Assert.Equal(200, okResult.StatusCode);
+            var value = Assert.IsType<List<UserResponse>>(okResult.Value);
 
-            var returnedUsers = Assert.IsType<List<OutputUserDetailsDto>>(okResult.Value);
-            Assert.Equal(users.Count, returnedUsers.Count);
+            Assert.Equal(200, okResult.StatusCode);
+            Assert.Equal(response.Count, value.Count);
         }
         
         [Fact]
-        public async Task GetUsersByCardId_ReturnsOk_WithEmptyList()
+        public async Task GetUsersByCardId_ShouldReturnsOk_WhenUserNotFound()
         {
-            int currentUserId = 1;
-            int cardId = 1;
-            var users = new List<OutputUserDetailsDto>();
+            const int cardId = 1;
 
-            _mockUserCardService
-                .Setup(s => s.GetUsersByCardId(cardId, currentUserId))
-                .ReturnsAsync(users);
+            _mockUserCardService.Setup(s => s.GetUsersByCardId(cardId)).ReturnsAsync([]);
 
             var result = await _controller.GetUsersByCardId(cardId);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            Assert.Equal(200, okResult.StatusCode);
+            var value = Assert.IsType<List<UserResponse>>(okResult.Value);
 
-            var returnedUsers = Assert.IsType<List<OutputUserDetailsDto>>(okResult.Value);
-            Assert.Empty(returnedUsers);
+            Assert.Equal(200, okResult.StatusCode);
+            Assert.Empty(value);
         }
         
-        // Test para agregar un usuario a una tarjeta
         [Fact]
-        public async Task AddUserToCard_ReturnsCreated_WhenUserIsAdded()
+        public async Task AddUserToCard_ShouldReturnsCreated_WhenAddedSuccessful()
         {
-            int currentUserId = 1;
-            int cardId = 1;
-            var addUserCardDto = new AddUserCardDto { UserId = 2 };
-            var outputUserCard = new OutputUserCardDetailsDto { UserId = 2, CardId = cardId };
+            const int cardId = 1;
+            var dto = new AddUserCardDto { UserId = 1 };
+            var response = new UserCardResponse { UserId = dto.UserId, CardId = cardId };
 
-            _mockUserCardService
-                .Setup(s => s.AddUserToCard(cardId, addUserCardDto, currentUserId))
-                .ReturnsAsync(outputUserCard);
+            _mockUserCardService.Setup(s => s.AddUserToCard(cardId, dto)).ReturnsAsync(response);
 
-            var result = await _controller.AddUserToCard(cardId, addUserCardDto);
+            var result = await _controller.AddUserToCard(cardId, dto);
             var createdResult = Assert.IsType<CreatedAtActionResult>(result);
+            
             Assert.Equal(201, createdResult.StatusCode);
-
-            var returnedUserCard = Assert.IsType<OutputUserCardDetailsDto>(createdResult.Value);
-            Assert.Equal(outputUserCard.UserId, returnedUserCard.UserId);
-            Assert.Equal(outputUserCard.CardId, returnedUserCard.CardId);
         }
         
         [Fact]
-        public async Task AddUserToCard_ReturnsBadRequest_WhenUserNotAdded()
+        public async Task AddUserToCard_ShouldReturnsBadRequest_WhenAddedUnsuccessful()
         {
-            int currentUserId = 1;
-            int cardId = 1;
-            var addUserCardDto = new AddUserCardDto { UserId = 2 };
+            const int cardId = 1;
+            var dto = new AddUserCardDto { UserId = 1 };
 
-            _mockUserCardService
-                .Setup(s => s.AddUserToCard(cardId, addUserCardDto, currentUserId))
-                .ReturnsAsync((OutputUserCardDetailsDto?)null);
+            _mockUserCardService.Setup(s => s.AddUserToCard(cardId, dto)).ReturnsAsync((UserCardResponse?)null);
 
-            var result = await _controller.AddUserToCard(cardId, addUserCardDto);
+            var result = await _controller.AddUserToCard(cardId, dto);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            
             Assert.Equal(400, badRequestResult.StatusCode);
         }
         
-        // Test para eliminar un usuario de una tarjeta
         [Fact]
-        public async Task RemoveUserFromCard_ReturnsNoContent_WhenDeletionIsSuccessful()
+        public async Task RemoveUserFromCard_ShouldReturnsNoContent_WhenDeletedSuccessful()
         {
-            int currentUserId = 1;
-            int userIdToRemove = 2;
-            int cardId = 1;
+            const int userId = 1, cardId = 1;
 
-            _mockUserCardService
-                .Setup(s => s.RemoveUserFromCard(userIdToRemove, cardId, currentUserId))
-                .ReturnsAsync(true);
+            _mockUserCardService.Setup(s => s.RemoveUserFromCard(userId, cardId)).ReturnsAsync(true);
 
-            var result = await _controller.RemoveUserFromCard(userIdToRemove, cardId);
+            var result = await _controller.RemoveUserFromCard(userId, cardId);
             var noContentResult = Assert.IsType<NoContentResult>(result);
+            
             Assert.Equal(204, noContentResult.StatusCode);
         }
         
         [Fact]
-        public async Task RemoveUserFromCard_ReturnsNotFound_WhenDeletionFails()
+        public async Task RemoveUserFromCard_ShouldReturnsNotFound_WhenDeletedUnsuccessful()
         {
-            int currentUserId = 1;
-            int userIdToRemove = 2;
-            int cardId = 1;
+            const int userId = 1, cardId = 1;
 
-            _mockUserCardService
-                .Setup(s => s.RemoveUserFromCard(userIdToRemove, cardId, currentUserId))
-                .ReturnsAsync(false);
+            _mockUserCardService.Setup(s => s.RemoveUserFromCard(userId, cardId)).ReturnsAsync(false);
 
-            var result = await _controller.RemoveUserFromCard(userIdToRemove, cardId);
+            var result = await _controller.RemoveUserFromCard(userId, cardId);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            
             Assert.Equal(404, notFoundResult.StatusCode);
         }
     }

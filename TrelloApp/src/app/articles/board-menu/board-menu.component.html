@@ -1,40 +1,26 @@
-<div class="board-menu" [class.open]="isOpen">
-  <header>
-    <button class="btn-base appearance-light aspect-free size-small radius-small skyblue" (click)="mode = 'menu'">
-      Menu
-    </button>
-    <button class="btn-base appearance-light aspect-free size-small radius-small red" (click)="onClose()">
-      Close
-    </button>
-  </header>
+<div class="board-menu">
+  <div class="drawer-overlay" *ngIf="isOpen" (click)="onClose()"></div>
+  <div class="drawer" [class.open]="isOpen">
+    <header>
+      <app-btn-back (click)="mode = 'menu'"></app-btn-back>
+      <app-btn-close (click)="onClose()"></app-btn-close>
+    </header>
 
-  <section *ngIf="mode == 'menu'" class="options">
-    <button class="btn-base appearance-ghost aspect-free size-small radius-small green" (click)="mode = 'background'">
-      Backgrounds
-    </button>
-    <button class="btn-base appearance-ghost aspect-free size-small radius-small green" (click)="mode = 'label'">
-      Labels
-    </button>
-    <button class="btn-base appearance-ghost aspect-free size-small radius-small green" (click)="mode = 'friend'">
-      Friends
-    </button>
-  </section>
+    <section *ngIf="mode == 'menu'" class="options">
+      <app-btn [text]="'Backgrounds'" [color]="'orange'" [appearance]="'appearance-ghost'" [size]="'s-small'" [rounded]="'r-small'" (click)="mode = 'background'"></app-btn>
+      <app-btn [text]="'Labels'" [color]="'orange'" [appearance]="'appearance-ghost'" [size]="'s-small'" [rounded]="'r-small'" (click)="mode = 'label'"></app-btn>
+      <app-btn [text]="'Friends'" [color]="'orange'" [appearance]="'appearance-ghost'" [size]="'s-small'" [rounded]="'r-small'" (click)="mode = 'friend'"></app-btn>
+    </section>
 
-  <section class="content" *ngIf="mode == 'background'">
-    <h1>asd</h1>
-  </section>
+    <section class="content" *ngIf="mode == 'background'"></section>
 
-  <section class="content" *ngIf="mode == 'label'">
+    <section class="content" *ngIf="mode == 'label'"></section>
 
-  </section>
+    <section class="content" *ngIf="mode == 'friend'"></section>
 
-  <section class="content" *ngIf="mode == 'friend'">
-
-  </section>
-
-  <footer class="actions" *ngIf="mode == 'menu'">
-    <button type="button" class="btn-base appearance-solid aspect-free size-medium radius-small red">
-      Delete Board
-    </button>
-  </footer>
+    <footer class="actions" *ngIf="mode == 'menu'">
+      <app-btn [text]="'Delete board'" [appearance]="'appearance-solid'" [size]="'s-medium'" [color]="'red'"></app-btn>
+    </footer>
+  </div>
 </div>
+

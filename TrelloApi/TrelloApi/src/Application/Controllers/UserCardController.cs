@@ -43,13 +43,7 @@ public class UserCardController: BaseController
     {
         try
         {
-            UserCardResponse? userCard = await _userCardService.AddUserToCard(cardId, dto);
-            if (userCard == null)
-            {
-                _logger.LogError("Failed to add user {UserBoard} to card {CardId}",  dto.UserId, cardId);
-                return BadRequest(new { message = "Failed to add user." });
-            }
-            
+            UserCardResponse userCard = await _userCardService.AddUserToCard(cardId, dto);
             _logger.LogInformation("User {UserBoard} added to card {CardId}", dto.UserId, cardId);
             return CreatedAtAction(nameof(GetUsersByCardId), new { userId = userCard.UserId, taskId = userCard.CardId }, userCard);
         }

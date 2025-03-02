@@ -59,7 +59,7 @@ public class LabelService: BaseService, ILabelService
         }
     }
 
-    public async Task<LabelResponse?> AddLabel(int boardId, AddLabelDto dto)
+    public async Task<LabelResponse> AddLabel(int boardId, AddLabelDto dto)
     {
         try
         {

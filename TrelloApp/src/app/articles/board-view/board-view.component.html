@@ -4,11 +4,7 @@
   <section class="board__content background-10">
     <header class="board__header">
       <input class="board__title-input" type="text" value="Board's title" placeholder="Board's title" />
-      <button class="board__options-button" (click)="switchBoardMenu()">
-        <span class="dot"></span>
-        <span class="dot"></span>
-        <span class="dot"></span>
-      </button>
+      <app-btn-menu (click)="isOpenBoardMenu = true"></app-btn-menu>
     </header>
 
     <section class="board__lists">
@@ -42,5 +38,5 @@
       </ul>
     </section>
   </section>
-  <app-board-menu *ngIf="isOpenBoardMenu" (close)="isOpenBoardMenu = false"></app-board-menu>
+  <app-board-menu [isOpen]="isOpenBoardMenu" (isClose)="isOpenBoardMenu = false"></app-board-menu>
 </div>

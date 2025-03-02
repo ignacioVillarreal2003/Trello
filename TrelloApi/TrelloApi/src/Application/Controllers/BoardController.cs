@@ -81,13 +81,7 @@ public class BoardController : BaseController
     {
         try
         {
-            BoardResponse? board = await _boardService.AddBoard(dto, UserId);
-            if (board == null)
-            {
-                _logger.LogError("Failed to add board for user {UserId}", UserId);
-                return BadRequest(new { message = "Failed to add board." });
-            }
-
+            BoardResponse board = await _boardService.AddBoard(dto, UserId);
             _logger.LogInformation("Board added for user {UserId}", UserId);
             return CreatedAtAction(nameof(GetBoardById), new { boardId = board.Id }, board);
         }

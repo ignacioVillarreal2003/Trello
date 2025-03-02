@@ -1,15 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Application.Utils;
-using TrelloApi.Domain.DTOs;
-using Xunit;
+using TrelloApi.Domain.DTOs.User;
 
 namespace TrelloApi.Tests.Controllers
 {
@@ -31,257 +27,238 @@ namespace TrelloApi.Tests.Controllers
         
         private void SetUserId(int userId)
         {
-            var httpContext = new DefaultHttpContext();
-            httpContext.Items["UserId"] = userId;
+            var claims = new List<Claim>
+            {
+                new Claim("UserId", userId.ToString())
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+    
+            var httpContext = new DefaultHttpContext { User = principal };
             _controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
         }
         
-        // GET /User - GetUsers
         [Fact]
-        public async Task GetUsers_ReturnsOk_WithFullList()
+        public async Task GetUsers_ShouldReturnsOk_WhenUsersFound()
         {
-            int userId = 1;
-            var listOutputUserDetailsDto = new List<OutputUserDetailsDto>
+            var response = new List<UserResponse>
             {
-                new OutputUserDetailsDto { Id = 1, Email = "user1@example.com", Username = "user1", Theme = "Light" },
-                new OutputUserDetailsDto { Id = 2, Email = "user2@example.com", Username = "user2", Theme = "Light" }
+                new UserResponse { Id = 1, Email = "user1@example.com", Username = "username 1", Theme = "theme" },
+                new UserResponse { Id = 2, Email = "user2@example.com", Username = "username 2", Theme = "theme" }
             };
 
-            _mockUserService.Setup(s => s.GetUsers(userId)).ReturnsAsync(listOutputUserDetailsDto);
+            _mockUserService.Setup(s => s.GetUsers()).ReturnsAsync(response);
 
             var result = await _controller.GetUsers();
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedList = Assert.IsType<List<OutputUserDetailsDto>>(okResult.Value);
-            Assert.Equal(2, returnedList.Count);
+            var value = Assert.IsType<List<UserResponse>>(okResult.Value);
+            
+            Assert.Equal(200, okResult.StatusCode);
+            Assert.Equal(2, value.Count);
         }
         
         [Fact]
-        public async Task GetUsers_ReturnsOk_WithEmptyList()
+        public async Task GetUsers_ShouldReturnsOk_WhenUsersNotFound()
         {
-            int userId = 1;
-            var listOutputUserDetailsDto = new List<OutputUserDetailsDto>();
-
-            _mockUserService.Setup(s => s.GetUsers(userId)).ReturnsAsync(listOutputUserDetailsDto);
+            _mockUserService.Setup(s => s.GetUsers()).ReturnsAsync([]);
 
             var result = await _controller.GetUsers();
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedList = Assert.IsType<List<OutputUserDetailsDto>>(okResult.Value);
-            Assert.Empty(returnedList);
+            var value = Assert.IsType<List<UserResponse>>(okResult.Value);
+            
+            Assert.Equal(200, okResult.StatusCode);
+            Assert.Empty(value);
         }
         
-        // GET /User/username/{username}
         [Fact]
-        public async Task GetUsersByUsername_ReturnsOk_WithFullList()
+        public async Task GetUsersByUsername_ShouldReturnsOk_WhenUsersFound()
         {
-            int userId = 1;
-            string username = "user";
-            var listOutputUserDetailsDto = new List<OutputUserDetailsDto>
+            const string username = "user";
+            var response = new List<UserResponse>
             {
-                new OutputUserDetailsDto { Id = 1, Email = "user1@example.com", Username = "user1", Theme = "Light" },
-                new OutputUserDetailsDto { Id = 2, Email = "user2@example.com", Username = "user2", Theme = "Light" }
+                new UserResponse { Id = 1, Email = "user1@example.com", Username = "username 1", Theme = "theme" },
+                new UserResponse { Id = 2, Email = "user2@example.com", Username = "username 2", Theme = "theme" }
             };
 
-            _mockUserService.Setup(s => s.GetUsersByUsername(username, userId)).ReturnsAsync(listOutputUserDetailsDto);
+            _mockUserService.Setup(s => s.GetUsersByUsername(username)).ReturnsAsync(response);
 
             var result = await _controller.GetUsersByUsername(username);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedList = Assert.IsType<List<OutputUserDetailsDto>>(okResult.Value);
-            Assert.Equal(2, returnedList.Count);
+            var value = Assert.IsType<List<UserResponse>>(okResult.Value);
+            
+            Assert.Equal(200, okResult.StatusCode);
+            Assert.Equal(2, value.Count);
         }
         
         [Fact]
-        public async Task GetUsersByUsername_ReturnsOk_WithEmptyList()
+        public async Task GetUsersByUsername_ShouldReturnsOk_WhenUsersNotFound()
         {
-            int userId = 1;
-            string username = "nouser";
-            var listOutputUserDetailsDto = new List<OutputUserDetailsDto>();
+            const string username = "user";
 
-            _mockUserService.Setup(s => s.GetUsersByUsername(username, userId)).ReturnsAsync(listOutputUserDetailsDto);
+            _mockUserService.Setup(s => s.GetUsersByUsername(username)).ReturnsAsync([]);
 
             var result = await _controller.GetUsersByUsername(username);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedList = Assert.IsType<List<OutputUserDetailsDto>>(okResult.Value);
-            Assert.Empty(returnedList);
+            var value = Assert.IsType<List<UserResponse>>(okResult.Value);
+            
+            Assert.Equal(200, okResult.StatusCode);
+            Assert.Empty(value);
         }
         
-        // GET /User/card/{cardId}
         [Fact]
-        public async Task GetUsersByTaskId_ReturnsOk_WithFullList()
+        public async Task GetUsersByTaskId_ShouldReturnsOk_WhenUsersFound()
         {
-            int userId = 1;
-            int cardId = 1;
-            var listOutputUsers = new List<OutputUserDetailsDto>
+            const int cardId = 1;
+            var response = new List<UserResponse>
             {
-                new OutputUserDetailsDto { Id = 1, Email = "user1@example.com", Username = "user1", Theme = "Light" },
-                new OutputUserDetailsDto { Id = 2, Email = "user2@example.com", Username = "user2", Theme = "Light" }
+                new UserResponse { Id = 1, Email = "user1@example.com", Username = "username 1", Theme = "theme" },
+                new UserResponse { Id = 2, Email = "user2@example.com", Username = "username 2", Theme = "theme" }
             };
 
-            _mockUserService.Setup(s => s.GetUsersByCardId(cardId, userId)).ReturnsAsync(listOutputUsers);
+            _mockUserService.Setup(s => s.GetUsersByCardId(cardId)).ReturnsAsync(response);
 
             var result = await _controller.GetUsersByCardId(cardId);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedList = Assert.IsType<List<OutputUserDetailsDto>>(okResult.Value);
-            Assert.Equal(2, returnedList.Count);
+            var value = Assert.IsType<List<UserResponse>>(okResult.Value);
+            
+            Assert.Equal(200, okResult.StatusCode);
+            Assert.Equal(2, value.Count);
         }
         
         [Fact]
-        public async Task GetUsersByTaskId_ReturnsOk_WithEmptyList()
+        public async Task GetUsersByTaskId_ShouldReturnsOk_WhenUsersNotFound()
         {
-            int userId = 1;
-            int cardId = 1;
-            var listOutputUsers = new List<OutputUserDetailsDto>();
+            const int cardId = 1;
 
-            _mockUserService.Setup(s => s.GetUsersByCardId(cardId, userId)).ReturnsAsync(listOutputUsers);
+            _mockUserService.Setup(s => s.GetUsersByCardId(cardId)).ReturnsAsync([]);
 
             var result = await _controller.GetUsersByCardId(cardId);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedList = Assert.IsType<List<OutputUserDetailsDto>>(okResult.Value);
-            Assert.Empty(returnedList);
+            var value = Assert.IsType<List<UserResponse>>(okResult.Value);
+            
+            Assert.Equal(200, okResult.StatusCode);
+            Assert.Empty(value);
         }
         
-        // POST /User/register-user
         [Fact]
-        public async Task RegisterUser_ReturnsCreated_WithElementCreated()
+        public async Task RegisterUser_ShouldReturnsCreated_WhenRegisteredSuccessful()
         {
-            var registerUserDto = new RegisterUserDto { Email = "user1@example.com", Username = "user1", Password = "password1" };
-            var outputUserDetailsDto = new OutputUserDetailsDto { Id = 1, Email = "user1@example.com", Username = "user1", Theme = "Light" };
+            var dto = new RegisterUserDto { Email = "user@example.com", Username = "user", Password = "password" };
+            var response = new UserResponse { Id = 1, Email = dto.Email, Username = dto.Username, Theme = "theme" };
             var token = "fake-jwt-token";
 
-            _mockUserService.Setup(s => s.RegisterUser(registerUserDto)).ReturnsAsync(outputUserDetailsDto);
-            _mockJwt.Setup(j => j.GenerateToken(outputUserDetailsDto.Id)).Returns(token);
-
-            var result = await _controller.RegisterUser(registerUserDto);
+            _mockUserService.Setup(s => s.RegisterUser(dto)).ReturnsAsync(response);
+            _mockJwt.Setup(j => j.GenerateAccessToken(response.Id)).Returns(token);
+            _mockJwt.Setup(j => j.GenerateRefreshToken()).Returns(token);
+            _mockJwt.Setup(j => j.SaveRefreshToken(response.Id, token)).Returns(Task.CompletedTask);
+            
+            var result = await _controller.RegisterUser(dto);
             var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-            var value = createdResult.Value;
-            Assert.NotNull(value);
-
-            // Se extraen las propiedades "token" y "user" de la respuesta anónima
-            var tokenValue = value.GetType().GetProperty("token")?.GetValue(value);
-            var user = value.GetType().GetProperty("user")?.GetValue(value) as OutputUserDetailsDto;
-
-            Assert.NotNull(user);
-            Assert.NotNull(tokenValue);
-            Assert.Equal(token, tokenValue);
-            Assert.Equal(outputUserDetailsDto.Id, user!.Id);
-            Assert.Equal(outputUserDetailsDto.Email, user.Email);
-            Assert.Equal(outputUserDetailsDto.Username, user.Username);
-            Assert.Equal(outputUserDetailsDto.Theme, user.Theme);
+            
+            Assert.Equal(201, createdResult.StatusCode);
         }
         
         [Fact]
-        public async Task RegisterUser_ReturnsBadRequest_WithElementNotCreated()
+        public async Task RegisterUser_ShouldReturnsBadRequest_WhenRegisteredUnsuccessful()
         {
-            var registerUserDto = new RegisterUserDto { Email = "user1@example.com", Username = "user1", Password = "password1" };
-            OutputUserDetailsDto? outputUserDetailsDto = null;
+            var dto = new RegisterUserDto { Email = "user@example.com", Username = "username", Password = "password" };
 
-            _mockUserService.Setup(s => s.RegisterUser(registerUserDto)).ReturnsAsync(outputUserDetailsDto);
+            _mockUserService.Setup(s => s.RegisterUser(dto)).ReturnsAsync((UserResponse?)null);
 
-            var result = await _controller.RegisterUser(registerUserDto);
+            var result = await _controller.RegisterUser(dto);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            
             Assert.Equal(400, badRequestResult.StatusCode);
         }
         
-        // POST /User/login-user
         [Fact]
-        public async Task LoginUser_ReturnsOk_WithElementLogged()
+        public async Task LoginUser_ShouldReturnsOk_WhenLoggedSuccessful()
         {
-            var loginUserDto = new LoginUserDto { Email = "user1@example.com", Password = "password1" };
-            var outputUserDetailsDto = new OutputUserDetailsDto { Id = 1, Email = "user1@example.com", Username = "user1", Theme = "Light" };
+            var dto = new LoginUserDto { Email = "user@example.com", Password = "password" };
+            var response = new UserResponse { Id = 1, Email = dto.Email, Username = "username", Theme = "theme" };
             var token = "fake-jwt-token";
 
-            _mockUserService.Setup(s => s.LoginUser(loginUserDto)).ReturnsAsync(outputUserDetailsDto);
-            _mockJwt.Setup(j => j.GenerateToken(outputUserDetailsDto.Id)).Returns(token);
+            _mockUserService.Setup(s => s.LoginUser(dto)).ReturnsAsync(response);
+            _mockJwt.Setup(j => j.GenerateAccessToken(response.Id)).Returns(token);
+            _mockJwt.Setup(j => j.GenerateRefreshToken()).Returns(token);
+            _mockJwt.Setup(j => j.SaveRefreshToken(response.Id, token)).Returns(Task.CompletedTask);
 
-            var result = await _controller.LoginUser(loginUserDto);
+            var result = await _controller.LoginUser(dto);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var value = okResult.Value;
-            Assert.NotNull(value);
-
-            var tokenValue = value.GetType().GetProperty("token")?.GetValue(value);
-            var user = value.GetType().GetProperty("user")?.GetValue(value) as OutputUserDetailsDto;
-
-            Assert.NotNull(user);
-            Assert.NotNull(tokenValue);
-            Assert.Equal(token, tokenValue);
-            Assert.Equal(outputUserDetailsDto.Id, user!.Id);
-            Assert.Equal(outputUserDetailsDto.Email, user.Email);
-            Assert.Equal(outputUserDetailsDto.Username, user.Username);
-            Assert.Equal(outputUserDetailsDto.Theme, user.Theme);
+            
+            Assert.Equal(200, okResult.StatusCode);
         }
         
         [Fact]
-        public async Task LoginUser_ReturnsBadRequest_WithElementNotLogged()
+        public async Task LoginUser_ShouldReturnsBadRequest_WhenLoggedUnsuccessful()
         {
-            var loginUserDto = new LoginUserDto { Email = "user1@example.com", Password = "password1" };
-            OutputUserDetailsDto? outputUserDetailsDto = null;
+            var dto = new LoginUserDto { Email = "user@example.com", Password = "password" };
 
-            _mockUserService.Setup(s => s.LoginUser(loginUserDto)).ReturnsAsync(outputUserDetailsDto);
-
-            var result = await _controller.LoginUser(loginUserDto);
+            _mockUserService.Setup(s => s.LoginUser(dto)).ReturnsAsync((UserResponse?)null);
+            
+            var result = await _controller.LoginUser(dto);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+            
             Assert.Equal(400, badRequestResult.StatusCode);
         }
         
-        // PUT /User
         [Fact]
-        public async Task UpdateUser_ReturnsOk_WithElementUpdated()
+        public async Task UpdateUser_ShouldReturnsOk_WhenUpdatedSuccessful()
         {
-            int userId = 1;
-            var updateUserDto = new UpdateUserDto { Username = "user2" };
-            var outputUserDetailsDto = new OutputUserDetailsDto { Id = userId, Email = "user1@example.com", Username = "user2", Theme = "Light" };
+            const int userId = 1;
+            var dto = new UpdateUserDto { Username = "updated username" };
+            var response = new UserResponse
+            {
+                Id = userId, 
+                Email = "user@example.com", 
+                Username = dto.Username, 
+                Theme = "theme"
+            };
+            _mockUserService.Setup(s => s.UpdateUser(dto, userId)).ReturnsAsync(response);
 
-            _mockUserService.Setup(s => s.UpdateUser(updateUserDto, userId)).ReturnsAsync(outputUserDetailsDto);
-
-            var result = await _controller.UpdateUser(updateUserDto);
+            var result = await _controller.UpdateUser(dto);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedUser = Assert.IsType<OutputUserDetailsDto>(okResult.Value);
-            Assert.Equal(outputUserDetailsDto.Id, returnedUser.Id);
-            Assert.Equal(outputUserDetailsDto.Email, returnedUser.Email);
-            Assert.Equal(outputUserDetailsDto.Username, returnedUser.Username);
-            Assert.Equal(outputUserDetailsDto.Theme, returnedUser.Theme);
+            
+            Assert.Equal(200, okResult.StatusCode);
         }
         
         [Fact]
-        public async Task UpdateUser_ReturnsNotFound_WithElementNotUpdated()
+        public async Task UpdateUser_ShouldReturnsNotFound_WhenUpdatedUnsuccessful()
         {
-            int userId = 1;
-            var updateUserDto = new UpdateUserDto { Username = "user2" };
-            OutputUserDetailsDto? outputUserDetailsDto = null;
+            const int userId = 1;
+            var dto = new UpdateUserDto { Username = "updated username" };
 
-            _mockUserService.Setup(s => s.UpdateUser(updateUserDto, userId)).ReturnsAsync(outputUserDetailsDto);
+            _mockUserService.Setup(s => s.UpdateUser(dto, userId)).ReturnsAsync((UserResponse?)null);
 
-            var result = await _controller.UpdateUser(updateUserDto);
+            var result = await _controller.UpdateUser(dto);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            
             Assert.Equal(404, notFoundResult.StatusCode);
         }
         
-        // DELETE /User
         [Fact]
-        public async Task DeleteUser_ReturnsOk_WithElementDeleted()
+        public async Task DeleteUser_ShouldReturnsNoContent_WhenDeletedSuccessful()
         {
-            int userId = 1;
-            var outputUserDetailsDto = new OutputUserDetailsDto { Id = userId, Email = "user1@example.com", Username = "user2", Theme = "Light" };
+            const int userId = 1;
 
-            _mockUserService.Setup(s => s.DeleteUser(userId)).ReturnsAsync(false);
+            _mockUserService.Setup(s => s.DeleteUser(userId)).ReturnsAsync(true);
 
             var result = await _controller.DeleteUser();
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var returnedUser = Assert.IsType<OutputUserDetailsDto>(okResult.Value);
-            Assert.Equal(outputUserDetailsDto.Id, returnedUser.Id);
-            Assert.Equal(outputUserDetailsDto.Email, returnedUser.Email);
-            Assert.Equal(outputUserDetailsDto.Username, returnedUser.Username);
-            Assert.Equal(outputUserDetailsDto.Theme, returnedUser.Theme);
+            var noContentResult = Assert.IsType<NoContentResult>(result);
+            
+            Assert.Equal(204, noContentResult.StatusCode);
         }
         
         [Fact]
-        public async Task DeleteUser_ReturnsNotFound_WithElementNotDeleted()
+        public async Task DeleteUser_ShouldReturnsNotFound_WhenDeletedUnsuccessful()
         {
-            int userId = 1;
-
+            const int userId = 1; 
+            
             _mockUserService.Setup(s => s.DeleteUser(userId)).ReturnsAsync(false);
 
             var result = await _controller.DeleteUser();
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
+            
             Assert.Equal(404, notFoundResult.StatusCode);
         }
     }

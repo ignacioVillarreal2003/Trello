@@ -44,13 +44,7 @@ public class CardLabelController: BaseController
     {
         try
         {
-            CardLabelResponse? cardLabel = await _cardLabelService.AddLabelToCard(cardId, dto);
-            if (cardLabel == null)
-            {
-                _logger.LogError("Failed to add label {LabelId} to card {CardId}", dto, cardId);
-                return BadRequest(new { message = "Failed to add card label." });
-            }
-            
+            CardLabelResponse cardLabel = await _cardLabelService.AddLabelToCard(cardId, dto);
             _logger.LogInformation("Label {LabelId} added to card {CardId}", dto, cardId);
             return CreatedAtAction(nameof(GetLabelsByCardId), new { cardId = cardLabel.CardId, labelId = cardLabel.LabelId }, cardLabel);
         }

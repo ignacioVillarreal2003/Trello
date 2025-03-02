@@ -1,8 +1,9 @@
+using System.Linq.Expressions;
 using AutoMapper;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Services;
-using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.DTOs.Board;
 using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Persistence.Interfaces;
 
@@ -13,7 +14,7 @@ public class BoardServiceTests
     private readonly Mock<IBoardRepository> _mockBoardRepository;
     private readonly Mock<ILogger<BoardService>> _mockLogger;
     private readonly Mock<IMapper> _mockMapper;
-    private readonly Mock<IBoardAuthorizationService> _mockBoardAuthorizationService;
+    private readonly Mock<IUnitOfWork> _mockUnitOfWork;
     private readonly Mock<IUserBoardRepository> _mockUserBoardRepository;
     private readonly BoardService _service;
 
@@ -22,208 +23,149 @@ public class BoardServiceTests
         _mockBoardRepository = new Mock<IBoardRepository>();
         _mockLogger = new Mock<ILogger<BoardService>>();
         _mockMapper = new Mock<IMapper>();
-        _mockBoardAuthorizationService = new Mock<IBoardAuthorizationService>();
+        _mockUnitOfWork = new Mock<IUnitOfWork>();
         _mockUserBoardRepository = new Mock<IUserBoardRepository>();
 
         _service = new BoardService(
             _mockMapper.Object,
-            _mockBoardAuthorizationService.Object,
+            _mockUnitOfWork.Object,
             _mockBoardRepository.Object,
             _mockUserBoardRepository.Object,
             _mockLogger.Object);
     }
 
     [Fact]
-    public async Task GetBoardById_ReturnsBoardDto_WhenFound()
+    public async Task GetBoardById_ShouldReturnsBoard_WhenBoardFound()
     {
-        var board = new Board("title 1", "background-1.svg");
-        var outputBoardDto = new OutputBoardDetailsDto 
-        { 
-            Id = 1, 
-            Title = "Title 1", 
-            Background = "background-1.svg", 
-        };
+        const int boardId = 1;
+        var board = new Board("title", "background") { Id = boardId };
+        var response = new BoardResponse { Id = board.Id, Title = board.Title, Background = board.Background };
 
-        _mockBoardRepository.Setup(r => r.GetBoardById(1)).ReturnsAsync(board);
-        _mockMapper.Setup(m => m.Map<OutputBoardDetailsDto>(It.IsAny<Board>())).Returns(outputBoardDto);
+        _mockBoardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Board, bool>>>())).ReturnsAsync(board);
+        _mockMapper.Setup(m => m.Map<BoardResponse>(It.IsAny<Board>())).Returns(response);
 
-        var result = await _service.GetBoardById(1, 1);
+        var result = await _service.GetBoardById(boardId);
 
         Assert.NotNull(result);
-        Assert.Equal(outputBoardDto.Id, result.Id);
-        Assert.Equal(outputBoardDto.Title, result.Title);
-        Assert.Equal(outputBoardDto.Background, result.Background);
     }
 
     [Fact]
-    public async Task GetBoardById_ReturnsNull_WhenBoardNotFound()
+    public async Task GetBoardById_ShouldReturnsNull_WhenBoardNotFound()
     {
-        _mockBoardRepository.Setup(r => r.GetBoardById(1)).ReturnsAsync((Board?)null);
+        const int boardId = 1;
 
-        var result = await _service.GetBoardById(1, 1);
+        _mockBoardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Board, bool>>>())).ReturnsAsync((Board?)null);
+
+        var result = await _service.GetBoardById(boardId);
 
         Assert.Null(result);
     }
 
     [Fact]
-    public async Task GetBoards_ReturnsFullList_WhenBoardsExist()
+    public async Task GetBoardsByUserId_ShouldReturnsBoards_WhenBoardsFound()
     {
-        var listBoard = new List<Board>()
+        const int userId = 1;
+        var boards = new List<Board>()
         {
-            new Board("Title 1", "background-1.svg"),
-            new Board("Title 2", "Icon-2")
+            new Board("title 1", "background"),
+            new Board("title 2", "background")
         };
-        var listOutputBoardDto = new List<OutputBoardDetailsDto>()
+        var response = new List<BoardResponse>()
         {
-            new OutputBoardDetailsDto { Id = 1, Title = "Title 1", Background = "background-1.svg" },
-            new OutputBoardDetailsDto { Id = 2, Title = "Title 2", Background = "background-1.svg" },
+            new BoardResponse { Id = 1, Title = boards[0].Title, Background = boards[0].Background },
+            new BoardResponse { Id = 2, Title = boards[1].Title, Background = boards[1].Background },
         };
 
-        _mockBoardRepository.Setup(r => r.GetBoardsByUserId(1)).ReturnsAsync(listBoard);
-        _mockMapper.Setup(m => m.Map<List<OutputBoardDetailsDto>>(It.IsAny<List<Board>>())).Returns(listOutputBoardDto);
+        _mockBoardRepository.Setup(r => r.GetBoardsByUserIdAsync(userId)).ReturnsAsync(boards);
+        _mockMapper.Setup(m => m.Map<List<BoardResponse>>(It.IsAny<List<Board>>())).Returns(response);
 
-        var result = await _service.GetBoardsByUserId(1);
+        var result = await _service.GetBoardsByUserId(userId);
 
         Assert.Equal(2, result.Count);
     }
 
     [Fact]
-    public async Task GetBoards_ReturnsEmptyList_WhenNoBoardsExist()
+    public async Task GetBoardsByUserId_ShouldReturnsEmptyList_WhenBoardsNotFound()
     {
-        _mockBoardRepository.Setup(r => r.GetBoardsByUserId(1)).ReturnsAsync(new List<Board>());
-        _mockMapper.Setup(m => m.Map<List<OutputBoardDetailsDto>>(It.IsAny<List<Board>>())).Returns(new List<OutputBoardDetailsDto>());
+        const int userId = 1;
+        
+        _mockBoardRepository.Setup(r => r.GetBoardsByUserIdAsync(userId)).ReturnsAsync([]);
+        _mockMapper.Setup(m => m.Map<List<BoardResponse>>(It.IsAny<List<Board>>())).Returns([]);
 
-        var result = await _service.GetBoardsByUserId(1);
+        var result = await _service.GetBoardsByUserId(userId);
 
         Assert.Empty(result);
     }
 
     [Fact]
-    public async Task AddBoard_ReturnsBoardDto_WhenBoardIsAdded()
+    public async Task AddBoard_ShouldReturnsBoard_WhenAddedSuccessful()
     {
-        var board = new Board("Title 1", "background-1.svg", "Blue");
-        var outputBoardDto = new OutputBoardDetailsDto 
-        { 
-            Id = 1, 
-            Title = "Title 1", 
-            Background = "background-1.svg"
-        };
-        var addBoardDto = new AddBoardDto { Title = "Title 1", Background = "background-1.svg" };
+        const int userId = 1, boardId = 1;
+        var dto = new AddBoardDto { Title = "title", Background = "background" };
+        var response = new BoardResponse { Id = boardId, Title = dto.Title, Background = dto.Background };
 
-        _mockBoardRepository.Setup(r => r.AddBoard(It.IsAny<Board>()));
-        _mockUserBoardRepository.Setup(r => r.AddUserBoard(It.IsAny<UserBoard>()));
-        _mockMapper.Setup(m => m.Map<OutputBoardDetailsDto>(It.IsAny<Board>())).Returns(outputBoardDto);
+        _mockBoardRepository.Setup(r => r.CreateAsync(It.IsAny<Board>()));
+        _mockUserBoardRepository.Setup(r => r.CreateAsync(It.IsAny<UserBoard>()));
+        _mockMapper.Setup(m => m.Map<BoardResponse>(It.IsAny<Board>())).Returns(response);
 
-        var result = await _service.AddBoard(addBoardDto, 1);
+        var result = await _service.AddBoard(dto, userId);
 
         Assert.NotNull(result);
-        Assert.Equal(outputBoardDto.Id, result.Id);
-        Assert.Equal(outputBoardDto.Title, result.Title);
-        Assert.Equal(outputBoardDto.Background, result.Background);
     }
 
     [Fact]
-    public async Task AddBoard_ReturnsNull_WhenBoardIsNotAdded()
+    public async Task UpdateBoard_ShouldReturnsBoard_WhenUpdatedSuccessful()
     {
-        var addBoardDto = new AddBoardDto { Title = "Title 1", Background = "background-1.svg" };
+        const int boardId = 1;
+        var board = new Board("title", "background");
+        var dto = new UpdateBoardDto { Title = "updated title" };
+        var response = new BoardResponse { Id = 1, Title = dto.Title, Background = board.Background };
 
-        _mockBoardRepository.Setup(r => r.AddBoard(It.IsAny<Board>()));
+        _mockBoardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Board, bool>>>())).ReturnsAsync(board);
+        _mockBoardRepository.Setup(r => r.UpdateAsync(It.IsAny<Board>()));
+        _mockMapper.Setup(m => m.Map<BoardResponse>(It.IsAny<Board>())).Returns(response);
 
-        var result = await _service.AddBoard(addBoardDto, 1);
-
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public async Task UpdateBoard_ReturnsBoardDto_WhenBoardIsUpdated()
-    {
-        var board = new Board("Title 1", "background-1.svg");
-        var outputBoardDto = new OutputBoardDetailsDto 
-        { 
-            Id = 1, 
-            Title = "Title 1", 
-            Background = "background-1.svg"
-        };
-        var updateBoardDto = new UpdateBoardDto { Title = "Title 1" };
-
-        _mockBoardRepository.Setup(r => r.GetBoardById(1)).ReturnsAsync(board);
-        _mockBoardRepository.Setup(r => r.UpdateBoard(It.IsAny<Board>()));
-        _mockMapper.Setup(m => m.Map<OutputBoardDetailsDto>(It.IsAny<Board>())).Returns(outputBoardDto);
-
-        var result = await _service.UpdateBoard(1, updateBoardDto, 1);
+        var result = await _service.UpdateBoard(boardId, dto);
 
         Assert.NotNull(result);
-        Assert.Equal(outputBoardDto.Id, result.Id);
-        Assert.Equal(outputBoardDto.Title, result.Title);
-        Assert.Equal(outputBoardDto.Background, result.Background);
     }
 
     [Fact]
-    public async Task UpdateBoard_ReturnsNull_WhenUpdateFails()
+    public async Task UpdateBoard_ShouldReturnsNull_WhenUpdatedUnsuccessful()
     {
-        var board = new Board("Title 1", "background-1.svg");
-        var updateBoardDto = new UpdateBoardDto { Title = "Title 1" };
+        const int boardId = 1;
+        var dto = new UpdateBoardDto { Title = "title" };
 
-        _mockBoardRepository.Setup(r => r.GetBoardById(1)).ReturnsAsync(board);
-        _mockBoardRepository.Setup(r => r.UpdateBoard(It.IsAny<Board>()));
+        _mockBoardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Board, bool>>>())).ReturnsAsync((Board?)null);
 
-        var result = await _service.UpdateBoard(1, updateBoardDto, 1);
+        var result = await _service.UpdateBoard(boardId, dto);
 
         Assert.Null(result);
     }
 
     [Fact]
-    public async Task UpdateBoard_ReturnsNull_WhenBoardNotFound()
+    public async Task DeleteBoard_ShouldReturnsTrue_WhenDeletedSuccessful()
     {
-        var updateBoardDto = new UpdateBoardDto { Title = "Title 1" };
+        const int boardId = 1;
+        var board = new Board("title", "background");
 
-        _mockBoardRepository.Setup(r => r.GetBoardById(1)).ReturnsAsync((Board?)null);
-
-        var result = await _service.UpdateBoard(1, updateBoardDto, 1);
-
-        Assert.Null(result);
-    }
-
-    [Fact]
-    public async Task DeleteBoard_ReturnsBoardDto_WhenBoardIsDeleted()
-    {
-        var board = new Board("Title 1", "background-1.svg");
-        var outputBoardDto = new OutputBoardDetailsDto 
-        { 
-            Id = 1, 
-            Title = "Title 1", 
-            Background = "background-1.svg"
-        };
-
-        _mockBoardRepository.Setup(r => r.GetBoardById(1)).ReturnsAsync(board);
-        _mockBoardRepository.Setup(r => r.DeleteBoard(It.IsAny<Board>()));
-        _mockMapper.Setup(m => m.Map<OutputBoardDetailsDto>(It.IsAny<Board>())).Returns(outputBoardDto);
-
-        var result = await _service.DeleteBoard(1, 1);
+        _mockBoardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Board, bool>>>())).ReturnsAsync(board);
+        _mockBoardRepository.Setup(r => r.DeleteAsync(It.IsAny<Board>()));
+        
+        var result = await _service.DeleteBoard(boardId);
 
         Assert.True(result);
     }
 
     [Fact]
-    public async Task DeleteBoard_ReturnsNull_WhenDeletionFails()
+    public async Task DeleteBoard_ShouldReturnsFalse_WhenDeletedUnsuccessful()
     {
-        var board = new Board("Title 1", "background-1.svg");
+        const int boardId = 1;
 
-        _mockBoardRepository.Setup(r => r.GetBoardById(1)).ReturnsAsync(board);
-        _mockBoardRepository.Setup(r => r.DeleteBoard(It.IsAny<Board>()));
+        _mockBoardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Board, bool>>>())).ReturnsAsync((Board?)null);
 
-        var result = await _service.DeleteBoard(1, 1);
+        var result = await _service.DeleteBoard(boardId);
 
-        Assert.True(result);
-    }
-
-    [Fact]
-    public async Task DeleteBoard_ReturnsNull_WhenBoardNotFound()
-    {
-        _mockBoardRepository.Setup(r => r.GetBoardById(1)).ReturnsAsync((Board?)null);
-
-        var result = await _service.DeleteBoard(1, 1);
-
-        Assert.True(result);
+        Assert.False(result);
     }
 }

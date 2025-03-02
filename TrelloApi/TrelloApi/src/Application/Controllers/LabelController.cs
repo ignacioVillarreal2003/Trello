@@ -81,13 +81,7 @@ public class LabelController : BaseController
     {
         try
         {
-            LabelResponse? label = await _labelService.AddLabel(boardId, dto);
-            if (label == null)
-            {
-                _logger.LogError("Failed to add label to board {BoardId}", boardId);
-                return BadRequest(new { message = "Failed to add label." });
-            }
-
+            LabelResponse label = await _labelService.AddLabel(boardId, dto);
             _logger.LogInformation("Label added to board {BoardId}", boardId);
             return CreatedAtAction(nameof(GetLabelById), new { labelId = label.Id }, label);
         }

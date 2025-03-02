@@ -18,7 +18,7 @@ public class UpdateUserDtoValidator : AbstractValidator<UpdateUserDto>
         
         RuleFor(label => label.Theme)
             .MaximumLength(64).WithMessage("The theme should be of maximum 64 characters")
-            .Must(theme => UserThemeValues.UserThemesAllowed.Contains(theme))
+            .Must(theme => theme == null || UserThemeValues.UserThemesAllowed.Contains(theme))
             .WithMessage($"The theme must bo one of: {string.Join(", ", UserThemeValues.UserThemesAllowed)}");
     }
 }

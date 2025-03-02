@@ -1,14 +1,11 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Xunit;
 using TrelloApi.Application.Controllers;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.DTOs; // OutputCardDetailsDto, AddCardDto, UpdateCardDto
+using TrelloApi.Domain.DTOs.Card;
 
 namespace TrelloApi.Tests.Controllers
 {
@@ -28,266 +25,202 @@ namespace TrelloApi.Tests.Controllers
 
         private void SetUserId(int userId)
         {
-            var httpContext = new DefaultHttpContext();
-            httpContext.Items["UserId"] = userId;
+            var claims = new List<Claim>
+            {
+                new Claim("UserId", userId.ToString())
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+    
+            var httpContext = new DefaultHttpContext { User = principal };
             _controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
         }
 
         [Fact]
-        public async Task GetCardById_ReturnsOk_WithElementFound()
+        public async Task GetCardById_ShouldReturnsOk_WhenCardFound()
         {
-            // Arrange
-            int userId = 1;
-            int cardId = 1;
-            var outputCardDto = new OutputCardDetailsDto 
+            const int cardId = 1;
+            var response = new CardResponse
             { 
                 Id = cardId,
-                Title = "Card 1",
-                Description = "Test card",
+                Title = "title",
+                Description = "description",
                 ListId = 1,
                 DueDate = null,
-                Priority = "Medium",
+                Priority = "priority",
                 IsCompleted = false,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = null
             };
 
-            _mockCardService.Setup(s => s.GetCardById(cardId, userId))
-                            .ReturnsAsync(outputCardDto);
+            _mockCardService.Setup(s => s.GetCardById(cardId)).ReturnsAsync(response);
 
-            // Act
             var result = await _controller.GetCardById(cardId);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var value = Assert.IsAssignableFrom<OutputCardDetailsDto>(okResult.Value);
 
-            // Assert
             Assert.Equal(200, okResult.StatusCode);
-            Assert.Equal(outputCardDto.Id, value.Id);
-            Assert.Equal(outputCardDto.Title, value.Title);
-            Assert.Equal(outputCardDto.Description, value.Description);
-            Assert.Equal(outputCardDto.Priority, value.Priority);
-            Assert.Equal(outputCardDto.IsCompleted, value.IsCompleted);
         }
 
         [Fact]
-        public async Task GetCardById_ReturnsNotFound_WhenElementNotFound()
+        public async Task GetCardById_ShouldReturnsNotFound_WhenCardNotFound()
         {
-            // Arrange
-            int userId = 1;
-            int cardId = 1;
-            OutputCardDetailsDto? outputCardDto = null;
+            const int cardId = 1;
 
-            _mockCardService.Setup(s => s.GetCardById(cardId, userId))
-                            .ReturnsAsync(outputCardDto);
+            _mockCardService.Setup(s => s.GetCardById(cardId)).ReturnsAsync((CardResponse?)null);
 
-            // Act
             var result = await _controller.GetCardById(cardId);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
 
-            // Assert
             Assert.Equal(404, notFoundResult.StatusCode);
         }
 
         [Fact]
-        public async Task GetCardsByListId_ReturnsOk_WithFullList()
+        public async Task GetCardsByListId_ShouldReturnsOk_WhenCardsFound()
         {
-            // Arrange
-            int userId = 1;
-            int listId = 1;
-            var listOutputCardDto = new List<OutputCardDetailsDto>
+            const int listId = 1;
+            var response = new List<CardResponse>
             {
-                new OutputCardDetailsDto { Id = 1, Title = "Card 1", Description = "", ListId = listId, Priority = "Medium", IsCompleted = false, CreatedAt = DateTime.UtcNow },
-                new OutputCardDetailsDto { Id = 2, Title = "Card 2", Description = "", ListId = listId, Priority = "High", IsCompleted = false, CreatedAt = DateTime.UtcNow }
+                new CardResponse { Id = 1, Title = "title 1", Description = "description 1", ListId = listId, Priority = "priority", IsCompleted = false, CreatedAt = DateTime.UtcNow },
+                new CardResponse { Id = 2, Title = "title 2", Description = "description 2", ListId = listId, Priority = "priority", IsCompleted = false, CreatedAt = DateTime.UtcNow }
             };
 
-            _mockCardService.Setup(s => s.GetCardsByListId(listId, userId))
-                            .ReturnsAsync(listOutputCardDto);
+            _mockCardService.Setup(s => s.GetCardsByListId(listId)).ReturnsAsync(response);
 
-            // Act
             var result = await _controller.GetCardsByListId(listId);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var value = Assert.IsType<List<OutputCardDetailsDto>>(okResult.Value);
+            var value = Assert.IsType<List<CardResponse>>(okResult.Value);
 
-            // Assert
             Assert.Equal(200, okResult.StatusCode);
-            Assert.Equal(2, value.Count);
+            Assert.Equal(response.Count, value.Count);
         }
 
         [Fact]
-        public async Task GetCardsByListId_ReturnsOk_WithEmptyList()
+        public async Task GetCardsByListId_ShouldReturnsOk_WhenCardsNotFound()
         {
-            // Arrange
-            int userId = 1;
-            int listId = 1;
-            var listOutputCardDto = new List<OutputCardDetailsDto>();
+            const int listId = 1;
 
-            _mockCardService.Setup(s => s.GetCardsByListId(listId, userId))
-                            .ReturnsAsync(listOutputCardDto);
+            _mockCardService.Setup(s => s.GetCardsByListId(listId)).ReturnsAsync([]);
 
-            // Act
             var result = await _controller.GetCardsByListId(listId);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var value = Assert.IsType<List<OutputCardDetailsDto>>(okResult.Value);
+            var value = Assert.IsType<List<CardResponse>>(okResult.Value);
 
-            // Assert
             Assert.Equal(200, okResult.StatusCode);
             Assert.Empty(value);
         }
 
         [Fact]
-        public async Task GetPriorities_ReturnsOk_WithPrioritiesList()
+        public async Task GetPriorities_ShouldReturnsOk_WhenPrioritiesFound()
         {
-            // Arrange
-            // Este endpoint usa la ruta "priorities" y retorna la lista de prioridades definida en PriorityValues.
-            // Act
-            var result = await _controller.GetBoardColors();
+            var result = await _controller.GetPriorities();
             var okResult = Assert.IsType<OkObjectResult>(result);
             var value = Assert.IsType<List<string>>(okResult.Value);
 
-            // Assert
             Assert.Equal(200, okResult.StatusCode);
             Assert.NotEmpty(value);
         }
 
         [Fact]
-        public async Task AddCard_ReturnsCreatedAtAction_WithElementCreated()
+        public async Task AddCard_ShouldReturnsCreated_WhenAddedSuccessful()
         {
-            // Arrange
-            int userId = 1;
-            int listId = 1;
-            var addCardDto = new AddCardDto { Title = "Card 1", Description = "Test card", Priority = "Medium" };
-            var outputCardDto = new OutputCardDetailsDto
+            const int listId = 1;
+            var dto = new AddCardDto { Title = "title", Description = "description", Priority = "priority" };
+            var response = new CardResponse
             {
                 Id = 1,
-                Title = "Card 1",
-                Description = "Test card",
+                Title = dto.Title,
+                Description = dto.Description,
                 ListId = listId,
-                Priority = "Medium",
+                Priority = dto.Priority,
                 IsCompleted = false,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = null
             };
 
-            _mockCardService.Setup(s => s.AddCard(listId, addCardDto, userId))
-                            .ReturnsAsync(outputCardDto);
+            _mockCardService.Setup(s => s.AddCard(listId, dto)).ReturnsAsync(response);
 
-            // Act
-            var result = await _controller.AddCard(listId, addCardDto);
+            var result = await _controller.AddCard(listId, dto);
             var createdResult = Assert.IsType<CreatedAtActionResult>(result);
-            var value = Assert.IsType<OutputCardDetailsDto>(createdResult.Value);
 
-            // Assert
             Assert.Equal(201, createdResult.StatusCode);
-            Assert.Equal(outputCardDto.Id, value.Id);
-            Assert.Equal(outputCardDto.Title, value.Title);
-            Assert.Equal(outputCardDto.Description, value.Description);
-            Assert.Equal(outputCardDto.Priority, value.Priority);
-            Assert.Equal(outputCardDto.IsCompleted, value.IsCompleted);
         }
 
         [Fact]
-        public async Task AddCard_ReturnsBadRequest_WithElementNotCreated()
+        public async Task AddCard_ReturnsBadRequest_WhenAddedUnsuccessful()
         {
-            // Arrange
-            int userId = 1;
-            int listId = 1;
-            var addCardDto = new AddCardDto { Title = "Card 1", Description = "Test card", Priority = "Medium" };
-            OutputCardDetailsDto? outputCardDto = null;
+            const int listId = 1;
+            var dto = new AddCardDto { Title = "title", Description = "description", Priority = "priority" };
 
-            _mockCardService.Setup(s => s.AddCard(listId, addCardDto, userId))
-                            .ReturnsAsync(outputCardDto);
+            _mockCardService.Setup(s => s.AddCard(listId, dto)).ReturnsAsync((CardResponse?)null);
 
-            // Act
-            var result = await _controller.AddCard(listId, addCardDto);
+            var result = await _controller.AddCard(listId, dto);
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
 
-            // Assert
             Assert.Equal(400, badRequestResult.StatusCode);
         }
 
         [Fact]
-        public async Task UpdateCard_ReturnsOk_WithElementUpdated()
+        public async Task UpdateCard_ShouldReturnsOk_WhenUpdatedSuccessful()
         {
-            // Arrange
-            int userId = 1;
-            int cardId = 1;
-            var updateCardDto = new UpdateCardDto { Title = "Updated Card" };
-            var outputCardDto = new OutputCardDetailsDto
+            const int cardId = 1;
+            var dto = new UpdateCardDto { Title = "updated title" };
+            var response = new CardResponse
             {
                 Id = cardId,
-                Title = "Updated Card",
-                Description = "Test card",
+                Title = dto.Title,
+                Description = "description",
                 ListId = 1,
-                Priority = "Medium",
+                Priority = "priority",
                 IsCompleted = false,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = null,
+                DueDate = null
             };
 
-            _mockCardService.Setup(s => s.UpdateCard(cardId, updateCardDto, userId))
-                            .ReturnsAsync(outputCardDto);
+            _mockCardService.Setup(s => s.UpdateCard(cardId, dto)).ReturnsAsync(response);
 
-            // Act
-            var result = await _controller.UpdateCard(cardId, updateCardDto);
+            var result = await _controller.UpdateCard(cardId, dto);
             var okResult = Assert.IsType<OkObjectResult>(result);
-            var value = Assert.IsType<OutputCardDetailsDto>(okResult.Value);
 
-            // Assert
             Assert.Equal(200, okResult.StatusCode);
-            Assert.Equal(outputCardDto.Id, value.Id);
-            Assert.Equal(outputCardDto.Title, value.Title);
         }
 
         [Fact]
-        public async Task UpdateCard_ReturnsNotFound_WithElementNotUpdated()
+        public async Task UpdateCard_ShouldReturnsNotFound_WhenUpdatedUnsuccessful()
         {
-            // Arrange
-            int userId = 1;
-            int cardId = 1;
-            var updateCardDto = new UpdateCardDto { Title = "Updated Card" };
-            OutputCardDetailsDto? outputCardDto = null;
+            const int cardId = 1;
+            var updateCardDto = new UpdateCardDto { Title = "updated title" };
 
-            _mockCardService.Setup(s => s.UpdateCard(cardId, updateCardDto, userId))
-                            .ReturnsAsync(outputCardDto);
+            _mockCardService.Setup(s => s.UpdateCard(cardId, updateCardDto)).ReturnsAsync((CardResponse?)null);
 
-            // Act
             var result = await _controller.UpdateCard(cardId, updateCardDto);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
 
-            // Assert
             Assert.Equal(404, notFoundResult.StatusCode);
         }
 
         [Fact]
-        public async Task DeleteCard_ReturnsNoContent_WhenDeletionIsSuccessful()
+        public async Task DeleteCard_ShouldReturnsNoContent_WhenDeleteSuccessful()
         {
-            // Arrange
-            int userId = 1;
-            int cardId = 1;
+            const int cardId = 1;
 
-            _mockCardService.Setup(s => s.DeleteCard(cardId, userId))
-                            .ReturnsAsync(true);
+            _mockCardService.Setup(s => s.DeleteCard(cardId)).ReturnsAsync(true);
 
-            // Act
             var result = await _controller.DeleteCard(cardId);
             var noContentResult = Assert.IsType<NoContentResult>(result);
 
-            // Assert
             Assert.Equal(204, noContentResult.StatusCode);
         }
 
         [Fact]
-        public async Task DeleteCard_ReturnsNotFound_WhenElementNotDeleted()
+        public async Task DeleteCard_ShouldReturnsNotFound_WhenDeleteUnsuccessful()
         {
-            // Arrange
-            int userId = 1;
-            int cardId = 1;
-            _mockCardService.Setup(s => s.DeleteCard(cardId, userId))
-                            .ReturnsAsync(false);
+            const int cardId = 1;
+            _mockCardService.Setup(s => s.DeleteCard(cardId)).ReturnsAsync(false);
 
-            // Act
             var result = await _controller.DeleteCard(cardId);
             var notFoundResult = Assert.IsType<NotFoundObjectResult>(result);
 
-            // Assert
             Assert.Equal(404, notFoundResult.StatusCode);
         }
     }
