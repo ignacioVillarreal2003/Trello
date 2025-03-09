@@ -33,10 +33,6 @@ ul {
   list-style: none;
 }
 
-li {
-  width: 100%;
-}
-
 @font-face {
   font-family: 'Nunito-Light';
   src: url('/fonts/Nunito-Light.ttf') format('truetype');

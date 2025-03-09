@@ -1,0 +1,16 @@
+.btn-menu {
+  transition: all .1s ease-in-out;
+  border: none;
+  padding: 5px;
+  background-color: var(--background-transparent-1);
+  border-radius: 5px;
+}
+
+.btn-menu:hover {
+  background-color: var(--background-transparent-2);
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+}

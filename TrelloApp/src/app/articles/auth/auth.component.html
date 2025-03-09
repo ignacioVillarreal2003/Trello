@@ -1,7 +1,7 @@
 <section class="auth">
   <div class="auth__container">
     <header class="auth__header">
-      <img class="auth__logo" src="./icons/trello-icon.svg" alt="Trello Logo">
+      <img class="auth__logo" src="./Trello.svg" alt="Trello Logo">
       <h1 class="auth__title">Trello</h1>
     </header>
 
@@ -9,41 +9,21 @@
     <h2 class="auth__subtitle" *ngIf="!isLogin">Sign up to continue</h2>
 
     <form class="auth__form" *ngIf="isLogin" [formGroup]="formLogin" (ngSubmit)="onSubmitLogin()">
-      <fieldset class="auth__field">
-        <legend class="auth__label">Email</legend>
-        <input class="input-base appearance-outline aspect-free radius-small size-small blue" formControlName="email" placeholder="Enter your email">
-      </fieldset>
-      
-      <fieldset class="auth__field">
-        <legend class="auth__label">Password</legend>
-        <input class="input-base appearance-outline aspect-free radius-small size-small blue" formControlName="password" type="password" placeholder="Enter your password">
-      </fieldset>
-      
-      <button class="btn-base aspect-free appearance-solid radius-small size-small blue" type="submit">Continue</button>
+      <app-input [textLabel]="'Email'" [placeholder]="'Enter your email'" formControlName="email"></app-input>
+      <app-input [textLabel]="'Password'" [type]="'password'" [placeholder]="'Enter your password'" formControlName="password"></app-input>
+      <app-btn [text]="'Log in'" [type]="'submit'"></app-btn>
     </form>
 
     <form class="auth__form" *ngIf="!isLogin" [formGroup]="formRegister" (ngSubmit)="onSubmitRegister()">
-      <fieldset class="auth__field">
-        <legend class="auth__label">Email</legend>
-        <input class="input-base appearance-outline aspect-free radius-small size-small blue" formControlName="email" placeholder="Enter your email">
-      </fieldset>
-      
-      <fieldset class="auth__field">
-        <legend class="auth__label">Password</legend>
-        <input class="input-base appearance-outline aspect-free radius-small size-small blue" formControlName="password" type="password" placeholder="Enter your password">
-      </fieldset>
-      
-      <fieldset class="auth__field">
-        <legend class="auth__label">Username</legend>
-        <input class="input-base appearance-outline aspect-free radius-small size-small blue" formControlName="username" placeholder="Enter your username">
-      </fieldset>
-      
-      <button class="btn-base aspect-free appearance-solid radius-small size-small blue" type="submit">Sign up</button>
+      <app-input [textLabel]="'Email'" [placeholder]="'Enter your email'" formControlName="email"></app-input>
+      <app-input [textLabel]="'Password'" [type]="'password'" [placeholder]="'Enter your password'" formControlName="password"></app-input>
+      <app-input [textLabel]="'Username'" [placeholder]="'Enter your username'" formControlName="username"></app-input>
+      <app-btn [text]="'Sign up'" [type]="'submit'"></app-btn>
     </form>
 
     <footer class="auth__footer">
-      <a class="auth__link" *ngIf="isLogin" (click)="isLogin=!isLogin">Create an account</a>
-      <a class="auth__link" *ngIf="!isLogin" (click)="isLogin=!isLogin">Log in</a>
+      <a class="auth__link" *ngIf="isLogin" (click)="toggleAuthMode()">Create an account</a>
+      <a class="auth__link" *ngIf="!isLogin" (click)="toggleAuthMode()">Log in</a>
     </footer>
   </div>
 </section>

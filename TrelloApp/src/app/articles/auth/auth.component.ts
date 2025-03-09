@@ -5,13 +5,18 @@ import {UserHttpService} from '../../core/services/http/user-http.service';
 import {AlertService} from '../../core/services/alert.service';
 import {NgIf} from '@angular/common';
 import {HttpErrorResponse} from '@angular/common/http';
-import {SessionServiceService} from '../../core/services/session-service.service';
+import {SessionServiceService} from '../../core/services/session/session-service.service';
+import {InputComponent} from '../../shared/components/input/input.component';
+import {BtnComponent} from '../../shared/components/btn/btn.component';
+import {UserAuth} from '../../core/models/user';
 
 @Component({
   selector: 'app-auth',
   imports: [
     ReactiveFormsModule,
-    NgIf
+    NgIf,
+    InputComponent,
+    BtnComponent
   ],
   templateUrl: './auth.component.html',
   standalone: true,
@@ -23,70 +28,72 @@ export class AuthComponent {
   constructor(private router: Router,
               private userHttpService: UserHttpService,
               private alertService: AlertService,
-              private sessionServiceService: SessionServiceService) { }
+              private sessionService: SessionServiceService) { }
 
   formLogin: FormGroup = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(8)]),
+    email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(64)]),
+    password: new FormControl('', [Validators.required, Validators.minLength(8), Validators.maxLength(64)])
   });
 
   onSubmitLogin(): void {
-    if (this.formLogin.invalid) {
-      if (this.formLogin.controls["email"].errors) {
-        this.alertService.ErrorMessage('Invalid email address.');
-      } else if (this.formLogin.controls["password"].errors) {
-        this.alertService.ErrorMessage('Password must be at least 8 characters.');
-      }
-      return;
+    if (!this.handleFormErrors(this.formLogin)) {
+      this.userHttpService.login(this.formLogin.value.email, this.formLogin.value.password).subscribe({
+        next: (response: UserAuth): void => {
+          this.saveUserData(response);
+          this.router.navigate(['/board-dashboard']);
+        },
+        error: (error: Error): void => {
+          this.alertService.ErrorMessage(error.message);
+        }
+      });
     }
-    this.userHttpService.login(this.formLogin.value.email, this.formLogin.value.password).subscribe({
-      next: (response: any): void => {
-        this.sessionServiceService.setToken(response.token);
-        this.sessionServiceService.setUserData({
-          email: response.email,
-          username: response.username,
-          theme: response.theme
-        });
-        this.router.navigate(['/board-dashboard']);
-      },
-      error: (error: HttpErrorResponse): void => {
-        const errorMessage: string = error?.message || 'Error in the server. Try again later.';
-        this.alertService.ErrorMessage(errorMessage);
-      }
-    });
   }
 
   formRegister: FormGroup = new FormGroup({
-    email: new FormControl('', [Validators.required, Validators.email]),
-    password: new FormControl('', [Validators.required, Validators.minLength(8)]),
-    username: new FormControl('', [Validators.required, Validators.pattern(/^\w+$/)])
+    email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(64)]),
+    password: new FormControl('', [Validators.required, Validators.minLength(8), Validators.maxLength(64)]),
+    username: new FormControl('', [Validators.required, Validators.maxLength(64)])
   });
 
   onSubmitRegister(): void {
-    if (this.formRegister.invalid) {
-      if (this.formRegister.controls["email"].errors) {
-        this.alertService.ErrorMessage('Invalid email address.');
-      } else if (this.formRegister.controls["password"].errors) {
-        this.alertService.ErrorMessage('Password must be at least 8 characters.');
-      } else if (this.formRegister.controls["username"].errors) {
-        this.alertService.ErrorMessage('Invalid username. Only letters, numbers and underscore.');
-      }
-      return;
+    if (!this.handleFormErrors(this.formRegister)) {
+      this.userHttpService.register(this.formRegister.value.email, this.formRegister.value.username, this.formRegister.value.password).subscribe({
+        next: (response: UserAuth): void => {
+          this.saveUserData(response);
+          this.router.navigate(['/board-dashboard']);
+        },
+        error: (error: Error): void => {
+          this.alertService.ErrorMessage(error.message);
+        }
+      });
     }
-    this.userHttpService.register(this.formRegister.value.email, this.formRegister.value.username, this.formRegister.value.password).subscribe({
-      next: (response: any): void => {
-        this.sessionServiceService.setToken(response.token);
-        this.sessionServiceService.setUserData({
-          email: response.email,
-          username: response.username,
-          theme: response.theme
-        });
-        this.router.navigate(['/board-dashboard']);
-      },
-      error: (error: HttpErrorResponse): void => {
-        const errorMessage: string = error?.message || 'Error in the server. Try again later.';
-        this.alertService.ErrorMessage(errorMessage);
+  }
+
+  private handleFormErrors(form: FormGroup): boolean {
+    if (form.invalid) {
+      if (form.controls['email'].errors) {
+        this.alertService.ErrorMessage('Invalid email address.');
+      } else if (form.controls['password'].errors) {
+        this.alertService.ErrorMessage('Password must have since 8 to 64 characters.');
+      } else if (form.controls['username'] && form.controls['username'].errors) {
+        this.alertService.ErrorMessage('Username must have less than 64 characters.');
       }
+      return true;
+    }
+    return false;
+  }
+
+  saveUserData(data: UserAuth): void {
+    this.sessionService.setSessionData({
+      accessToken: data.accessToken,
+      refreshToken: data.refreshToken,
+      email: data.user.email,
+      username: data.user.username,
+      theme: data.user.theme
     });
+  }
+
+  toggleAuthMode(): void {
+    this.isLogin = !this.isLogin;
   }
 }

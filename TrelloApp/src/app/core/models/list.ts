@@ -1,16 +1,21 @@
-import { Task } from "./task"
+import { Card } from "./card"
 
 export interface List {
-  id?: string,
-  title?: string,
-  boardId?: string
-  tasks: Task[]
+  id: number,
+  title: string,
+  position: number,
+  boardId: number,
+  createdAt: string,
+  updatedAt?: string,
+  cards: Card[]
 }
 
 export interface AddList {
   title: string,
+  position: number
 }
 
 export interface UpdateList {
-  title: string
+  title?: string,
+  position?: number
 }

@@ -1,0 +1,9 @@
+<div class="textarea">
+  <label *ngIf="textLabel.length > 0" [for]="id">{{ textLabel }}</label>
+  <textarea
+    [id]="id"
+    [disabled]="disabled"
+    (input)="updateValue($event)"
+    (blur)="onTouched()"
+    [placeholder]="placeholder">{{ value }}</textarea>
+</div>

@@ -1,0 +1,240 @@
+.select {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 10px;
+}
+
+label {
+  width: 100%;
+  color: var(--text-color);
+}
+
+.content {
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+
+select {
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  padding: 10px;
+  transition-duration: .15s;
+  transition-property: background-color, border-color, box-shadow, color;
+  transition-timing-function: ease-in;
+  outline: none;
+}
+
+.s-tiny select, .s-tiny label {
+  font-size: .6rem;
+  line-height: .85rem;
+}
+
+.s-small select, .s-small label {
+  font-size: 0.85rem;
+  line-height: 1rem;
+}
+
+.s-medium select, .s-medium label {
+  font-size: 1rem;
+  line-height: 1.2rem;
+}
+
+.s-large select, .s-large label {
+  font-size: 1.2rem;
+  line-height: 1.3rem;
+}
+
+.r-small select, .r-small label {
+  border-radius: 3px;
+}
+
+.r-medium select, .r-medium label {
+  border-radius: 5px;
+}
+
+.r-large select, .r-large label {
+  border-radius: 8px;
+}
+
+.appearance-solid select {
+  border-style: solid;
+  border-width: 2px;
+}
+
+.appearance-solid.blue select {
+  border-color: var(--color-blue-500);
+}
+
+.appearance-solid.blue:hover select {
+  background-color: var(--color-blue-transparent-100);
+}
+
+.appearance-solid.blue:focus-within select {
+  border-color: var(--color-blue-300);
+}
+
+.appearance-solid.red select {
+  border-color: var(--color-red-500);
+}
+
+.appearance-solid.red:hover select {
+  background-color: var(--color-red-transparent-100);
+}
+
+.appearance-solid.red:focus-within select {
+  border-color: var(--color-red-300);
+}
+
+.appearance-solid.green select {
+  border-color: var(--color-green-500);
+}
+
+.appearance-solid.green:hover select {
+  background-color: var(--color-green-transparent-100);
+}
+
+.appearance-solid.green:focus-within select {
+  border-color: var(--color-green-300);
+}
+
+.appearance-solid.orange select {
+  border-color: var(--color-orange-500);
+}
+
+.appearance-solid.orange:hover select {
+  background-color: var(--color-orange-transparent-100);
+}
+
+.appearance-solid.orange:focus-within select {
+  border-color: var(--color-orange-300);
+}
+
+.appearance-solid.yellow select {
+  border-color: var(--color-yellow-500);
+}
+
+.appearance-solid.yellow:hover select {
+  background-color: var(--color-yellow-transparent-100);
+}
+
+.appearance-solid.yellow:focus-within select {
+  border-color: var(--color-yellow-300);
+}
+
+.appearance-solid.skyblue select {
+  border-color: var(--color-skyblue-500);
+}
+
+.appearance-solid.skyblue:hover{
+  background-color: var(--color-skyblue-transparent-100);
+}
+
+.appearance-solid.skyblue:focus-within select {
+  border-color: var(--color-skyblue-300);
+}
+
+.appearance-solid.grey select {
+  border-color: var(--color-grey-500);
+}
+
+.appearance-solid.grey:hover select {
+  background-color: var(--color-grey-transparent-100);
+}
+
+.appearance-solid.grey:focus-within select {
+  border-color: var(--color-grey-300);
+}
+
+.appearance-outline select {
+  border-style: solid;
+  border-width: 2px;
+}
+
+.appearance-outline.blue select {
+  border-color: var(--color-blue-500);
+}
+
+.appearance-outline.blue:hover select {
+  outline: 5px solid var(--color-blue-200);
+}
+
+.appearance-outline.blue:focus-within select {
+  background-color: var(--color-blue-50);
+}
+
+.appearance-outline.red select {
+  border-color: var(--color-red-500);
+}
+
+.appearance-outline.red:hover select {
+  outline: 5px solid var(--color-red-200);
+}
+
+.appearance-outline.red:focus-within select {
+  background-color: var(--color-red-50);
+}
+
+.appearance-outline.green select {
+  border-color: var(--color-green-500);
+}
+
+.appearance-outline.green:hover select {
+  outline: 5px solid var(--color-green-200);
+}
+
+.appearance-outline.green:focus-within select {
+  background-color: var(--color-green-50);
+}
+
+.appearance-outline.skyblue select {
+  border-color: var(--color-skyblue-500);
+}
+
+.appearance-outline.skyblue:hover select {
+  outline: 5px solid var(--color-skyblue-200);
+}
+
+.appearance-outline.skyblue:focus-within select {
+  background-color: var(--color-skyblue-50);
+}
+
+.appearance-outline.yellow select {
+  border-color: var(--color-yellow-500);
+}
+
+.appearance-outline.yellow:hover select {
+  outline: 5px solid var(--color-yellow-200);
+}
+
+.appearance-outline.yellow:focus-within select {
+  background-color: var(--color-yellow-50);
+}
+
+.appearance-outline.orange select {
+  border-color: var(--color-orange-500);
+}
+
+.appearance-outline.orange:hover select {
+  outline: 5px solid var(--color-orange-200);
+}
+
+.appearance-outline.orange:focus-within select {
+  background-color: var(--color-orange-50);
+}
+
+.appearance-outline.grey select {
+  border-color: var(--color-grey-500);
+}
+
+.appearance-outline.grey:hover select {
+  outline: 5px solid var(--color-grey-200);
+}
+
+.appearance-outline.grey:focus-within select {
+  background-color: var(--color-grey-50);
+}

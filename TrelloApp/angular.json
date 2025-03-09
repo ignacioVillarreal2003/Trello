@@ -28,10 +28,7 @@
             ],
             "styles": [
               "src/styles.css",
-              "src/styles/button.css",
-              "src/styles/components.css",
-              "src/styles/input.css",
-              "src/styles/variables.css"
+              "src/variables.css"
             ],
             "scripts": []
           },

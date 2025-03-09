@@ -1,0 +1,16 @@
+.btn-back {
+  transition: all .1s ease-in-out;
+  border: none;
+  padding: 5px;
+  background-color: #dcdcdc;
+  border-radius: 5px;
+}
+
+.btn-back:hover {
+  background-color: #c8c8c8;
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+}

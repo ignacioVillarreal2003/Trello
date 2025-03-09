@@ -1,76 +1,99 @@
 .user-menu {
     width: 100%;
-    height: 100vh;
     display: flex;
-    flex-direction: column;
+  justify-content: center;
     gap: 30px;
     backdrop-filter: blur(5px);
     padding: 30px;
-    background-color: var(--background-1);
 }
 
-.user-menu__block {
-    display: flex;
-    gap: 30px;
+.user-menu__container {
+  max-width: 700px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 30px;
+  background-color: var(--background-2);
+  padding: 40px;
+  border-radius: 10px;
+}
+
+.user-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+}
+
+.user-menu__title {
+  font-size: 26px;
+}
+
+.btn-close {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.user-menu__data-section {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+}
+
+.user-menu__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: var(--color-blue-500);
+  font-size: 26px;
+  border-radius: 50%;
+  color: white;
+  text-decoration: none;
+  text-align: center;
+}
+
+.user-menu__user-data {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.user-menu__username {
+  font-size: 18px;
+}
+
+.user-menu__email {
+  font-size: 14px;
+}
+
+.user-menu__password-section,
+.user-menu__username-section,
+.user-menu__theme-section {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .user-menu__form {
-    width: 100%;
-    height: auto;
-    display: flex;
-    align-items: center;
-    flex-direction: column;
-    gap: 20px;
-    background-color: var(--transparent-background-4);
-    padding: 20px;
-    border-radius: 10px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-.user-menu__field {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    border: none;
-}
-
-.user-menu__label {
-    width: 100%;
-    font-size: clamp(16px, 5vw, 22px);
-    color: var(--text-1);
-    margin-bottom: 10px;
-}
-
-.user-menu__actions {
-    width: 100%;
-    display: flex;
-}
-
-.user-menu__theme {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    background-color: var(--transparent-background-4);
-    padding: 20px;
-    border-radius: 10px;
-}
-
-.user-menu__global-actions {
-    width: 100%;
-    display: flex;
-    gap: 20px;
-    background-color: var(--transparent-background-4);
-    padding: 20px;
-    border-radius: 10px;
+.user-menu__footer {
+  width: 100%;
+  display: flex;
+  gap: 20px;
 }
 
 @media (max-width: 900px) {
-    .user-menu {
-        height: auto;
-    }
 
-    .user-menu__block {
-        flex-direction: column;
-    }
 }

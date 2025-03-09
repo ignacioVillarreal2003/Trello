@@ -17,6 +17,7 @@ public class RegisterUserDtoValidator : AbstractValidator<RegisterUserDto>
         
         RuleFor(user => user.Password)
             .NotEmpty().WithMessage("The password is required")
-            .MaximumLength(64).WithMessage("The password should be of maximum 64 characters");
+            .MaximumLength(64).WithMessage("The password should be of maximum 64 characters")
+            .MinimumLength(8).WithMessage("The password should be at least 8 characters");  
     }
 }

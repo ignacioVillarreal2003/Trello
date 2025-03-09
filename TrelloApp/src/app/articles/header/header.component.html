@@ -1,9 +1,9 @@
 <header class="header">
   <a class="header__brand" routerLink="/board-dashboard">
-    <img class="header__logo" src="/icons/trello-icon.svg" alt="Trello">
+    <img class="header__logo" src="/Trello.svg" alt="Trello">
     <h2 class="header__title">Trello</h2>
   </a>
-  <a class="header__user" routerLink="/user-menu" aria-label="User menu">
-    {{ username?.charAt(0) }}
+  <a class="header__user" routerLink="/user-menu" aria-label="User menu" *ngIf="username">
+    {{ username.charAt(0) }}
   </a>
 </header>

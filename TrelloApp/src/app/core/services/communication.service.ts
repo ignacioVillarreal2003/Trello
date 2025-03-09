@@ -13,11 +13,11 @@ export class CommunicationService {
     this.refreshBoardsSubject.next();
   }
 
-  private refreshTasksSubject: Subject<void> = new Subject<void>();
-  refreshTasks$: Observable<any> = this.refreshTasksSubject.asObservable();
+  private refreshCardsSubject: Subject<void> = new Subject<void>();
+  refreshCards$: Observable<any> = this.refreshCardsSubject.asObservable();
 
-  triggerRefreshTasks(): void {
-    this.refreshTasksSubject.next();
+  triggerRefreshCards(): void {
+    this.refreshCardsSubject.next();
   }
 
   private refreshListsSubject: Subject<void> = new Subject<void>();

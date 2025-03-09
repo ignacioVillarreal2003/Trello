@@ -1,0 +1,11 @@
+<div class="input">
+  <label *ngIf="textLabel.length > 0" [for]="id">{{ textLabel }}</label>
+  <input
+    [id]="id"
+    [type]="type"
+    [value]="value"
+    [disabled]="disabled"
+    (input)="updateValue($event)"
+    (blur)="onTouched()"
+    placeholder="{{placeholder}}">
+</div>

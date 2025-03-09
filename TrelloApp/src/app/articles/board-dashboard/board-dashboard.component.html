@@ -1,20 +1,24 @@
 <div class="dashboard">
   <app-header></app-header>
 
-  <section class="dashboard__content">
+  <div class="dashboard__container">
     <header class="dashboard__header">
-      <button class="btn-base appearance-solid aspect-free radius-small blue size-large"
-        (click)="toggleCreateBoard()">Create Board</button>
+      <app-btn [text]="'Create Board'" (click)="openCreateBoardModal()" style="width: 100%"></app-btn>
     </header>
 
-    <ul class="dashboard__grid">
-      <li class="dashboard__card" *ngFor="let board of boards">
-        <button class="dashboard__card-button" (click)="openBoard(board.id)">
+    <ul class="dashboard__board-list">
+      <li
+        class="dashboard__board-item"
+        *ngFor="let board of boards">
+        <button
+          class="dashboard__btn-board"
+          (click)="openBoard(board.id)"
+          [style.backgroundImage]="'url(' + boardBackgroundPath + board.background + ')'">
           {{ board.title }}
         </button>
       </li>
     </ul>
-  </section>
+  </div>
 
-  <app-create-board-modal *ngIf="isCreateBoardOpen" (close)="toggleCreateBoard()"></app-create-board-modal>
+  <app-create-board-modal *ngIf="isCreateBoardModalOpen" (close)="closeCreateBoardModal()"></app-create-board-modal>
 </div>

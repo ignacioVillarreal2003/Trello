@@ -1,39 +1,77 @@
 import { Injectable } from '@angular/core';
-import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
-import {catchError, NotFoundError, Observable, of, throwError} from 'rxjs';
-import {SessionServiceService} from '../session-service.service';
+import { HttpClient } from '@angular/common/http';
+import { catchError, Observable } from 'rxjs';
+import {AddBoard, UpdateBoard} from '../../models/board';
+import {BaseHttpService} from './base-http.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class BoardHttpService {
+export class BoardHttpService extends BaseHttpService {
 
-  constructor(private http: HttpClient, private sessionServiceService: SessionServiceService) { }
+  url = `${this.baseUrl}/Board`;
 
-  httpOptions = { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) };
-  baseUrl: string = 'https://localhost:44384/Board';
+  constructor(http: HttpClient) {
+    super(http);
+  }
 
-  private handleError(error: HttpErrorResponse) {
-    console.log(error)
-    return throwError(error.error);
+  getBoard(id: number): Observable<any> {
+    return this.http.get<any>(`${this.url}/${id}`, this.httpOptions).pipe(
+      catchError(this.handleError)
+    );
   }
 
   getBoards(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}`, this.httpOptions).pipe(
+    return this.http.get<any>(`${this.url}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  postBoard(title: string, theme: string, icon: string): Observable<any> {
-    const requestBody: any = { title, theme, icon };
-    return this.http.post<any>(`${this.baseUrl}`, requestBody, this.httpOptions).pipe(
+  addBoard(title: string, description: string, background: string): Observable<any> {
+    const requestBody: AddBoard = { title, description, background };
+    return this.http.post<any>(`${this.url}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  putBoard(theme: string, boardId: number): Observable<any> {
-    const requestBody: any = { theme, boardId };
-    return this.http.put<any>(`${this.baseUrl}`, requestBody, this.httpOptions).pipe(
+  updateBackground(boardId: number, background: string): Observable<any> {
+    const requestBody: UpdateBoard = {
+      background: background
+    };
+    return this.http.put<any>(`${this.url}/${boardId}`, requestBody, this.httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  updateDescription(boardId: number, description: string): Observable<any> {
+    const requestBody: UpdateBoard = {
+      description: description
+    };
+    return this.http.put<any>(`${this.url}/${boardId}`, requestBody, this.httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  updateTitle(boardId: number, title: string): Observable<any> {
+    const requestBody: UpdateBoard = {
+      title: title
+    };
+    return this.http.patch<any>(`${this.url}/${boardId}`, requestBody, this.httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  updateIsArchived(boardId: number, isArchived: boolean): Observable<any> {
+    const requestBody: UpdateBoard = {
+      isArchived: isArchived
+    };
+    return this.http.patch<any>(`${this.url}/${boardId}`, requestBody, this.httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  deleteBoard(boardId: number): Observable<any> {
+    return this.http.delete<any>(`${this.url}/${boardId}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }

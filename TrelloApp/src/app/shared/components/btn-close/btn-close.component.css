@@ -1,0 +1,16 @@
+.btn-close {
+  transition: all .1s ease-in-out;
+  border: none;
+  padding: 5px;
+  background-color: var(--color-red-500);
+  border-radius: 50%;
+}
+
+.btn-close:hover {
+  background-color: var(--color-red-600);
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+}

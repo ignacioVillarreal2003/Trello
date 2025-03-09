@@ -11,6 +11,6 @@ public class AddListDtoValidator : AbstractValidator<AddListDto>
             .MaximumLength(32).WithMessage("The title should be of maximum 32 characters");
 
         RuleFor(list => list.Position)
-            .NotEmpty().WithMessage("The position is required");
+            .GreaterThanOrEqualTo(0).WithMessage("The position must be 0 or greater");
     }
 }

@@ -1,0 +1,34 @@
+.input {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 5px;
+}
+
+label {
+  width: 100%;
+  color: var(--text-1);
+  font-size: 16px;
+}
+
+input {
+  width: 100%;
+  background-color: transparent;
+  padding: 10px;
+  transition-duration: .15s;
+  transition-property: background-color, border-color, box-shadow, color;
+  transition-timing-function: ease-in;
+  outline: none;
+  font-size: 14px;
+  border-radius: 5px;
+  border: 2px solid;
+  border-color: var(--color-blue-500);
+}
+
+.input:hover input {
+  background-color: var(--color-blue-transparent-100);
+}
+
+.input:focus-within input {
+  border-color: var(--color-blue-300);
+}

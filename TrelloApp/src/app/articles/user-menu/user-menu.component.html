@@ -1,49 +1,40 @@
 <section class="user-menu">
-    <div class="user-menu__block">
-        <form class="user-menu__form" [formGroup]="updatePasswordForm" (ngSubmit)="onSubmitUpdatePassword()">
-            <fieldset class="user-menu__field">
-                <legend class="user-menu__label">Your last password</legend>
-                <input formControlName="oldPassword"
-                    class="input-base appearance-outline aspect-free blue radius-small size-small"
-                    placeholder="Your last password" />
-            </fieldset>
-            <fieldset class="user-menu__field">
-                <legend class="user-menu__label">Your new password</legend>
-                <input formControlName="newPassword"
-                    class="input-base appearance-outline aspect-free blue radius-small size-small"
-                    placeholder="Your new password" />
-            </fieldset>
-            <footer class="user-menu__actions">
-                <button type="submit" class="btn-base appearance-solid size-small radius-small aspect-free skyblue">
-                    Change password
-                </button>
-            </footer>
-        </form>
+  <div class="user-menu__container">
+    <header class="user-menu__header">
+      <h1 class="user-menu__title">Account</h1>
+      <app-btn-close class="btn-close" (click)="goBack()"></app-btn-close>
+    </header>
 
-        <form class="user-menu__form" [formGroup]="updateUsernameForm" (ngSubmit)="onSubmitUpdateUsername()">
-            <fieldset class="user-menu__field">
-                <legend class="user-menu__label">Change username</legend>
-                <input formControlName="username"
-                    class="input-base appearance-outline aspect-free blue radius-small size-small"
-                    placeholder="Your new username" />
-            </fieldset>
-            <footer class="user-menu__actions">
-                <button type="submit" class="btn-base appearance-solid size-small radius-small aspect-free skyblue">
-                    Change username
-                </button>
-            </footer>
-        </form>
-    </div>
+    <section class="user-menu__data-section">
+      <span class="user-menu__icon">{{username.charAt(0)}}</span>
+      <div class="user-menu__user-data">
+        <h2 class="user-menu__username">{{username}}</h2>
+        <h3 class="user-menu__email">{{email}}</h3>
+      </div>
+    </section>
 
-    <div class="user-menu__block">
-        <div class="user-menu__theme">
-            <app-theme-btn></app-theme-btn>
-        </div>
-        <footer class="user-menu__global-actions">
-            <button class="btn-base appearance-light orange size-small radius-small aspect-free" (click)="logout()">Log
-                out</button>
-            <button class="btn-base appearance-solid red size-small radius-small aspect-free"
-                (click)="goBack()">Close</button>
-        </footer>
-    </div>
+    <section class="user-menu__password-section">
+      <form class="user-menu__form" [formGroup]="updatePasswordForm" (ngSubmit)="onSubmitUpdatePassword()">
+        <app-input [textLabel]="'Your old password'" [type]="'password'" [placeholder]="'Your old password'" formControlName="oldPassword"></app-input>
+        <app-input [textLabel]="'Your new password'" [type]="'password'" [placeholder]="'Your new password'" formControlName="newPassword"></app-input>
+        <app-btn [text]="'Change password'" [type]="'submit'"></app-btn>
+      </form>
+    </section>
+
+    <section class="user-menu__username-section">
+      <form class="user-menu__form" [formGroup]="updateUsernameForm" (ngSubmit)="onSubmitUpdateUsername()">
+        <app-input [textLabel]="'Change username'" [placeholder]="'Your new username'" formControlName="username"></app-input>
+        <app-btn [text]="'Change username'" [type]="'submit'"></app-btn>
+      </form>
+    </section>
+
+    <section class="user-menu__theme-section">
+      <app-btn-icon [icon]="'dark-theme'" (click)="onSubmitUpdateTheme()"></app-btn-icon>
+    </section>
+
+    <footer class="user-menu__footer">
+      <app-btn [text]="'Delete account'" [color]="'red'" style="width: 100%" (click)="onSubmitDeleteUser()"></app-btn>
+      <app-btn [text]="'Log out'" [color]="'red'" [appearance]="'appearance-light'" style="width: 100%"></app-btn>
+    </footer>
+  </div>
 </section>

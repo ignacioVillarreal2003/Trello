@@ -1,0 +1,10 @@
+<section class="create-list-modal">
+  <form class="create-list-modal__form" [formGroup]="createListForm" (ngSubmit)="onSubmitCreateList()">
+    <app-input style="width: 100%" [textLabel]="'Select a title'" [placeholder]="'Enter list title'" formControlName="title"></app-input>
+
+    <footer class="create-list-modal__footer">
+      <app-btn style="width: 100%" [appearance]="'appearance-solid'" [type]="'submit'" [text]="'Create list'"></app-btn>
+      <app-btn style="width: 100%" [appearance]="'appearance-solid'" (click)="onClose()" [color]="'red'" [text]="'Close'"></app-btn>
+    </footer>
+  </form>
+</section>

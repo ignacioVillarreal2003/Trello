@@ -5,62 +5,12 @@
   overflow: hidden;
 }
 
-app-header {
-  flex: 0 0 auto;
-}
-
 .board__content {
   flex: 1 1 auto;
   overflow: hidden;
   display: flex;
   flex-direction: column;
-}
-
-.background-1 {
-  background-image: linear-gradient(45deg, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
-}
-.background-2 {
-  background-image: linear-gradient(to right, #ffecd2 0%, #fcb69f 100%);
-}
-.background-3 {
-  background-image: linear-gradient(120deg, #a1c4fd 0%, #c2e9fb 100%);
-}
-.background-4 {
-  background-image: linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%);
-}
-.background-5 {
-  background-image: linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%);
-}
-.background-6 {
-  background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-}
-.background-7 {
-  background-image: url("/backgrounds/background-1.svg");
-  background-position: 50%;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-.background-8 {
-  background-image: url("/backgrounds/background-2.svg");
-  background-position: 50%;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-.background-9 {
-  background-image: url("/backgrounds/background-3.svg");
-  background-position: 50%;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-.background-10 {
-  background-image: url("/backgrounds/background-4.svg");
-  background-position: 50%;
-  background-repeat: no-repeat;
-  background-size: cover;
-}
-.background-11 {
-  background-image: url("/backgrounds/background-5.svg");
-  background-position: 50%;
+  background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
 }
@@ -71,7 +21,7 @@ app-header {
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
-  background-color: var(--transparent-background-1);
+  background-color: var(--background-transparent-1);
   backdrop-filter: blur(30px);
   flex: 0 0 auto;
 }
@@ -81,7 +31,7 @@ app-header {
   width: 100%;
   padding: 10px;
   background-color: transparent;
-  color: var(--text-color);
+  color: #ffffff;
   border: none;
   font-size: 22px;
   border-radius: 5px;
@@ -89,37 +39,12 @@ app-header {
 }
 
 .board__title-input:hover {
-  background-color: var(--transparent-background-3);
+  background-color: rgba(255, 255, 255, 0.4);
 }
 
 .board__title-input:focus-visible {
   outline: none;
-  background-color: var(--text-color);
-  color: var(--text-color-complement);
-}
-
-.board__options-button {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  border: none;
-  border-radius: 3px;
-  background-color: transparent;
-  transition: all .1s ease-in-out;
-}
-
-.board__options-button:hover {
-  background-color: var(--transparent-background-3);
-}
-
-.board__options-button .dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background-color: var(--text-color);
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 .board__lists {
@@ -134,12 +59,12 @@ app-header {
 }
 
 .board__lists::-webkit-scrollbar-thumb {
-  background-color: var(--transparent-background-1);
+  background-color: var(--background-transparent-1);
   border-radius: 5px;
 }
 
 .board__lists::-webkit-scrollbar-thumb:hover {
-  background-color: var(--transparent-background-4);
+  background-color: var(--background-transparent-2);
 }
 
 .board__lists-container {
@@ -157,7 +82,7 @@ app-header {
   gap: 10px;
   padding: 10px;
   border-radius: 5px;
-  background-color: var(--transparent-background-1);
+  background-color: var(--background-transparent-1);
   backdrop-filter: blur(20px) contrast(120%) brightness(90%);
 }
 
@@ -176,42 +101,16 @@ app-header {
   border-radius: 5px;
   background-color: transparent;
   cursor: pointer;
-  color: var(--text-color);
+  color: #ffffff;
   transition: all .2s ease-in-out;
 }
 
 .board__list-title-input:focus-visible {
   outline: none;
-  background-color: var(--text-color);
-  color: var(--text-color-complement);
+  background-color: rgba(255, 255, 255, 0.3);
 }
 
-.board__list-options-button {
-  width: 32px;
-  min-width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  border: none;
-  border-radius: 3px;
-  background-color: transparent;
-  transition: all .1s ease-in-out;
-}
-
-.board__list-options-button:hover {
-  background-color: var(--transparent-background-3);
-}
-
-.board__list-options-button .dot {
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  background-color: var(--text-color);
-}
-
-.board__task-list {
+.board__card-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -220,47 +119,47 @@ app-header {
   overflow-y: auto;
 }
 
-.board__task-list::-webkit-scrollbar {
+.board__card-list::-webkit-scrollbar {
   width: 8px;
 }
 
-.board__task-list::-webkit-scrollbar-thumb {
-  background-color: var(--transparent-background-1);
+.board__card-list::-webkit-scrollbar-thumb {
+  background-color: var(--background-transparent-1);
   border-radius: 5px;
 }
 
-.board__task-list::-webkit-scrollbar-thumb:hover {
-  background-color: var(--transparent-background-4);
+.board__card-list::-webkit-scrollbar-thumb:hover {
+  background-color: var(--background-transparent-2);
 }
 
-.board__task-button {
+.board__card-button {
   width: 100%;
   padding: 10px;
   text-align: start;
   border: none;
   border-radius: 5px;
   font-size: 14px;
-  background-color: var(--transparent-background-2);
+  background-color: var(--background-transparent-1);
   line-height: 20px;
-  color: var(--text-color);
+  color: var(--text-1);
   transition: background-color 0.1s ease-in-out;
 }
 
-.board__task-button:hover {
-  background-color: var(--transparent-background-1);
+.board__card-button:hover {
+  background-color: var(--background-transparent-2);
 }
 
-.board__add-task-button {
+.board__add-card-button {
   padding: 10px;
   border: none;
   border-radius: 5px;
   background-color: transparent;
-  color: var(--text-color);
+  color: var(--text-1);
   transition: all .2s ease-in-out;
 }
 
-.board__add-task-button:hover {
-  background-color: var(--transparent-background-1);
+.board__add-card-button:hover {
+  background-color: var(--background-transparent-1);
 }
 
 .board__list-add {
@@ -274,14 +173,14 @@ app-header {
   padding: 10px;
   border: none;
   border-radius: 5px;
-  background-color: var(--transparent-background-2);
+  background-color: var(--background-transparent-1);
   backdrop-filter: blur(20px) contrast(120%) brightness(90%);
   color: white;
   transition: all .2s ease-in-out;
 }
 
 .board__add-list-button:hover {
-  background-color: var(--transparent-background-1);
+  background-color: var(--background-transparent-2);
 }
 
 .cdk-drag-placeholder {

@@ -1,21 +1,24 @@
-import { List } from "./list";
-
 export interface Board {
-  id?: number;
-  icon?: string;
-  theme?: string;
-  title?: string;
-  lists?: List[];
+  id: number,
+  title: string,
+  description: string,
+  background: string,
+  createdAt: string,
+  updatedAt?: string,
+  isArchived: boolean,
+  archivedAt?: string
 }
 
 export interface AddBoard {
-  icon: string;
-  theme: string;
   title: string;
+  description?: string;
+  background: string;
 }
 
 export interface UpdateBoard {
-  icon: string;
-  theme: string;
-  title: string;
+  title?: string;
+  description?: string;
+  background?: string;
+  isArchived?: boolean,
 }
+

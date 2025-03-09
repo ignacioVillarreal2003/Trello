@@ -1,17 +1,22 @@
 export interface User {
-  id?: number;
-  email?: string;
-  password?: string;
-  username?: string;
-  token?: string;
-  theme?: string
+  id: number,
+  email: string,
+  username: string,
+  theme: string,
+  createdAt: string,
+  updatedAt?: string,
+}
+
+export interface UserAuth {
+  user: User,
+  accessToken: string,
+  refreshToken: string
 }
 
 export interface RegisterUser {
   email: string;
   password: string;
   username: string;
-  theme: string
 }
 
 export interface LoginUser {

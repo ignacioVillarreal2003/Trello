@@ -1,0 +1,35 @@
+.textarea {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 10px;
+}
+
+label {
+  width: 100%;
+  color: var(--text-1);
+  font-size: 16px;
+}
+
+textarea {
+  width: 100%;
+  background-color: transparent;
+  padding: 10px;
+  transition-duration: .15s;
+  transition-property: background-color, border-color, box-shadow, color;
+  transition-timing-function: ease-in;
+  outline: none;
+  font-size: 14px;
+  border-radius: 5px;
+  resize: vertical;
+  field-sizing: content;
+  border: 2px solid var(--color-blue-500);
+}
+
+.textarea:hover textarea {
+  background-color: var(--color-blue-transparent-100);
+}
+
+.textarea:focus-within textarea {
+  border-color: var(--color-blue-300);
+}

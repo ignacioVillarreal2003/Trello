@@ -1,59 +1,81 @@
 import { Injectable } from '@angular/core';
-import {catchError, map, Observable, of, throwError} from "rxjs";
-import {HttpClient, HttpErrorResponse, HttpHeaders} from "@angular/common/http";
-import {LoginUser, RegisterUser, UpdateUser, User} from '../../models/user';
-import {SessionServiceService} from '../session-service.service';
+import {catchError, Observable} from "rxjs";
+import {HttpClient} from "@angular/common/http";
+import {LoginUser, RegisterUser, UpdateUser} from '../../models/user';
+import {BaseHttpService} from './base-http.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class UserHttpService {
+export class UserHttpService extends BaseHttpService {
 
-  private baseUrl: string = 'https://localhost:44384/User';
-  private httpOptions = {
-    headers: new HttpHeaders({
-      'Content-Type': 'application/json'
-    })
-  };
+  url = `${this.baseUrl}/User`;
 
-  constructor(private http: HttpClient, private sessionServiceService: SessionServiceService) {}
-
-  private handleError(error: HttpErrorResponse): Observable<never> {
-    console.error('API Error:', error);
-    return throwError(() => new Error(error.error || 'Unexpected error occurred'));
+  constructor(http: HttpClient) {
+    super(http);
   }
 
   register(email: string, username: string, password: string): Observable<any> {
-    const requestBody: RegisterUser = { email: email,username: username, password: password, theme: 'light' };
-    return this.http.post<any>(`${this.baseUrl}/register-user`, requestBody, this.httpOptions).pipe(
+    const requestBody: RegisterUser = { email, username, password };
+    return this.http.post<any>(`${this.url}/register`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
   login(email: string, password: string): Observable<any> {
-    const requestBody: LoginUser = { email: email, password: password };
-    return this.http.post<any>(`${this.baseUrl}/login-user`, requestBody, this.httpOptions).pipe(
+    const requestBody: LoginUser = { email, password };
+    return this.http.post<any>(`${this.url}/login`, requestBody, this.httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  refreshToken(refreshToken: string): Observable<any> {
+    return this.http.post<any>(`${this.url}/refresh-token`, { refreshToken }, this.httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getUsers(): Observable<any> {
+    return this.http.get<any>(`${this.url}`, this.httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getUsersByUsername(username: string): Observable<any> {
+    return this.http.get<any>(`${this.url}/username/${username}`, this.httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  getUsersByCardId(cardId: number): Observable<any> {
+    return this.http.get<any>(`${this.url}/card/${cardId}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
   updatePassword(oldPassword: string, newPassword: string): Observable<any> {
-    const requestBody: UpdateUser = { oldPassword: oldPassword, newPassword: newPassword };
-    return this.http.put<any>(`${this.baseUrl}`, requestBody, this.httpOptions).pipe(
+    const requestBody: UpdateUser = { oldPassword, newPassword };
+    return this.http.put<any>(`${this.url}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
   updateUsername(username: string): Observable<any> {
-    const requestBody: UpdateUser = { username: username };
-    return this.http.put<any>(`${this.baseUrl}`, requestBody, this.httpOptions).pipe(
+    const requestBody: UpdateUser = { username };
+    return this.http.put<any>(`${this.url}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
   updateTheme(theme: string): Observable<any> {
-    const requestBody: UpdateUser = { theme: theme };
-    return this.http.put<any>(`${this.baseUrl}`, requestBody, this.httpOptions).pipe(
+    const requestBody: UpdateUser = { theme };
+    return this.http.put<any>(`${this.url}`, requestBody, this.httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  deleteUser(): Observable<any> {
+    return this.http.delete<any>(`${this.url}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }

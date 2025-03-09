@@ -1,0 +1,16 @@
+<div class="card-users">
+  <input class="user-panel__input" placeholder="Enter username" [(ngModel)]="searchTerm">
+
+  <ul class="user-panel__list">
+    <li class="user-panel__item" *ngFor="let user of filteredUsers">
+      <button class="user-panel__user-btn" (click)="user.checked = !user.checked">
+        <label class="user-panel__selector">
+          <input type="checkbox" [(ngModel)]="user.checked">
+          <span class="user-panel__checkmark"></span>
+        </label>
+        <h2 class="user-panel__username">{{ user.name }}</h2>
+      </button>
+    </li>
+    <li class="user-panel__no-match" *ngIf="filteredUsers.length === 0">No matches</li>
+  </ul>
+</div>

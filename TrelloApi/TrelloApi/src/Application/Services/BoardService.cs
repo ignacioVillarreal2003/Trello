@@ -68,6 +68,7 @@ public class BoardService: BaseService, IBoardService
             Board board = new Board(dto.Title, dto.Background, dto.Description);
             
             await _boardRepository.CreateAsync(board);
+            await _unitOfWork.CommitAsync();
 
             var userBoard = new UserBoard(userId, board.Id, RoleValues.RolesAllowed[0]);
             await _userBoardRepository.CreateAsync(userBoard);

@@ -1,10 +1,10 @@
 import { HttpInterceptorFn } from '@angular/common/http';
 import {inject} from "@angular/core";
-import {SessionServiceService} from '../../services/session-service.service';
+import {SessionServiceService} from '../../services/session/session-service.service';
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const sessionServiceService: SessionServiceService = inject(SessionServiceService);
-  const authorization: string = `Bearer ${sessionServiceService.getToken()}`;
+  const authorization: string = `Bearer ${sessionServiceService.getSessionData()?.accessToken}`;
 
   const modifiedRequest = req.clone({
     setHeaders: {

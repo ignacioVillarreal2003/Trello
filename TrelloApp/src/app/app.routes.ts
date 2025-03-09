@@ -17,8 +17,11 @@ export const routes: Routes = [
   {
     path: 'board-view/:id',
     loadComponent: () => import('./articles/board-view/board-view.component').then(m => m.BoardViewComponent),
-  }
-  ,
+  },
+  {
+    path: 'card-view/:id',
+    loadComponent: () => import('./articles/card-view/card-view.component').then(m => m.CardViewComponent),
+  },
   {
     path: 'user-menu',
     loadComponent: () => import('./articles/user-menu/user-menu.component').then(m => m.UserMenuComponent),
