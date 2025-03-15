@@ -33,8 +33,8 @@ public class UserBoardIntegrationTests: IClassFixture<CustomWebApplicationFactor
     public async Task GetUsersByBoardId_ShouldReturnUsers_WhenUsersFound()
     {
         var board = new Board("title", "background") { Id = 1 };
-        var user = new User("user@email.com", "username", "password") { Id = 1 };
-        var userBoard = new UserBoard(user.Id, board.Id);
+        var user = new User("user@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
+        var userBoard = new UserBoard(user.Id, board.Id, "Role");
         
         _dbContext.Boards.Add(board);
         _dbContext.Users.Add(user);
@@ -72,7 +72,7 @@ public class UserBoardIntegrationTests: IClassFixture<CustomWebApplicationFactor
     public async Task AddUserToBoard_ShouldReturnCreated_WhenAddedSuccessful()
     {
         var board = new Board("title", "background") { Id = 1 };
-        var user = new User("user@email.com", "username", "password") { Id = 1 };
+        var user = new User("user@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
         var dto = new AddUserBoardDto { UserId = user.Id, Role = "Member" };
 
         _dbContext.Boards.Add(board);
@@ -88,8 +88,8 @@ public class UserBoardIntegrationTests: IClassFixture<CustomWebApplicationFactor
     public async Task RemoveUserFromBoard_ShouldReturnNoContent_WhenDeletedSuccessful()
     {
         var board = new Board("title", "background") { Id = 1 };
-        var user = new User("user@email.com", "username", "password") { Id = 1 };
-        var userBoard = new UserBoard(user.Id, board.Id);
+        var user = new User("user@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
+        var userBoard = new UserBoard(user.Id, board.Id, "Role");
 
         _dbContext.Boards.Add(board);
         _dbContext.Users.Add(user);

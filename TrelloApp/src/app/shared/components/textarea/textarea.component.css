@@ -24,6 +24,7 @@ textarea {
   resize: vertical;
   field-sizing: content;
   border: 2px solid var(--color-blue-500);
+  color: var(--text-1);
 }
 
 .textarea:hover textarea {

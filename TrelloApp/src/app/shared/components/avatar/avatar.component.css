@@ -1,0 +1,12 @@
+.avatar {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   width: 40px;
+   height: 40px;
+   font-size: clamp(18px, 5vw, 22px);
+   border-radius: 50%;
+   color: white;
+   text-decoration: none;
+   text-align: center;
+ }

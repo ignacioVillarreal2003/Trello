@@ -1,5 +1,6 @@
 <section class="create-list-modal">
   <form class="create-list-modal__form" [formGroup]="createListForm" (ngSubmit)="onSubmitCreateList()">
+    <h1 class="create-list-modal__title">Create a list</h1>
     <app-input style="width: 100%" [textLabel]="'Select a title'" [placeholder]="'Enter list title'" formControlName="title"></app-input>
 
     <footer class="create-list-modal__footer">

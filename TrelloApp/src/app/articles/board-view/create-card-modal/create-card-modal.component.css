@@ -24,6 +24,10 @@
   border-radius: 5px;
 }
 
+.create-card-modal__title {
+  font-size: clamp(16px, 5vw, 20px);
+}
+
 .create-card-modal__footer {
   width: 100%;
   display: flex;

@@ -27,17 +27,21 @@ public class User: Entity
     [DataType(DataType.DateTime)] 
     public DateTime? RefreshTokenExpiryTime { get; set; }
     
+    [StringLength(32), Required]
+    public string AvatarBackground { get; set; }
+    
     public ICollection<UserBoard> UserBoards { get; set; }
 
     public ICollection<UserCard> UserCards { get; set; }
     
     public ICollection<Comment> Comments { get; set; }
 
-    public User(string email, string username, string password, string theme = "Light")
+    public User(string email, string username, string password, string avatarBackground, string theme)
     {
         Email = email;
         Username = username;
         Password = password;
+        AvatarBackground = avatarBackground;
         Theme = theme;
         CreatedAt = DateTime.UtcNow;
         LastLogin = DateTime.UtcNow;

@@ -8,7 +8,7 @@
 label {
   width: 100%;
   color: var(--text-1);
-  font-size: 16px;
+  font-size: 14px;
 }
 
 input {
@@ -23,6 +23,7 @@ input {
   border-radius: 5px;
   border: 2px solid;
   border-color: var(--color-blue-500);
+  color: var(--text-1);
 }
 
 .input:hover input {

@@ -113,7 +113,7 @@ builder.Services.AddRateLimiter(options =>
             partitionKey: httContext.Connection.RemoteIpAddress?.ToString(),
             factory: _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 10,
+                PermitLimit = 50,
                 Window = TimeSpan.FromSeconds(10)
             }));
     options.AddPolicy("block", httContext =>
@@ -121,8 +121,8 @@ builder.Services.AddRateLimiter(options =>
             partitionKey: httContext.Connection.RemoteIpAddress?.ToString(),
             factory: _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 5,
-                Window = TimeSpan.FromMinutes(5)
+                PermitLimit = 50,
+                Window = TimeSpan.FromMinutes(1)
             }));
 });
 

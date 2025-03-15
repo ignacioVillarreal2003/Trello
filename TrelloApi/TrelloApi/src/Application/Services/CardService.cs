@@ -64,7 +64,7 @@ public class CardService: BaseService, ICardService
     {
         try
         {
-            Card card = new Card(dto.Title, dto.Description, listId, dto.Priority);
+            Card card = new Card(dto.Title, dto.Description, listId, dto.Priority, dto.Position);
             await _cardRepository.CreateAsync(card);
             await _unitOfWork.CommitAsync();
 
@@ -105,13 +105,17 @@ public class CardService: BaseService, ICardService
             {
                 card.DueDate = dto.DueDate;
             }
-            if (dto.IsCompleted != null)
+            if (dto.IsCompleted.HasValue)
             {
                 card.IsCompleted = dto.IsCompleted.Value;
             }
             if (!string.IsNullOrEmpty(dto.Priority))
             {
                 card.Priority = dto.Priority;
+            }
+            if (dto.Position != null)
+            {
+                card.Position = dto.Position.Value;
             }
 
             await _cardRepository.UpdateAsync(card);

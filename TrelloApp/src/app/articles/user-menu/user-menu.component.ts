@@ -2,40 +2,46 @@ import { Component } from '@angular/core';
 import { AlertService } from '../../core/services/alert.service';
 import { UserHttpService } from '../../core/services/http/user-http.service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { HttpErrorResponse } from '@angular/common/http';
-import { SessionServiceService } from '../../core/services/session/session-service.service';
+import { SessionService } from '../../core/services/session/session.service';
 import { Router } from '@angular/router';
-import { Location } from '@angular/common';
+import {Location, NgForOf, NgIf} from '@angular/common';
 import {InputComponent} from "../../shared/components/input/input.component";
 import {BtnComponent} from '../../shared/components/btn/btn.component';
 import {BtnIconComponent} from '../../shared/btn-icon/btn-icon.component';
 import {TextareaComponent} from '../../shared/components/textarea/textarea.component';
 import {BtnCloseComponent} from '../../shared/components/btn-close/btn-close.component';
+import {AvatarComponent} from '../../shared/components/avatar/avatar.component';
+import {ResourcesService} from '../../core/services/resources.service';
+import {BtnThemeComponent} from '../../shared/components/btn-theme/btn-theme.component';
+import {UpdateUser} from '../../core/models/user';
 
 @Component({
   selector: 'app-user-menu',
-  imports: [ReactiveFormsModule, InputComponent, BtnComponent, BtnIconComponent, TextareaComponent, BtnCloseComponent],
+  imports: [ReactiveFormsModule, InputComponent, BtnComponent, BtnIconComponent, TextareaComponent, BtnCloseComponent, AvatarComponent, NgIf, NgForOf, BtnThemeComponent],
   templateUrl: './user-menu.component.html',
   styleUrl: './user-menu.component.css'
 })
 export class UserMenuComponent {
+  email: string | undefined ;
+  username: string | undefined = undefined;
+  avatarBackground: string | undefined = undefined;
+  avatarBackgrounds: string[] = [];
+  theme: string | undefined = undefined;
 
   constructor(private alertService: AlertService,
     private userHttpService: UserHttpService,
-    private sessionServiceService: SessionServiceService,
+    private sessionServiceService: SessionService,
     private router: Router,
-    private location: Location) { }
+    private location: Location,
+    private resourcesService: ResourcesService) { }
 
   ngOnInit(): void {
-    this.email = this.sessionServiceService.getSessionData()?.email ?? "";
-    this.username = this.sessionServiceService.getSessionData()?.username ?? "";
+    this.email = this.sessionServiceService.getSessionData()?.email;
+    this.username = this.sessionServiceService.getSessionData()?.username;
+    this.avatarBackground = this.sessionServiceService.getSessionData()?.avatarBackground;
+    this.avatarBackgrounds = this.resourcesService.avatarBackgrounds;
   }
 
-  /* User data*/
-  email: string = "";
-  username: string = "";
-
-  /* Update password */
   updatePasswordForm: FormGroup = new FormGroup({
     oldPassword: new FormControl('', [Validators.required, Validators.minLength(8)]),
     newPassword: new FormControl('', [Validators.required, Validators.minLength(8)])
@@ -50,18 +56,20 @@ export class UserMenuComponent {
       }
       return;
     }
-    this.userHttpService.updatePassword(this.updatePasswordForm.value.oldPassword, this.updatePasswordForm.value.newPassword).subscribe({
+    const body: UpdateUser = {
+      oldPassword: this.updatePasswordForm.value.oldPassword,
+      newPassword: this.updatePasswordForm.value.newPassword
+    }
+    this.userHttpService.update(body).subscribe({
       next: (response: any): void => {
         this.alertService.SuccessMessage("Password changed successfully.");
       },
-      error: (error: HttpErrorResponse): void => {
-        const errorMessage: string = error?.message || 'Error in the server. Try again later.';
-        this.alertService.ErrorMessage(errorMessage);
+      error: (error: Error): void => {
+        this.alertService.ErrorMessage(error.message);
       }
     });
   }
 
-  /* Update username */
   updateUsernameForm: FormGroup = new FormGroup({
     username: new FormControl('', [Validators.required, Validators.pattern(/^\w+$/)])
   })
@@ -73,19 +81,20 @@ export class UserMenuComponent {
       }
       return;
     }
-    this.userHttpService.updateUsername(this.updateUsernameForm.value.username).subscribe({
+    const body: UpdateUser = {
+      username: this.updateUsernameForm.value.username
+    }
+    this.userHttpService.update(body).subscribe({
       next: (response: any): void => {
         this.sessionServiceService.updateSessionData({ username: response.username });
         this.alertService.SuccessMessage("Username changed successfully.");
       },
-      error: (error: HttpErrorResponse): void => {
-        const errorMessage: string = error?.message || 'Error in the server. Try again later.';
-        this.alertService.ErrorMessage(errorMessage);
+      error: (error: Error): void => {
+        this.alertService.ErrorMessage(error.message);
       }
     });
   }
 
-  /* Update theme */
   onSubmitUpdateTheme(): void {
     const actualTheme: string | undefined = this.sessionServiceService.getSessionData()?.theme
     let theme: string = "Light";
@@ -95,41 +104,56 @@ export class UserMenuComponent {
     else if (actualTheme == "Dark" && actualTheme != undefined) {
       theme = "Light";
     }
-    this.userHttpService.updateTheme(theme).subscribe({
+    const body: UpdateUser = {
+      theme: theme
+    }
+    this.userHttpService.update(body).subscribe({
       next: (response: any): void => {
         this.sessionServiceService.updateSessionData({ theme: response.theme });
         const body: HTMLElement = document.querySelector('body') as HTMLElement;
         body.classList.remove('dark');
         body.classList.remove('light');
         body.classList.add(response.theme.toLowerCase());
+        this.theme = theme;
       },
-      error: (error: HttpErrorResponse): void => {
-        const errorMessage: string = error?.message || 'Error in the server. Try again later.';
-        this.alertService.ErrorMessage(errorMessage);
+      error: (error: Error): void => {
+        this.alertService.ErrorMessage(error.message);
       }
     });
   }
 
-  /* Delete user */
   onSubmitDeleteUser(): void {
     this.userHttpService.delete().subscribe({
       next: (response: any): void => {
         this.logout();
       },
-      error: (error: HttpErrorResponse): void => {
-        const errorMessage: string = error?.message || 'Error in the server. Try again later.';
-        this.alertService.ErrorMessage(errorMessage);
+      error: (error: Error): void => {
+        this.alertService.ErrorMessage(error.message);
       }
     });
   }
 
-  /* Logout */
+  updateAvatar(avatarBackground: string) {
+    const body: UpdateUser = {
+      avatarBackground: avatarBackground
+    }
+    this.userHttpService.update(body).subscribe({
+      next: (response: any): void => {
+        this.sessionServiceService.updateSessionData({ avatarBackground: response.avatarBackground });
+        this.avatarBackground = this.sessionServiceService.getSessionData()?.avatarBackground;
+        this.alertService.SuccessMessage("Avatar changed successfully.");
+      },
+      error: (error: Error): void => {
+        this.alertService.ErrorMessage(error.message);
+      }
+    });
+  }
+
   logout(): void {
     this.sessionServiceService.clearSession();
     this.router.navigate(['/']);
   }
 
-  /* Close */
   goBack(): void {
     this.location.back();
   }

@@ -78,7 +78,7 @@ public class UserService: BaseService, IUserService
     {
         try
         {
-            User user = new User(dto.Email, dto.Username, _encrypt.HashPassword(dto.Password), UserThemeValues.UserThemesAllowed[1]);
+            User user = new User(dto.Email, dto.Username, _encrypt.HashPassword(dto.Password), AvatarBackgroundValues.AvatarBackgroundsAllowed[3], UserThemeValues.UserThemesAllowed[1]);
             await _userRepository.CreateAsync(user);
 
             await _unitOfWork.CommitAsync();
@@ -149,6 +149,10 @@ public class UserService: BaseService, IUserService
                     throw new UnauthorizedAccessException("Invalid user credentials.");
                 }
                 user.Password = _encrypt.HashPassword(dto.NewPassword);
+            }
+            if (!string.IsNullOrEmpty(dto.AvatarBackground))
+            {
+                user.AvatarBackground = dto.AvatarBackground;
             }
 
             await _userRepository.UpdateAsync(user);

@@ -1,26 +1,29 @@
 export interface Card {
-  id: string,
+  id: number,
   title: string,
   description: string,
-  listId: string,
+  listId: number,
   dueDate: string,
   priority?: string,
-  isComplete: boolean,
+  isCompleted: boolean,
   createdAt: string,
   updatedAt?: string,
+  position: number
 }
 
 export interface AddCard {
   title: string,
   description: string,
   priority?: string,
+  position: number
 }
 
 export interface UpdateCard {
-  title: string,
-  description: string,
-  listId: string,
-  dueDate: string,
+  title?: string,
+  description?: string,
+  listId?: number,
+  dueDate?: string,
   priority?: string,
-  isComplete: boolean,
+  isCompleted?: boolean,
+  position?: number
 }

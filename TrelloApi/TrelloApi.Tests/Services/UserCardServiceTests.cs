@@ -39,8 +39,8 @@ public class UserCardServiceTests
         const int cardId = 1;
         var users = new List<User>
         {
-            new User(email: "email1@gmail.com", username: "username 1", password: "password") { Id = 1 },
-            new User(email: "email2@gmail.com", username: "username 2", password: "password") { Id = 2 },
+            new User(email: "email1@gmail.com", username: "username 1", password: "password", "avatar background", "theme") { Id = 1 },
+            new User(email: "email2@gmail.com", username: "username 2", password: "password", "avatar background", "theme") { Id = 2 },
         };
         var response = new List<UserResponse>
         {

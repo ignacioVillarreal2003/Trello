@@ -35,8 +35,8 @@ public class UserIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pr
     [Fact]
     public async Task GetUsers_ShouldReturnUsers_WhenUsersFound()
     {
-        var user1 = new User("user1@email.com", "username", "password", "theme") { Id = 1 };
-        var user2 = new User("user2@email.com", "username", "password", "theme") { Id = 2 };
+        var user1 = new User("user1@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
+        var user2 = new User("user2@email.com", "username", "password", "avatar background", "theme") { Id = 2 };
 
         _dbContext.Users.Add(user1);
         _dbContext.Users.Add(user2);
@@ -71,8 +71,8 @@ public class UserIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pr
     public async Task GetUsersByUsername_ShouldReturnUsers_WhenUsersFound()
     {
         const string username = "user";
-        var user1 = new User("user1@email.com", "username", "password", "theme") { Id = 1 };
-        var user2 = new User("user2@email.com", "username", "password", "theme") { Id = 2 };
+        var user1 = new User("user1@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
+        var user2 = new User("user2@email.com", "username", "password", "avatar background", "theme") { Id = 2 };
 
         _dbContext.Users.Add(user1);
         _dbContext.Users.Add(user2);
@@ -109,9 +109,9 @@ public class UserIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pr
     public async Task GetUsersByCardId_ShouldReturnUsers_WhenUsersFound()
     {
         const int cardId = 1;
-        var user1 = new User("user1@email.com", "username", "password", "theme") { Id = 1 };
-        var user2 = new User("user2@email.com", "username", "password", "theme") { Id = 2 };
-        var card = new Card("title", "description", 1) {Id = cardId};
+        var user1 = new User("user1@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
+        var user2 = new User("user2@email.com", "username", "password", "avatar background", "theme") { Id = 2 };
+        var card = new Card("title", "description", 1, null, 1) {Id = cardId};
         var userCard1 = new UserCard(user1.Id, card.Id);
         var userCard2 = new UserCard(user2.Id, card.Id);
 
@@ -163,7 +163,7 @@ public class UserIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pr
     public async Task Login_ShouldReturnsOk_WhenUserFound()
     {
         var password = _encrypt.HashPassword("password");   
-        var user = new User("user@email.com", "username", password, "theme") { Id = 1 };
+        var user = new User("user@email.com", "username", password, "avatar background", "theme") { Id = 1 };
         var dto = new LoginUserDto { Email = user.Email, Password = "password" };
 
         _dbContext.Users.Add(user);
@@ -188,7 +188,7 @@ public class UserIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pr
     [Fact]
     public async Task Login_ShouldReturnsUnauthorized_WhenUserCredentialsAreIncorrect()
     {
-        var user = new User("user@email.com", "username", "password", "theme") { Id = 1 };
+        var user = new User("user@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
         var dto = new LoginUserDto { Email = "user@email.com", Password = "incorrect password" };
         
         _dbContext.Users.Add(user);
@@ -202,7 +202,7 @@ public class UserIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pr
     [Fact]
     public async Task UpdateUser_ShouldReturnsOk_WhenUpdatedSuccessful()
     {
-        var user = new User("user@email.com", "username", "password", "theme") { Id = 1 };
+        var user = new User("user@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
         var dto = new UpdateUserDto { Username = "updated username" };
 
         _dbContext.Users.Add(user);
@@ -225,7 +225,7 @@ public class UserIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pr
     [Fact]
     public async Task DeleteUser_ShouldReturnsNoContent_WhenSuccessful()
     {
-        var user = new User("user@email.com", "username", "password", "theme") { Id = 1 };
+        var user = new User("user@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
         
         _dbContext.Users.Add(user);
         await _dbContext.SaveChangesAsync();

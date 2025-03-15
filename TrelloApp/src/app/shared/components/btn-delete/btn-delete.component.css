@@ -1,0 +1,16 @@
+.btn-delete {
+  transition: all .1s ease-in-out;
+  border: none;
+  padding: 8px;
+  background-color: var(--color-red-500);
+  border-radius: 50%;
+}
+
+.btn-delete:hover {
+  background-color: var(--color-red-600);
+}
+
+svg {
+  width: 100%;
+  height: 100%;
+}

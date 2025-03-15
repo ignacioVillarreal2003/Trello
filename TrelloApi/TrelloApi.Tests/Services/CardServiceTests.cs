@@ -35,7 +35,7 @@ public class CardServiceTests
     public async Task GetCardById_ShouldReturnsCard_WhenCardFound()
     {
         const int cardId = 1;
-        var card = new Card("title", "description", listId: 1, priority: "priority") { Id = cardId };
+        var card = new Card("title", "description", 1, "priority", 1) { Id = cardId };
         var response = new CardResponse
             { Id = 1, Title = card.Title, Description = card.Description, Priority = card.Priority };
         
@@ -65,8 +65,8 @@ public class CardServiceTests
         const int listId = 1;
         var cards = new List<Card>
         {
-            new Card("title 1", "description 1", listId, "priority") { Id = 1 },
-            new Card("title 2", "description 2", listId, "priority") { Id = 2 }
+            new Card("title 1", "description 1", listId, "priority", 1) { Id = 1 },
+            new Card("title 2", "description 2", listId, "priority", 1) { Id = 2 }
         };
         var response = new List<CardResponse>
         {
@@ -115,7 +115,7 @@ public class CardServiceTests
     public async Task UpdateCard_ShouldReturnsCard_WhenUpdatedSuccessful()
     {
         const int cardId = 1;
-        var card = new Card("title", "description", listId: 1, priority: "priority") { Id = cardId };
+        var card = new Card("title", "description", 1, "priority", 1) { Id = cardId };
         var dto = new UpdateCardDto { Title = "updated title" };
         var response = new CardResponse { Id = cardId, Title = dto.Title, Description = card.Description, Priority = card.Priority, ListId = card.ListId };
 
@@ -145,7 +145,7 @@ public class CardServiceTests
     public async Task DeleteCard_ShouldReturnsTrue_WhenDeletedSuccessful()
     {
         const int cardId = 1;
-        var card = new Card("title", "description", listId: 1, priority: "priority") { Id = cardId };
+        var card = new Card("title", "description", 1, "priority", 1) { Id = cardId };
 
         _mockCardRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<Card, bool>>>())).ReturnsAsync(card);
         _mockCardRepository.Setup(r => r.DeleteAsync(It.IsAny<Card>()));

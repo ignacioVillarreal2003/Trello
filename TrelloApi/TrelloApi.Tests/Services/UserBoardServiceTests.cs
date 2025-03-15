@@ -39,8 +39,8 @@ public class UserBoardServiceTests
         const int boardId = 1;
         var users = new List<User>()
         {
-            new User(email: "email1@gmail.com", username: "username 1", password: "password", theme: "theme"),
-            new User(email: "email2@gmail.com", username: "username 2", password: "password", theme: "theme")
+            new User(email: "email1@gmail.com", username: "username 1", password: "password", "avatar background", theme: "theme"),
+            new User(email: "email2@gmail.com", username: "username 2", password: "password", "avatar background", theme: "theme")
         };
         var response = new List<UserResponse>()
         {

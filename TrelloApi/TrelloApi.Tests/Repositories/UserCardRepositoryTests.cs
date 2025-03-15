@@ -53,8 +53,8 @@ public class UserCardRepositoryTests
     public async Task GetUsersByCardId_ShouldReturnUsers_WhenCardHasUsers()
     {
         int cardId = 1;
-        var user1 = new User("email1@gmail.com", "username", "password") { Id = 1 };
-        var user2 = new User("email2@gmail.com", "username", "password") { Id = 2 };
+        var user1 = new User("email1@gmail.com", "username", "password", "avatar background", "theme") { Id = 1 };
+        var user2 = new User("email2@gmail.com", "username", "password", "avatar background", "theme") { Id = 2 };
         var userCard1 = new UserCard(1, cardId);
         var userCard2 = new UserCard(2, cardId);
         

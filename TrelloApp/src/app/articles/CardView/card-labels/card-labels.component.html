@@ -1,0 +1,13 @@
+<div class="card-labels">
+  <input class="label-panel__input" placeholder="Enter a label name" [(ngModel)]="searchTerm">
+
+  <ul class="label-panel__list">
+    <li class="label-panel__item" *ngFor="let label of filteredLabels">
+      <button class="label-panel__label-btn" (click)="updateAssignment(label)">
+        <app-checkbox [type]="1" [checked]="label.isAssigned"></app-checkbox>
+        <h2 class="label-panel__label-name" [style]="{ backgroundColor: label.color}">{{ label.title }}</h2>
+      </button>
+    </li>
+    <li class="label-panel__no-match" *ngIf="filteredLabels.length === 0">No matches</li>
+  </ul>
+</div>

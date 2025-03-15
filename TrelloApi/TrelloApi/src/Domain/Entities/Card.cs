@@ -20,6 +20,8 @@ public class Card: Entity
     
     public bool IsCompleted { get; set; }
     
+    public int Position { get; set; }
+
     [ForeignKey("List"), Required]
     public int ListId { get; set; }
     public List List { get; set; }
@@ -28,7 +30,7 @@ public class Card: Entity
     
     public ICollection<CardLabel> CardLabels { get; set; }
     
-    public Card(string title, string description, int listId, string? priority = null)
+    public Card(string title, string description, int listId, string? priority, int position)
     {
         Title = title;
         Description = description;
@@ -38,5 +40,6 @@ public class Card: Entity
         IsCompleted = false;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = null;
+        Position = position;
     }
 }

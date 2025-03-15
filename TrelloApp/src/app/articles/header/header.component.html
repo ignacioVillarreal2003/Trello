@@ -3,7 +3,7 @@
     <img class="header__logo" src="/Trello.svg" alt="Trello">
     <h2 class="header__title">Trello</h2>
   </a>
-  <a class="header__user" routerLink="/user-menu" aria-label="User menu" *ngIf="username">
-    {{ username.charAt(0) }}
+  <a routerLink="/user-menu" *ngIf="username && avatarBackground">
+    <app-avatar [username]="username" [backgroundColor]="avatarBackground"></app-avatar>
   </a>
 </header>

@@ -5,6 +5,11 @@ export interface User {
   theme: string,
   createdAt: string,
   updatedAt?: string,
+  avatarBackground: string
+}
+
+export interface UserWithAssignment extends User {
+  isAssigned: boolean;
 }
 
 export interface UserAuth {
@@ -29,4 +34,5 @@ export interface UpdateUser {
   oldPassword?: string,
   newPassword?: string,
   theme?: string
+  avatarBackground?: string
 }

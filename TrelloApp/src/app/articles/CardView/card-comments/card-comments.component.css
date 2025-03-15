@@ -1,0 +1,66 @@
+.card-comments {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comments {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comments ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.comments li {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.comments header {
+  width: 100%;
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+.comments h3 {
+  font-size: 18px;
+  color: var(--text-1);
+}
+
+.comments label {
+  font-size: 12px;
+  margin-bottom: 3px;
+  color: var(--text-1);
+}
+
+.comments textarea {
+  width: 100%;
+  background-color: transparent;
+  color: var(--text-1);
+  border: 2px solid transparent;
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.comments textarea:focus-visible {
+  outline: none;
+  border: 2px solid var(--color-blue-500);
+}

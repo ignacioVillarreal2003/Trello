@@ -6,6 +6,7 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {InputComponent} from '../../../shared/components/input/input.component';
 import {BtnComponent} from "../../../shared/components/btn/btn.component";
 import {List} from '../../../core/models/list';
+import {AddCard} from '../../../core/models/card';
 
 @Component({
   selector: 'app-create-card-modal',
@@ -19,13 +20,14 @@ import {List} from '../../../core/models/list';
   styleUrl: './create-card-modal.component.css'
 })
 export class CreateCardModalComponent {
-  @Input() listId: number | undefined = undefined;
+  @Input() list: List | undefined = undefined;
+  @Output() close: EventEmitter<void> = new EventEmitter<void>();
+  @Input() cardsCount: number = 0;
 
   constructor(private alertService: AlertService,
               private cardHttpService: CardHttpService,
               private communicationService: CommunicationService) {}
 
-  /* Create card */
   createCardForm: FormGroup = new FormGroup({
     title: new FormControl('', [Validators.required]),
     description: new FormControl('', [Validators.required])
@@ -41,23 +43,24 @@ export class CreateCardModalComponent {
       }
       return;
     }
-    if (this.listId) {
-      this.cardHttpService.postCard(this.createCardForm.value.title, this.createCardForm.value.description, this.listId).subscribe({
+    if (this.list != undefined) {
+      const body: AddCard = {
+        title: this.createCardForm.value.title,
+        description: this.createCardForm.value.description,
+        position: this.cardsCount
+      }
+      this.cardHttpService.add(this.list.id, body).subscribe({
         next: (response: any): void => {
-          this.alertService.SuccessMessage('Successfully created list.ts.');
+          this.alertService.SuccessMessage('Successfully created card');
           this.communicationService.triggerRefreshCards();
+          this.onClose();
         },
-        error: (error: any): void => {
-          const errorMessage: string = error?.message || 'Error in the server. Try again later.';
-          this.alertService.ErrorMessage(errorMessage);
+        error: (error: Error): void => {
+          this.alertService.ErrorMessage(error.message);
         }
       });
     }
   }
-
-  /* Close */
-  @Output() close: EventEmitter<void> = new EventEmitter<void>();
-  @Input() list: List | undefined;
 
   onClose(): void {
     this.close.emit();

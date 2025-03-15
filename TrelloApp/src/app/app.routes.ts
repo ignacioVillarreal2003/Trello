@@ -12,7 +12,7 @@ export const routes: Routes = [
   },
   {
     path: 'board-dashboard',
-    loadComponent: () => import('./articles/board-dashboard/board-dashboard.component').then(m => m.BoardDashboardComponent),
+    loadComponent: () => import('./articles/BoardDashboard/board-dashboard/board-dashboard.component').then(m => m.BoardDashboardComponent),
   },
   {
     path: 'board-view/:id',
@@ -20,7 +20,7 @@ export const routes: Routes = [
   },
   {
     path: 'card-view/:id',
-    loadComponent: () => import('./articles/card-view/card-view.component').then(m => m.CardViewComponent),
+    loadComponent: () => import('./articles/CardView/card-view/card-view.component').then(m => m.CardViewComponent),
   },
   {
     path: 'user-menu',

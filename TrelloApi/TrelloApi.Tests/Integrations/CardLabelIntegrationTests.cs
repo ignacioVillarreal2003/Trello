@@ -32,7 +32,7 @@ public class CardLabelIntegrationTests: IClassFixture<CustomWebApplicationFactor
     [Fact]
     public async Task GetLabelsByCardId_ShouldReturnLabels_WhenLabelsFound()
     {
-        var card = new Card("title", "description",1) { Id = 1 };
+        var card = new Card("title", "description",1, null, 1) { Id = 1 };
         var label = new Label("title", "color", 1) { Id = 1 };
         var cardLabel = new CardLabel (card.Id, label.Id);
 
@@ -71,7 +71,7 @@ public class CardLabelIntegrationTests: IClassFixture<CustomWebApplicationFactor
     [Fact]
     public async Task AddLabelToCard_ShouldReturnCreated_WhenAddedSuccessful()
     {
-        var card = new Card("title", "description",1) { Id = 1 };
+        var card = new Card("title", "description",1, null, 1) { Id = 1 };
         var label = new Label("title", "color", 1) { Id = 1 };
         var dto = new AddCardLabelDto { LabelId = label.Id };
 
@@ -88,7 +88,7 @@ public class CardLabelIntegrationTests: IClassFixture<CustomWebApplicationFactor
     [Fact]
     public async Task RemoveLabelFromCard_ShouldReturnNoContent_WhenDeletedSuccessful()
     {
-        var card = new Card("title", "description",1) { Id = 1 };
+        var card = new Card("title", "description",1, null, 1) { Id = 1 };
         var label = new Label("title", "color", 1) { Id = 1 };
         var cardLabel = new CardLabel (card.Id, label.Id);
 

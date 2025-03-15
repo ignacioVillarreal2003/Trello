@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {catchError, Observable, throwError} from 'rxjs';
-import {SessionServiceService} from '../session/session-service.service';
-import {AddList, List} from '../../models/list';
+import {SessionService} from '../session/session.service';
+import {AddList, List, UpdateList} from '../../models/list';
 
 @Injectable({
   providedIn: 'root'
@@ -19,19 +19,20 @@ export class ListHttpService {
     return throwError(error.error);
   }
 
-  postList(title: string, position: number, boardId: number): Observable<any> {
-    const requestBody: AddList = {
-      title: title,
-      position: position
-    };
-    console.log(requestBody)
+  getLists(boardId: number): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/board/${boardId}`, this.httpOptions).pipe(
+      catchError(this.handleError)
+    );
+  }
+
+  add(boardId: number, requestBody: AddList): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/board/${boardId}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  getLists(boardId: number): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/board/${boardId}`, this.httpOptions).pipe(
+  update(listId: number, requestBody: UpdateList): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/${listId}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }

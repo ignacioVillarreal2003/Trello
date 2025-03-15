@@ -41,8 +41,8 @@ namespace TrelloApi.Tests.Services
         {
             var users = new List<User>
             {
-                new User("user1@example.com", "username 1", "password", "theme"),
-                new User("user2@example.com", "username 2", "password", "theme"),
+                new User("user1@example.com", "username 1", "password", "avatar background", "theme"),
+                new User("user2@example.com", "username 2", "password", "avatar background", "theme"),
             };
             var response = new List<UserResponse>
             {
@@ -77,8 +77,8 @@ namespace TrelloApi.Tests.Services
             const string username = "";
             var users = new List<User>
             {
-                new User("user1@example.com", "username 1", "password", "theme"),
-                new User("user2@example.com", "username 2", "password", "theme"),
+                new User("user1@example.com", "username 1", "password", "avatar background", "theme"),
+                new User("user2@example.com", "username 2", "password", "avatar background", "theme"),
             };
             var response = new List<UserResponse>
             {
@@ -115,8 +115,8 @@ namespace TrelloApi.Tests.Services
             const int taskId = 1;
             var users = new List<User>
             {
-                new User("user1@example.com", "username", "password", "theme"),
-                new User("user2@example.com", "username", "password", "theme"),
+                new User("user1@example.com", "username", "password", "avatar background", "theme"),
+                new User("user2@example.com", "username", "password", "avatar background", "theme"),
             };
             var response = new List<UserResponse>
             {
@@ -167,7 +167,7 @@ namespace TrelloApi.Tests.Services
         public async Task LoginUser_ShouldReturnsUser_WhenLoggedSuccessful()
         {
             var dto = new LoginUserDto { Email = "user@email.com", Password = "password" };
-            var user = new User(email: dto.Email, username: "username", password: dto.Password, theme: "theme") { Id = 1 };
+            var user = new User(email: dto.Email, username: "username", password: dto.Password, "avatar background", theme: "theme") { Id = 1 };
             var response = new UserResponse { Id = user.Id, Email = user.Email, Username = user.Username, Theme = user.Theme };
 
             _mockUserRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User,bool>>>())).ReturnsAsync(user);
@@ -195,7 +195,7 @@ namespace TrelloApi.Tests.Services
         public async Task LoginUser_ShouldThrowsException_WhenInvalidPassword()
         {
             var dto = new LoginUserDto { Email = "user@email.com", Password = "wrong password" };
-            var user = new User(email: dto.Email, username: "username", password: "password", theme: "theme") { Id = 1 };
+            var user = new User(email: dto.Email, username: "username", password: "password", "avatar background", theme: "theme") { Id = 1 };
 
             _mockUserRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User,bool>>>())).ReturnsAsync(user);
             _mockEncrypt.Setup(e => e.ComparePassword(dto.Password, user.Password)).Returns(false);
@@ -207,7 +207,7 @@ namespace TrelloApi.Tests.Services
         public async Task UpdateUser_ShouldReturnsUser_WhenUpdatedSuccessful()
         {
             const int userId = 1;
-            var user = new User("user@example.com", "username", "password", "theme") { Id = userId };
+            var user = new User("user@example.com", "username", "password", "avatar background", "theme") { Id = userId };
             var dto = new UpdateUserDto { Username = "updated username" };
             var response = new UserResponse { Id = userId, Email = user.Email, Username = dto.Username, Theme = user.Theme };
 
@@ -238,7 +238,7 @@ namespace TrelloApi.Tests.Services
         {
             const int userId = 1;
             var dto = new UpdateUserDto { OldPassword = "old password", NewPassword = "new password" };
-            var user = new User("user@example.com", "username", "password", "theme") { Id = userId };
+            var user = new User("user@example.com", "username", "password", "avatar background", "theme") { Id = userId };
             
 
             _mockUserRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User,bool>>>())).ReturnsAsync(user);
@@ -251,7 +251,7 @@ namespace TrelloApi.Tests.Services
         public async Task DeleteUser_ShouldReturnsTrue_WhenDeletedSuccessful()
         {
             const int userId = 1;
-            var user = new User("user@example.com", "username", "password", "theme") { Id = userId };
+            var user = new User("user@example.com", "username", "password", "avatar background", "theme") { Id = userId };
             var response = new UserResponse { Id = userId, Email = user.Email, Username = user.Username, Theme = user.Theme };
 
             _mockUserRepository.Setup(r => r.GetAsync(It.IsAny<Expression<Func<User,bool>>>())).ReturnsAsync(user);

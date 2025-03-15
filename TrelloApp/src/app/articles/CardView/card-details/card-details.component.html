@@ -1,0 +1,26 @@
+<div class="card-details" *ngIf="card">
+  <section class="labels" *ngIf="labels.length > 0">
+    <h2>Labels</h2>
+    <ul>
+      <li *ngFor="let label of labels">
+        <button [style.background]="label.color">{{ label.title }}</button>
+      </li>
+    </ul>
+  </section>
+
+  <section class="users" *ngIf="users.length > 0">
+    <h2>Users</h2>
+    <ul>
+      <li *ngFor="let user of users">
+        <button>
+          <app-avatar [username]="user.username"></app-avatar>
+        </button>
+      </li>
+    </ul>
+  </section>
+
+  <section class="description">
+    <button *ngIf="!isDescriptionActive" (click)="isDescriptionActive = true">Add a card description</button>
+    <textarea *ngIf="isDescriptionActive" placeholder="Card description" (input)="updateCardDescription($event)">{{card.description}}</textarea>
+  </section>
+</div>

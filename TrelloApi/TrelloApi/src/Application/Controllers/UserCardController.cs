@@ -45,7 +45,7 @@ public class UserCardController: BaseController
         {
             UserCardResponse userCard = await _userCardService.AddUserToCard(cardId, dto);
             _logger.LogInformation("User {UserBoard} added to card {CardId}", dto.UserId, cardId);
-            return CreatedAtAction(nameof(GetUsersByCardId), new { userId = userCard.UserId, taskId = userCard.CardId }, userCard);
+            return CreatedAtAction(nameof(GetUsersByCardId), new { userId = userCard.UserId, cardId = userCard.CardId }, userCard);
         }
         catch (Exception ex)
         {
@@ -63,7 +63,7 @@ public class UserCardController: BaseController
             if (!isDeleted)
             {
                 _logger.LogDebug("User {UserId} for card {CardId} not found for deletion.", userId, cardId);
-                return NotFound(new { message = "UserTask not found." });
+                return NotFound(new { message = "UserCard not found." });
             }
 
             _logger.LogInformation("User {UserId} deleted for card {CardId}.", userId, cardId);

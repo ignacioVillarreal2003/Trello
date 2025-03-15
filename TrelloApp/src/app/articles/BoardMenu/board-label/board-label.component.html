@@ -1,0 +1,22 @@
+<section class="board-label">
+  <h1 class="title">Create label</h1>
+  <form class="create-label-form" [formGroup]="createLabelForm" (ngSubmit)="onSubmitCreateLabel()">
+    <div class="preview">
+      <span class="label-preview" [style.backgroundColor]="labelColors[selectedColor]" >{{ title }}</span>
+    </div>
+    <app-input [placeholder]="'title'" [textLabel]="'Title'" formControlName="title"></app-input>
+    <ul class="create-label-list">
+      <li class="create-label-item" *ngFor="let color of labelColors; let i = index">
+        <button class="btn-create-label" type="button" [style]="{ backgroundColor: color}" (click)="selectColor(i)"></button>
+      </li>
+    </ul>
+    <app-btn [text]="'Create'" [type]="'submit'"></app-btn>
+  </form>
+  <h1 class="title">Delete label</h1>
+  <ul class="label-list">
+    <li class="label-item" *ngFor="let label of labels">
+      <span class="label" [style]="{ backgroundColor: label.color}">{{label.title}}</span>
+      <app-btn-delete [size]="'36px'" (click)="deleteLabel(label.id)"></app-btn-delete>
+    </li>
+  </ul>
+</section>

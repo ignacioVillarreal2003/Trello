@@ -4,11 +4,11 @@ import {FormControl, FormGroup, ReactiveFormsModule, Validators} from '@angular/
 import {UserHttpService} from '../../core/services/http/user-http.service';
 import {AlertService} from '../../core/services/alert.service';
 import {NgIf} from '@angular/common';
-import {HttpErrorResponse} from '@angular/common/http';
-import {SessionServiceService} from '../../core/services/session/session-service.service';
+import {SessionService} from '../../core/services/session/session.service';
 import {InputComponent} from '../../shared/components/input/input.component';
 import {BtnComponent} from '../../shared/components/btn/btn.component';
-import {UserAuth} from '../../core/models/user';
+import {LoginUser, RegisterUser, UserAuth} from '../../core/models/user';
+import {AddBoard} from '../../core/models/board';
 
 @Component({
   selector: 'app-auth',
@@ -28,7 +28,7 @@ export class AuthComponent {
   constructor(private router: Router,
               private userHttpService: UserHttpService,
               private alertService: AlertService,
-              private sessionService: SessionServiceService) { }
+              private sessionService: SessionService) { }
 
   formLogin: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(64)]),
@@ -37,9 +37,14 @@ export class AuthComponent {
 
   onSubmitLogin(): void {
     if (!this.handleFormErrors(this.formLogin)) {
-      this.userHttpService.login(this.formLogin.value.email, this.formLogin.value.password).subscribe({
+      const body: LoginUser = {
+        email: this.formLogin.value.email,
+        password: this.formLogin.value.password,
+      }
+      this.userHttpService.login(body).subscribe({
         next: (response: UserAuth): void => {
           this.saveUserData(response);
+          this.applyTheme(response.user.theme)
           this.router.navigate(['/board-dashboard']);
         },
         error: (error: Error): void => {
@@ -57,9 +62,15 @@ export class AuthComponent {
 
   onSubmitRegister(): void {
     if (!this.handleFormErrors(this.formRegister)) {
-      this.userHttpService.register(this.formRegister.value.email, this.formRegister.value.username, this.formRegister.value.password).subscribe({
+      const body: RegisterUser = {
+        email: this.formRegister.value.email,
+        password: this.formRegister.value.password,
+        username: this.formRegister.value.username,
+      }
+      this.userHttpService.register(body).subscribe({
         next: (response: UserAuth): void => {
           this.saveUserData(response);
+          this.applyTheme(response.user.theme)
           this.router.navigate(['/board-dashboard']);
         },
         error: (error: Error): void => {
@@ -89,11 +100,23 @@ export class AuthComponent {
       refreshToken: data.refreshToken,
       email: data.user.email,
       username: data.user.username,
-      theme: data.user.theme
+      theme: data.user.theme,
+      avatarBackground: data.user.avatarBackground
     });
   }
 
   toggleAuthMode(): void {
     this.isLogin = !this.isLogin;
+  }
+
+  applyTheme(theme: string): void {
+    const body: HTMLElement = document.querySelector('body') as HTMLElement;
+    body.classList.remove('dark');
+    body.classList.remove('light');
+    if (theme) {
+      body.classList.add(theme.toLowerCase());
+    } else {
+      body.classList.add('light');
+    }
   }
 }

@@ -74,8 +74,8 @@ public class BoardRepositoryTests
         var board1 = new Board("title", "background") { Id = 1 };
         var board2 = new Board("title", "background") { Id = 2 };
 
-        var userBoard1 = new UserBoard(userId, 1);
-        var userBoard2 = new UserBoard(userId, 2);
+        var userBoard1 = new UserBoard(userId, 1, "Role");
+        var userBoard2 = new UserBoard(userId, 2, "Role");
 
         _context.Boards.AddRange(board1, board2);
         _context.UserBoards.AddRange(userBoard1, userBoard2);
@@ -104,8 +104,8 @@ public class BoardRepositoryTests
         int userId = 1;
         var board1 = new Board("title", "background") { Id = 1, IsArchived = true, ArchivedAt = DateTime.UtcNow };
         var board2 = new Board("title", "background") { Id = 2 };
-        var userBoard1 = new UserBoard(userId, 1);
-        var userBoard2 = new UserBoard(userId, 2);
+        var userBoard1 = new UserBoard(userId, 1, "Role");
+        var userBoard2 = new UserBoard(userId, 2, "Role");
 
         _context.Boards.AddRange(board1, board2);
         _context.UserBoards.AddRange(userBoard1, userBoard2);

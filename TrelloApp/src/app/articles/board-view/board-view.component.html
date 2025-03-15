@@ -1,24 +1,25 @@
-<div class="board">
+<div class="board" *ngIf="board">
   <app-header></app-header>
 
   <section class="board__content" [style.backgroundImage]="'url(' + boardBackgroundPath + board?.background + ')'">
     <header class="board__header">
-      <input class="board__title-input" type="text" value="Board's title" placeholder="Board's title"/>
+      <input class="board__title-input" type="text" [value]="board.title" placeholder="Board's title" (input)="updateBoardTitle($event)"/>
       <app-btn-menu [size]="'38px'" (click)="isOpenBoardMenu = true"></app-btn-menu>
     </header>
 
     <section class="board__lists">
-      <ul class="board__lists-container"  cdkDropList [cdkDropListData]="lists" (cdkDropListDropped)="drop($event)" cdkDropListGroup cdkDropListOrientation="horizontal">
+      <ul class="board__lists-container"  cdkDropList [cdkDropListData]="lists" (cdkDropListDropped)="dropLists($event)" cdkDropListGroup cdkDropListOrientation="horizontal">
         <li class="board__list" *ngFor="let list of lists" cdkDrag>
           <header class="board__list-header">
             <input class="board__list-title-input" type="text" [value]="list.title" placeholder="List title" />
             <app-btn-menu (click)="isOpenBoardMenu = true"></app-btn-menu>
           </header>
 
-          <ul class="board__card-list" cdkDropList [cdkDropListData]="list.cards" (cdkDropListDropped)="drop($event)">
+          <ul class="board__card-list" cdkDropList [cdkDropListData]="list.cards" (cdkDropListDropped)="dropCards($event)">
             <li *ngFor="let card of list.cards" cdkDrag cdkDragPreviewContainer="parent">
               <button
-                class="board__card-button">
+                class="board__card-button"
+                (click)="openCardView(card.id)">
                 {{ card.title }}
               </button>
             </li>
@@ -26,7 +27,7 @@
 
           <button
             class="board__add-card-button"
-            (click)="isOpenCreateCard = true">
+            (click)="openCreateCardModal(list)">
             Add Card
           </button>
         </li>
@@ -34,7 +35,7 @@
         <li class="board__list-add">
           <button
             class="board__add-list-button"
-            (click)="isOpenCreateList = true">
+            (click)="openCreateListModal()">
             + Add List
           </button>
         </li>
@@ -45,15 +46,17 @@
     *ngIf="isOpenCreateList"
     [boardId]="boardId"
     [listsCount]="lists.length"
-    (close)="isOpenCreateList = false">
+    (close)="closeCreateListModal()">
   </app-create-list-modal>
   <app-create-card-modal
     *ngIf="isOpenCreateCard"
     [list]="list"
-    (close)="isOpenCreateCard = false">
+    [cardsCount]="cardsCount"
+    (close)="closeCreateCardModal()">
   </app-create-card-modal>
   <app-board-menu
     [isOpen]="isOpenBoardMenu"
+    [board]="board"
     (close)="isOpenBoardMenu = false">
   </app-board-menu>
 </div>

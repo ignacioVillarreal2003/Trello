@@ -8,4 +8,5 @@ public class UserResponse
     public string Theme { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
+    public string AvatarBackground { get; set; } = string.Empty;
 }

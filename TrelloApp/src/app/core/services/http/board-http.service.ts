@@ -27,50 +27,19 @@ export class BoardHttpService extends BaseHttpService {
     );
   }
 
-  addBoard(title: string, description: string, background: string): Observable<any> {
-    const requestBody: AddBoard = { title, description, background };
+  add(requestBody: AddBoard): Observable<any> {
     return this.http.post<any>(`${this.url}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  updateBackground(boardId: number, background: string): Observable<any> {
-    const requestBody: UpdateBoard = {
-      background: background
-    };
+  update(boardId: number, requestBody: UpdateBoard): Observable<any> {
     return this.http.put<any>(`${this.url}/${boardId}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  updateDescription(boardId: number, description: string): Observable<any> {
-    const requestBody: UpdateBoard = {
-      description: description
-    };
-    return this.http.put<any>(`${this.url}/${boardId}`, requestBody, this.httpOptions).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  updateTitle(boardId: number, title: string): Observable<any> {
-    const requestBody: UpdateBoard = {
-      title: title
-    };
-    return this.http.patch<any>(`${this.url}/${boardId}`, requestBody, this.httpOptions).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  updateIsArchived(boardId: number, isArchived: boolean): Observable<any> {
-    const requestBody: UpdateBoard = {
-      isArchived: isArchived
-    };
-    return this.http.patch<any>(`${this.url}/${boardId}`, requestBody, this.httpOptions).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  deleteBoard(boardId: number): Observable<any> {
+  delete(boardId: number): Observable<any> {
     return this.http.delete<any>(`${this.url}/${boardId}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );

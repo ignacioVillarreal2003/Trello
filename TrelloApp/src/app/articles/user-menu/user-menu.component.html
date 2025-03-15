@@ -6,7 +6,7 @@
     </header>
 
     <section class="user-menu__data-section">
-      <span class="user-menu__icon">{{username.charAt(0)}}</span>
+      <app-avatar *ngIf="avatarBackground" [username]="username" [backgroundColor]="avatarBackground"></app-avatar>
       <div class="user-menu__user-data">
         <h2 class="user-menu__username">{{username}}</h2>
         <h3 class="user-menu__email">{{email}}</h3>
@@ -14,6 +14,7 @@
     </section>
 
     <section class="user-menu__password-section">
+      <h2 class="user-menu__password-section-title">Change your password</h2>
       <form class="user-menu__form" [formGroup]="updatePasswordForm" (ngSubmit)="onSubmitUpdatePassword()">
         <app-input [textLabel]="'Your old password'" [type]="'password'" [placeholder]="'Your old password'" formControlName="oldPassword"></app-input>
         <app-input [textLabel]="'Your new password'" [type]="'password'" [placeholder]="'Your new password'" formControlName="newPassword"></app-input>
@@ -22,14 +23,26 @@
     </section>
 
     <section class="user-menu__username-section">
+      <h2 class="user-menu__username-section-title">Change your username</h2>
       <form class="user-menu__form" [formGroup]="updateUsernameForm" (ngSubmit)="onSubmitUpdateUsername()">
         <app-input [textLabel]="'Change username'" [placeholder]="'Your new username'" formControlName="username"></app-input>
         <app-btn [text]="'Change username'" [type]="'submit'"></app-btn>
       </form>
     </section>
 
+    <section class="user-menu__avatar-section">
+      <h2 class="user-menu__avatar-section-title">Change your avatar</h2>
+      <ul class="user-menu__avatar-list">
+        <li class="user-menu__avatar-item" *ngFor="let avatarBg of avatarBackgrounds">
+          <button class="user-menu__avatar-btn" (click)="updateAvatar(avatarBg)">
+            <app-avatar [username]="username" [backgroundColor]="avatarBg"></app-avatar>
+          </button>
+        </li>
+      </ul>
+    </section>
+
     <section class="user-menu__theme-section">
-      <app-btn-icon [icon]="'dark-theme'" (click)="onSubmitUpdateTheme()"></app-btn-icon>
+      <app-btn-theme [theme]="theme" (click)="onSubmitUpdateTheme()"></app-btn-theme>
     </section>
 
     <footer class="user-menu__footer">

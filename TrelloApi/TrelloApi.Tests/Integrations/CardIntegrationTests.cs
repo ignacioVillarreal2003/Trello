@@ -31,7 +31,7 @@ public class CardIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pr
     [Fact]
     public async Task GetCardById_ShouldReturnCard_WhenCardFound()
     {
-        var card = new Card("title", "description", 1);
+        var card = new Card("title", "description", 1, null, 1);
         
         _dbContext.Cards.Add(card);
         await _dbContext.SaveChangesAsync();
@@ -55,8 +55,8 @@ public class CardIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pr
     public async Task GetCardsByListId_ShouldReturnCards_WhenCardsFound()
     {
         const int listId = 1;
-        var card1 = new Card("title 1", "description", listId);
-        var card2 = new Card("title 2", "description", listId);
+        var card1 = new Card("title 1", "description", listId, null, 1);
+        var card2 = new Card("title 2", "description", listId, null, 2);
         
         _dbContext.Cards.AddRange(card1, card2);
         await _dbContext.SaveChangesAsync();
@@ -101,7 +101,7 @@ public class CardIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pr
     [Fact]
     public async Task UpdateCard_ShouldReturnOk_WhenUpdatedSuccessful()
     {
-        var card = new Card("title", "description", 1);
+        var card = new Card("title", "description", 1, null, 1);
         var dto = new UpdateCardDto { Title = "updated title" };
 
         _dbContext.Cards.Add(card);
@@ -126,7 +126,7 @@ public class CardIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pr
     [Fact]
     public async Task DeleteCard_ShouldReturnNoContent_WhenDeletedSuccessful()
     {
-        var card = new Card("title", "description", 1);
+        var card = new Card("title", "description", 1, null, 1);
         
         _dbContext.Cards.Add(card);
         await _dbContext.SaveChangesAsync();

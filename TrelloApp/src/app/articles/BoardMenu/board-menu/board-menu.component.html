@@ -1,0 +1,22 @@
+<div class="board-menu">
+  <div class="drawer-overlay" *ngIf="isOpen" (click)="onClose()"></div>
+  <div class="drawer" [class.open]="isOpen">
+    <header>
+      <app-btn-back [size]="'40px'" (click)="setMode('menu')"></app-btn-back>
+      <app-btn-close [size]="'40px'" (click)="onClose()"></app-btn-close>
+    </header>
+
+    <ng-container [ngSwitch]="currentMode">
+      <nav *ngSwitchCase="'menu'" class="nav-bar">
+        <app-btn [color]="'orange'" [text]="'Backgrounds'" (click)="setMode('backgrounds')"></app-btn>
+        <app-btn [color]="'orange'" [text]="'Labels'" (click)="setMode('labels')"></app-btn>
+        <app-btn [color]="'orange'" [text]="'Members'" (click)="setMode('members')"></app-btn>
+        <app-btn [text]="'Delete board'" [color]="'red'"></app-btn>
+      </nav>
+      <app-board-background [board]="board" *ngSwitchCase="'backgrounds'"></app-board-background>
+      <app-board-label [board]="board" *ngSwitchCase="'labels'"></app-board-label>
+      <app-board-member [board]="board" *ngSwitchCase="'members'"></app-board-member>
+    </ng-container>
+  </div>
+</div>
+

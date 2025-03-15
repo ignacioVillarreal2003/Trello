@@ -8,4 +8,5 @@ public class UpdateCardDto
     public DateTime? DueDate { get; set; }
     public string? Priority { get; set; }
     public bool? IsCompleted { get; set; }
+    public int? Position { get; set; }
 }

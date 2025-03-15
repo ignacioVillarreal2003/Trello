@@ -1,13 +1,14 @@
 export interface Comment {
-  id?: number;
-  text?: string;
-  date?: string;
-  taskId?: string;
+  id: number,
+  text: string
+  cardId: number,
+  authorId: number,
+  createdAt: string,
+  updatedAt: string
 }
 
 export interface AddComment {
   text: string;
-  taskId: string;
 }
 
 export interface UpdateComment {

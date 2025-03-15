@@ -6,4 +6,5 @@ public class UpdateUserDto
     public string? OldPassword { get; set; }
     public string? NewPassword { get; set; }
     public string? Theme { get; set; }
+    public string? AvatarBackground { get; set; }
 }

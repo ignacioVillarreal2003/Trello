@@ -18,7 +18,7 @@ public class UserBoard
     [StringLength(32)]
     public string Role { get; set; }
 
-    public UserBoard(int userId, int boardId, string role = "Member")
+    public UserBoard(int userId, int boardId, string role)
     {
         UserId = userId;
         BoardId = boardId;

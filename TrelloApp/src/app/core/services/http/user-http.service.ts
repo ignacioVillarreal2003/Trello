@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {catchError, Observable} from "rxjs";
 import {HttpClient} from "@angular/common/http";
-import {LoginUser, RegisterUser, UpdateUser} from '../../models/user';
+import {LoginUser, RegisterUser, UpdateUser, User, UserAuth} from '../../models/user';
 import {BaseHttpService} from './base-http.service';
 
 @Injectable({
@@ -15,67 +15,51 @@ export class UserHttpService extends BaseHttpService {
     super(http);
   }
 
-  register(email: string, username: string, password: string): Observable<any> {
-    const requestBody: RegisterUser = { email, username, password };
-    return this.http.post<any>(`${this.url}/register`, requestBody, this.httpOptions).pipe(
+  register(requestBody: RegisterUser): Observable<UserAuth> {
+    return this.http.post<UserAuth>(`${this.url}/register`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  login(email: string, password: string): Observable<any> {
-    const requestBody: LoginUser = { email, password };
-    return this.http.post<any>(`${this.url}/login`, requestBody, this.httpOptions).pipe(
+  login(requestBody: LoginUser): Observable<UserAuth> {
+    return this.http.post<UserAuth>(`${this.url}/login`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  refreshToken(refreshToken: string): Observable<any> {
-    return this.http.post<any>(`${this.url}/refresh-token`, { refreshToken }, this.httpOptions).pipe(
+  refreshToken(refreshToken: string): Observable<string> {
+    return this.http.post<string>(`${this.url}/refresh-token`, { refreshToken }, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  getUsers(): Observable<any> {
-    return this.http.get<any>(`${this.url}`, this.httpOptions).pipe(
+  getUsers(): Observable<User[]> {
+    return this.http.get<User[]>(`${this.url}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  getUsersByUsername(username: string): Observable<any> {
-    return this.http.get<any>(`${this.url}/username/${username}`, this.httpOptions).pipe(
+  getUsersByUsername(username: string): Observable<User[]> {
+    console.log(`${this.url}/username/${username}`)
+    return this.http.get<User[]>(`${this.url}/username/${username}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  getUsersByCardId(cardId: number): Observable<any> {
-    return this.http.get<any>(`${this.url}/card/${cardId}`, this.httpOptions).pipe(
+  getUsersByCardId(cardId: number): Observable<User[]> {
+    return this.http.get<User[]>(`${this.url}/card/${cardId}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  updatePassword(oldPassword: string, newPassword: string): Observable<any> {
-    const requestBody: UpdateUser = { oldPassword, newPassword };
-    return this.http.put<any>(`${this.url}`, requestBody, this.httpOptions).pipe(
+  update(requestBody: UpdateUser): Observable<User> {
+    return this.http.put<User>(`${this.url}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  updateUsername(username: string): Observable<any> {
-    const requestBody: UpdateUser = { username };
-    return this.http.put<any>(`${this.url}`, requestBody, this.httpOptions).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  updateTheme(theme: string): Observable<any> {
-    const requestBody: UpdateUser = { theme };
-    return this.http.put<any>(`${this.url}`, requestBody, this.httpOptions).pipe(
-      catchError(this.handleError)
-    );
-  }
-
-  deleteUser(): Observable<any> {
-    return this.http.delete<any>(`${this.url}`, this.httpOptions).pipe(
+  delete(): Observable<void> {
+    return this.http.delete<void>(`${this.url}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }

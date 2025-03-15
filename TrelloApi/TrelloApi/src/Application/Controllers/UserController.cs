@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Domain.Constants;
 using TrelloApi.Domain.DTOs.User;
 
 namespace TrelloApi.Application.Controllers;
@@ -70,6 +71,22 @@ public class UserController : BaseController
         {
             _logger.LogError(ex, "Error retrieving users.");
             return StatusCode(500, new { message = "An unexpected error occurred." });
+        }
+    }
+    
+    [HttpGet("avatar-backgrounds")]
+    public Task<IActionResult> GetAvatarBackgrounds()
+    {
+        try
+        {
+            List<string> avatarBackgroundsAllowed = AvatarBackgroundValues.AvatarBackgroundsAllowed;
+            _logger.LogDebug("Retrieved {Count} avatar backgrounds for board", avatarBackgroundsAllowed.Count);
+            return Task.FromResult<IActionResult>(Ok(avatarBackgroundsAllowed));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving backgrounds for avatar");
+            return Task.FromResult<IActionResult>(StatusCode(500, new { message = "An unexpected error occurred." }));
         }
     }
     

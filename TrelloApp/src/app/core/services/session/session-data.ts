@@ -3,5 +3,10 @@ export interface SessionData {
   refreshToken: string,
   email: string,
   username: string,
-  theme: string
+  theme: string,
+  avatarBackground: string
+}
+
+export interface BoardData {
+  boardId: number
 }

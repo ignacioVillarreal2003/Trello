@@ -9,7 +9,7 @@ public class Label: Entity
     [StringLength(32), Required] 
     public string Title { get; set; }
 
-    [StringLength(8), Required] 
+    [StringLength(32), Required] 
     public string Color { get; set; }
 
     [ForeignKey("Board"), Required]

@@ -1,8 +1,16 @@
+import {User} from './user';
+
 export interface Label {
-  id?: number;
-  title?: string;
-  color?: string;
-  taskId?: string;
+  id: number,
+  title: string,
+  color: string,
+  boardId: number,
+  createdAt: string,
+  updatedAt: string
+}
+
+export interface LabelWithAssignment extends Label {
+  isAssigned: boolean;
 }
 
 export interface AddLabel {
