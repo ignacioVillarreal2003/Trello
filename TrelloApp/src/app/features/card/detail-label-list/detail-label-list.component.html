@@ -1,0 +1,8 @@
+<div class="detail-label-list" *ngIf="labels.length > 0">
+  <h1 class="detail-label-list__title">Labels</h1>
+  <ul class="detail-label-list__list">
+    <li class="detail-label-list__item" *ngFor="let label of labels"[style.background]="label.color">
+      {{ label.title }}
+    </li>
+  </ul>
+</div>

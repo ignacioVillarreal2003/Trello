@@ -1,0 +1,8 @@
+<div class="dashboard-page">
+  <app-header></app-header>
+  <div class="dashboard-page__container">
+    <app-btn [text]="'Create Board'" (click)="openBoardCreateForm()"></app-btn>
+    <app-board-list></app-board-list>
+  </div>
+</div>
+<app-board-create-form *ngIf="isBoardCreateFormOpen" (close)="closeBoardCreateForm()"></app-board-create-form>

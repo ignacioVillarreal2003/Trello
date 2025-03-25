@@ -1,0 +1,29 @@
+<section class="settings-page">
+  <app-header></app-header>
+  <div class="settings-page__container">
+    <div class="settings-page__content">
+      <header class="settings-page__header">
+        <h1 class="settings-page__title">Account</h1>
+        <app-btn-close class="settings-page__btn-close" (click)="goBack()"></app-btn-close>
+      </header>
+
+      <app-user-profile></app-user-profile>
+      <app-change-username-form></app-change-username-form>
+      <app-change-password-form></app-change-password-form>
+      <app-change-avatar-form></app-change-avatar-form>
+      <app-change-theme-form></app-change-theme-form>
+
+      <footer class="settings-page__footer">
+        <app-btn [text]="'Delete account'"
+                 [color]="'red'"
+                 (click)="onSubmitDeleteUser()">
+        </app-btn>
+        <app-btn [text]="'Log out'"
+                 [color]="'red'"
+                 [appearance]="'appearance-light'"
+                 (click)="logout()">
+        </app-btn>
+      </footer>
+    </div>
+  </div>
+</section>

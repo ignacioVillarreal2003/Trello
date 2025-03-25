@@ -1,0 +1,8 @@
+<div class="member-list">
+  <h1 class="member-list__title">Remove members</h1>
+  <ul class="member-list__list">
+    <li class="member-list__item" *ngFor="let user of usersFromBoard">
+      <app-member-item [user]="user" [board]="board"></app-member-item>
+    </li>
+  </ul>
+</div>

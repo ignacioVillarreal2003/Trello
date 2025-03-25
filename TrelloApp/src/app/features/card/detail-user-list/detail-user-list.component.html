@@ -1,0 +1,8 @@
+<div class="detail-user-list" *ngIf="users.length > 0">
+  <h1 class="detail-user-list__title">Users</h1>
+  <ul class="detail-user-list__list">
+    <li class="detail-user-list__item" *ngFor="let user of users">
+      <app-avatar [username]="user.username"></app-avatar>
+    </li>
+  </ul>
+</div>

@@ -1,0 +1,14 @@
+<section class="list-create-form">
+  <form class="list-create-form__form" [formGroup]="formCreateList" (ngSubmit)="onSubmitCreateList()">
+    <h1 class="list-create-form__title">Create a list</h1>
+    <app-input [textLabel]="'Select a title'"
+               [placeholder]="'Enter list title'"
+               formControlName="title"
+               [error]="getErrorMessage('title')"></app-input>
+
+    <footer class="list-create-form__footer">
+      <app-btn [appearance]="'appearance-solid'" [type]="'submit'" [text]="'Create list'"></app-btn>
+      <app-btn [appearance]="'appearance-solid'" (click)="onClose()" [color]="'red'" [text]="'Close'"></app-btn>
+    </footer>
+  </form>
+</section>

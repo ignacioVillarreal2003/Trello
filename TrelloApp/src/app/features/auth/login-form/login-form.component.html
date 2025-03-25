@@ -1,0 +1,20 @@
+<form class="login-form" [formGroup]="formLogin" (ngSubmit)="onSubmitLogin()">
+  <h1 class="login-form__title">Log in to continue</h1>
+
+  <app-input
+    [textLabel]="'Enter your email'"
+    [placeholder]="'Email'"
+    formControlName="email"
+    [error]="getErrorMessage('email')">
+  </app-input>
+
+  <app-input
+    [textLabel]="'Password'"
+    [type]="'password'"
+    [placeholder]="'Enter your password'"
+    formControlName="password"
+    [error]="getErrorMessage('password')">
+  </app-input>
+
+  <app-btn [text]="'Log in'" [type]="'submit'"></app-btn>
+</form>

@@ -1,0 +1,15 @@
+.card-item {
+  width: 100%;
+  padding: 10px;
+  text-align: start;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: var(--background-transparent-1);
+  line-height: 20px;
+  transition: background-color 0.1s ease-in-out;
+}
+
+.card-item:hover {
+  background-color: var(--background-transparent-2);
+}

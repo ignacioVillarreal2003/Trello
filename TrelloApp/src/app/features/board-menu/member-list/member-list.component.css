@@ -1,0 +1,24 @@
+.member-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.member-list__title {
+  text-align: center;
+  font-size: 18px;
+}
+
+.member-list__list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+}
+
+.member-list__item {
+  width: 100%;
+}

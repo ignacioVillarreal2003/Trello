@@ -1,0 +1,27 @@
+.detail-label-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.detail-label-list__title {
+  font-size: 14px;
+}
+
+.detail-label-list__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.detail-label-list__item {
+  min-height: 36px;
+  min-width: 70px;
+  padding: 0 15px;
+  border-radius: 3px;
+  font-size: 12px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

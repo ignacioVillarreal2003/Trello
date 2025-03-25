@@ -1,0 +1,14 @@
+.btn-delete-card {
+  width: 100%;
+  padding: 10px;
+  text-align: center;
+  background-color: var(--color-red-500);
+  border: none;
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+}
+
+.btn-delete-card:hover {
+  background-color: var(--color-red-600);
+}

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.Constants;
 using TrelloApi.Domain.DTOs.Card;
@@ -15,11 +17,13 @@ public class CardController: BaseController
 {
     private readonly ILogger<CardController> _logger;
     private readonly ICardService _cardService;
+    private readonly IHubContext<BoardHub> _hubContext;
 
-    public CardController(ILogger<CardController> logger, ICardService cardService)
+    public CardController(ILogger<CardController> logger, ICardService cardService, IHubContext<BoardHub> hubContext)
     {
         _logger = logger;
         _cardService = cardService;
+        _hubContext = hubContext;
     }
 
     [HttpGet("{cardId:int}")]
@@ -82,6 +86,10 @@ public class CardController: BaseController
         try
         {
             CardResponse card = await _cardService.AddCard(listId, dto);
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("CardCreated", card);
+            
             _logger.LogInformation("Card added to list {ListId}", listId);
             return CreatedAtAction(nameof(GetCardById), new { cardId = card.Id }, card);
         }
@@ -104,6 +112,9 @@ public class CardController: BaseController
                 return NotFound(new { message = "Card not found." });
             }
             
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("CardUpdated", card);
+            
             _logger.LogInformation("Card {CardId} updated", cardId);
             return Ok(card);
         }
@@ -125,6 +136,9 @@ public class CardController: BaseController
                 _logger.LogDebug("Card {CardId} not found for deletion.", cardId);
                 return NotFound(new { message = "Card not found." });
             }
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("CardDeleted", cardId);
 
             _logger.LogInformation("Card {CardId} deleted", cardId);
             return NoContent();

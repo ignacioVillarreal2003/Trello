@@ -1,0 +1,44 @@
+.drawer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 300px;
+  height: 100vh;
+  background: var(--background-1);
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease-in-out;
+  z-index: 10;
+  padding: 20px;
+  flex: 1 1;
+  display: flex;
+  overflow: auto;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.drawer.open {
+  transform: translateX(-300px);
+}
+
+.board-menu__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.board-menu__nav-bar {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 10px;
+}

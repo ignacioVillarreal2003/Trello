@@ -1,0 +1,9 @@
+<header class="header">
+  <a class="header__brand" routerLink="/dashboard">
+    <img class="header__logo" src="/Trello.svg" alt="Trello">
+    <h2 class="header__title">Trello</h2>
+  </a>
+  <a routerLink="/settings" *ngIf="username && avatarBackground">
+    <app-avatar [username]="username" [backgroundColor]="avatarBackground"></app-avatar>
+  </a>
+</header>

@@ -42,9 +42,12 @@ public class CardLabelService: BaseService, ICardLabelService
     {
         try
         {
-            CardLabel cardLabel = new CardLabel(cardId, dto.LabelId);
-            await _cardLabelRepository.CreateAsync(cardLabel);
+            CardLabel newCardLabel = new CardLabel(cardId, dto.LabelId);
+            await _cardLabelRepository.CreateAsync(newCardLabel);
             await _unitOfWork.CommitAsync();
+
+            var cardLabel = await _cardLabelRepository
+                .GetCardLabelByIdAsync(newCardLabel.CardId, newCardLabel.LabelId);
 
             _logger.LogInformation("Label {LabelId} added to card {CardId}", dto.LabelId, cardId);
             return _mapper.Map<CardLabelResponse>(cardLabel);

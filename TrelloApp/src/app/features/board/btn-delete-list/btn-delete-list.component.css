@@ -1,0 +1,15 @@
+.btn-delete-list {
+  width: 32px;
+  height: 32px;
+  background-color: var(--color-red-500);
+  border-radius: 5px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-delete-list__icon {
+  width: 80%;
+  height: 80%;
+}

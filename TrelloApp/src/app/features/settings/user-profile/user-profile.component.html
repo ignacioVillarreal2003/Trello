@@ -1,0 +1,7 @@
+<section class="user-profile">
+  <app-avatar *ngIf="avatarBackground" [username]="username" [backgroundColor]="avatarBackground"></app-avatar>
+  <div class="user-profile__data">
+    <h2 class="user-profile__username">{{username}}</h2>
+    <h3 class="user-profile__email">{{email}}</h3>
+  </div>
+</section>

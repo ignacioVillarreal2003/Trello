@@ -1,0 +1,8 @@
+<form class="list-update-title-form"
+      [formGroup]="formUpdateListTitle"
+      (ngSubmit)="onSubmitUpdateListTitle()">
+  <input class="list-update-title-form__input"
+         formControlName="title"
+         placeholder="List title"
+         (blur)="onSubmitUpdateListTitle()"/>
+</form>

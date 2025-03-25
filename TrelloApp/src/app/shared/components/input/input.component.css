@@ -33,3 +33,8 @@ input {
 .input:focus-within input {
   border-color: var(--color-blue-300);
 }
+
+span {
+  color: var(--color-red-500);
+  font-size: 12px;
+}

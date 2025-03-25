@@ -1,0 +1,19 @@
+.change-avatar-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.change-avatar-form__title {
+  font-size: 18px;
+}
+
+.change-avatar-form__list {
+  display: flex;
+  gap: 10px;
+}
+
+.change-avatar-form__btn {
+  background-color: transparent;
+  border: none;
+}

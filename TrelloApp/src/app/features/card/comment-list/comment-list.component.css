@@ -1,0 +1,15 @@
+.comment-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.comment-list__item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

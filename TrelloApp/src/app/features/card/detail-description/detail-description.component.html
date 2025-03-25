@@ -1,0 +1,12 @@
+<section class="detail-description" *ngIf="card">
+  <button class="detail-description__btn"
+          *ngIf="!isDescriptionActive"
+          (click)="isDescriptionActive = true">Add a card description</button>
+  <form [formGroup]="formUpdateCardDescription" (ngSubmit)="onSubmitUpdateCardDescription()">
+    <textarea class="detail-description__textarea"
+              *ngIf="isDescriptionActive"
+              placeholder="Card description"
+              formControlName="description"
+              (blur)="onSubmitUpdateCardDescription()"></textarea>
+  </form>
+</section>

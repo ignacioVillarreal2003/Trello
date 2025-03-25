@@ -1,0 +1,13 @@
+.label-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0;
+}
+
+.label-list__no-match {
+  text-align: center;
+  flex-grow: 1;
+  font-size: 14px;
+}

@@ -1,0 +1,10 @@
+<form class="card-update-title-form"
+      [formGroup]="formUpdateCardTitle"
+      (ngSubmit)="onSubmitUpdateCardTitle()">
+  <input
+    class="card-update-title-form__input"
+    formControlName="title"
+    type="text"
+    placeholder="Card title"
+    (blur)="onSubmitUpdateCardTitle()" />
+</form>

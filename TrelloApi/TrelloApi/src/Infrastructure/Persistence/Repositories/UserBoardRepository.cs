@@ -20,4 +20,12 @@ public class UserBoardRepository: GenericRepository<UserBoard>, IUserBoardReposi
             .Select(ub => ub.user)
             .ToListAsync();
     }
+    
+    public async Task<UserBoard> GetUserBoardByIdAsync(int userId, int boardId)
+    {
+        return await Context.UserBoards
+            .Include(ub => ub.User)
+            .Include(ub => ub.Board)
+            .FirstOrDefaultAsync(ub => ub.UserId.Equals(userId) && ub.BoardId.Equals(boardId));
+    }
 }

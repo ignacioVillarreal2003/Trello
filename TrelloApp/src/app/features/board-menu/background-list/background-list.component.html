@@ -1,0 +1,6 @@
+<ul class="background-list">
+  <li class="background-list__item"
+      *ngFor="let background of backgrounds">
+    <app-background-item [board]="board" [background]="background" [backgroundPath]="backgroundPath"></app-background-item>
+  </li>
+</ul>

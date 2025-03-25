@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs.User;
 using TrelloApi.Domain.DTOs.UserCard;
@@ -15,11 +17,13 @@ public class UserCardController: BaseController
 {
     private readonly ILogger<UserCardController> _logger;
     private readonly IUserCardService _userCardService;
+    private readonly IHubContext<BoardHub> _hubContext;
 
-    public UserCardController(ILogger<UserCardController> logger, IUserCardService userCardService)
+    public UserCardController(ILogger<UserCardController> logger, IUserCardService userCardService, IHubContext<BoardHub> hubContext)
     {
         _logger = logger;
         _userCardService = userCardService;
+        _hubContext = hubContext;
     }
 
     [HttpGet("{cardId:int}")]
@@ -44,6 +48,10 @@ public class UserCardController: BaseController
         try
         {
             UserCardResponse userCard = await _userCardService.AddUserToCard(cardId, dto);
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("UserCardCreated", userCard);
+            
             _logger.LogInformation("User {UserBoard} added to card {CardId}", dto.UserId, cardId);
             return CreatedAtAction(nameof(GetUsersByCardId), new { userId = userCard.UserId, cardId = userCard.CardId }, userCard);
         }
@@ -66,6 +74,9 @@ public class UserCardController: BaseController
                 return NotFound(new { message = "UserCard not found." });
             }
 
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("UserCardDeleted", userId, cardId);
+            
             _logger.LogInformation("User {UserId} deleted for card {CardId}.", userId, cardId);
             return NoContent();
         }

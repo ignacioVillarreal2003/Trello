@@ -1,0 +1,20 @@
+<section class="list-item" *ngIf="list">
+  <header class="list-item__header">
+    <app-list-update-title-form [list]="list" style="width: 100%"></app-list-update-title-form>
+    <app-btn-delete-list [list]="list"></app-btn-delete-list>
+  </header>
+
+  <app-card-list [list]="list" [lists]="lists" style="height: 100%"></app-card-list>
+
+  <button
+    class="list-item__add-card"
+    (click)="openCreateCardForm(list)">
+    Add Card
+  </button>
+</section>
+<app-card-create-form
+  *ngIf="isCreateCardFormOpen"
+  [list]="list"
+  [cardsCount]="cardsCount"
+  (close)="closeCreateCardForm()">
+</app-card-create-form>

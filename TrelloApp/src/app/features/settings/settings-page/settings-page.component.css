@@ -1,0 +1,54 @@
+.settings-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-page__container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 20px 20px 60px 20px;
+}
+
+.settings-page__content {
+  max-width: 750px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 30px;
+  background-color: var(--background-2);
+  padding: 40px 30px;
+  border-radius: 5px;
+}
+
+.settings-page__content > * {
+  width: 100%;
+}
+
+.settings-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+}
+
+.settings-page__title {
+  font-size: clamp(18px, 5vw, 22px);
+}
+
+.settings-page__btn-close {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.settings-page__footer {
+  width: 100%;
+  display: flex;
+  gap: 20px;
+}

@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs.User;
 using TrelloApi.Domain.DTOs.UserBoard;
@@ -15,11 +17,13 @@ public class UserBoardController: BaseController
 {
     private readonly ILogger<UserBoardController> _logger;
     private readonly IUserBoardService _userBoardService;
+    private readonly IHubContext<BoardHub> _hubContext;
 
-    public UserBoardController(ILogger<UserBoardController> logger, IUserBoardService userBoardService)
+    public UserBoardController(ILogger<UserBoardController> logger, IUserBoardService userBoardService, IHubContext<BoardHub> hubContext)
     {
         _logger = logger;
         _userBoardService = userBoardService;
+        _hubContext = hubContext;
     }   
     
     [HttpGet("board/{boardId:int}")]
@@ -45,6 +49,10 @@ public class UserBoardController: BaseController
         try
         {
             UserBoardResponse userBoard = await _userBoardService.AddUserToBoard(boardId, dto);
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("UserBoardCreated", userBoard);
+
             _logger.LogInformation("User {UserId} added to board {BoardId}", dto.UserId, boardId);
             return CreatedAtAction(nameof(GetUsersByBoardId), new { boardId = userBoard.BoardId }, userBoard);
         }
@@ -67,6 +75,9 @@ public class UserBoardController: BaseController
                 _logger.LogDebug("User {UserId} not found in board {BoardId} for deletion.", userId, boardId);
                 return NotFound(new { message = "User membership not found." });
             }
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("UserBoardDeleted", boardId, userId);
 
             _logger.LogInformation("User {UserId} removed from board {BoardId}.", userId, boardId);
             return NoContent();

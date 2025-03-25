@@ -1,0 +1,27 @@
+<form class="register-form" [formGroup]="formRegister" (ngSubmit)="onSubmitRegister()">
+  <h1 class="register-form__title">Sign up to continue</h1>
+
+  <app-input
+    [textLabel]="'Email'"
+    [placeholder]="'Enter your email'"
+    formControlName="email"
+    [error]="getErrorMessage('email')">
+  </app-input>
+
+  <app-input
+    [textLabel]="'Password'"
+    [type]="'password'"
+    [placeholder]="'Enter your password'"
+    formControlName="password"
+    [error]="getErrorMessage('password')">
+  </app-input>
+
+  <app-input
+    [textLabel]="'Username'"
+    [placeholder]="'Enter your username'"
+    formControlName="username"
+    [error]="getErrorMessage('username')">
+  </app-input>
+
+  <app-btn [text]="'Sign up'" [type]="'submit'"></app-btn>
+</form>

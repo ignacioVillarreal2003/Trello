@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.Constants;
 using TrelloApi.Domain.DTOs.Label;
@@ -15,11 +17,13 @@ public class LabelController : BaseController
 {
     private readonly ILogger<LabelController> _logger;
     private readonly ILabelService _labelService;
+    private readonly IHubContext<BoardHub> _hubContext;
 
-    public LabelController(ILogger<LabelController> logger, ILabelService labelService)
+    public LabelController(ILogger<LabelController> logger, ILabelService labelService, IHubContext<BoardHub> hubContext)
     {
         _logger = logger;
         _labelService = labelService;
+        _hubContext = hubContext;
     }
 
     [HttpGet("{labelId:int}")]
@@ -82,6 +86,10 @@ public class LabelController : BaseController
         try
         {
             LabelResponse label = await _labelService.AddLabel(boardId, dto);
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("LabelCreated", label);
+            
             _logger.LogInformation("Label added to board {BoardId}", boardId);
             return CreatedAtAction(nameof(GetLabelById), new { labelId = label.Id }, label);
         }
@@ -103,6 +111,9 @@ public class LabelController : BaseController
                 _logger.LogDebug("Label {LabelId} not found for update", labelId);
                 return NotFound(new { message = "Label not found." });
             }
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("LabelUpdated", label);
             
             _logger.LogInformation("Label {LabelId} updated", labelId);
             return Ok(label);
@@ -126,6 +137,9 @@ public class LabelController : BaseController
                 return NotFound(new { message = "Label not found." });
             }
 
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("LabelDeleted", labelId);
+            
             _logger.LogInformation("Label {LabelId} deleted", labelId);
             return NoContent();
         }

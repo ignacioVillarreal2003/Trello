@@ -1,0 +1,28 @@
+<div class="card-page" *ngIf="card">
+  <app-header></app-header>
+  <div class="card-page__container">
+    <div class="card-page__content">
+      <header class="card-page__header">
+        <app-card-update-is-completed-form [card]="card"></app-card-update-is-completed-form>
+        <app-card-update-title-form [card]="card" style="width: 100%"></app-card-update-title-form>
+        <app-btn-close [size]="'32px'" (click)="goBack()"></app-btn-close>
+      </header>
+
+      <div class="card-page__section">
+        <ng-container [ngSwitch]="currentMode">
+          <app-card-comments style="flex: 1" [card]="card" *ngSwitchCase="'comments'"></app-card-comments>
+          <app-card-users style="flex: 1" [boardId]="boardId" [card]="card" *ngSwitchCase="'users'"></app-card-users>
+          <app-card-labels style="flex: 1" [boardId]="boardId" [card]="card" *ngSwitchCase="'labels'"></app-card-labels>
+          <app-card-details style="flex: 1" [card]="card" *ngSwitchCase="'details'"></app-card-details>
+        </ng-container>
+        <nav class="card-page__nav-bar">
+          <button class="card-page__btn-option" (click)="setMode('details')" [class.active]="currentMode == 'details'">🏠 Details</button>
+          <button class="card-page__btn-option" (click)="setMode('users')" [class.active]="currentMode == 'users'">👤 Users</button>
+          <button class="card-page__btn-option" (click)="setMode('labels')" [class.active]="currentMode == 'labels'">🏷 Labels</button>
+          <button class="card-page__btn-option" (click)="setMode('comments')" [class.active]="currentMode == 'comments'">💬 Comments</button>
+          <app-btn-delete-card [card]="card"></app-btn-delete-card>
+        </nav>
+      </div>
+    </div>
+  </div>
+</div>

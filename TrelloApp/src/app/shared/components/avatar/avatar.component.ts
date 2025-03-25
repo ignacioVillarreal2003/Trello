@@ -1,12 +1,10 @@
 import {Component, Input} from '@angular/core';
 import {NgIf} from "@angular/common";
-import {RouterLink} from "@angular/router";
 
 @Component({
   selector: 'app-avatar',
     imports: [
         NgIf,
-        RouterLink
     ],
   templateUrl: './avatar.component.html',
   styleUrl: './avatar.component.css'

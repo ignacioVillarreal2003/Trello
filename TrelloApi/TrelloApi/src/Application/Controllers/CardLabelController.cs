@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.DTOs.CardLabel;
@@ -16,11 +18,13 @@ public class CardLabelController: BaseController
 {
     private readonly ILogger<CardLabelController> _logger;
     private readonly ICardLabelService _cardLabelService;
+    private readonly IHubContext<BoardHub> _hubContext;
 
-    public CardLabelController(ILogger<CardLabelController> logger, ICardLabelService cardLabelService)
+    public CardLabelController(ILogger<CardLabelController> logger, ICardLabelService cardLabelService, IHubContext<BoardHub> hubContext)
     {
         _logger = logger;
         _cardLabelService = cardLabelService;
+        _hubContext = hubContext;
     }
 
     [HttpGet("card/{cardId:int}")]
@@ -45,6 +49,10 @@ public class CardLabelController: BaseController
         try
         {
             CardLabelResponse cardLabel = await _cardLabelService.AddLabelToCard(cardId, dto);
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("CardLabelCreated", cardLabel);
+            
             _logger.LogInformation("Label {LabelId} added to card {CardId}", dto, cardId);
             return CreatedAtAction(nameof(GetLabelsByCardId), new { cardId = cardLabel.CardId, labelId = cardLabel.LabelId }, cardLabel);
         }
@@ -67,6 +75,9 @@ public class CardLabelController: BaseController
                 return NotFound(new { message = "CardLabel not found." });
             }
 
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("CardLabelDeleted", cardId, labelId);
+            
             _logger.LogInformation("Label {LabelId} deleted for card {CardId}.", labelId, cardId);
             return NoContent();
         }

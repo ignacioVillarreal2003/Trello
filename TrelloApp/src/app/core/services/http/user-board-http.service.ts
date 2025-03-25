@@ -22,13 +22,13 @@ export class UserBoardHttpService extends BaseHttpService {
     );
   }
 
-  add(boardId: number, requestBody: AddUserBoard): Observable<UserBoard> {
+  addUserToBoard(boardId: number, requestBody: AddUserBoard): Observable<UserBoard> {
     return this.http.post<UserBoard>(`${this.url}/board/${boardId}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  delete(boardId: number, userId: number): Observable<void> {
+  removeUserFromBoard(boardId: number, userId: number): Observable<void> {
     return this.http.delete<void>(`${this.url}/board/${boardId}/user/${userId}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );

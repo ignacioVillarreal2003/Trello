@@ -26,12 +26,6 @@ export class CardHttpService  extends BaseHttpService {
     );
   }
 
-  getPriorities(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.url}/priorities`, this.httpOptions).pipe(
-      catchError(this.handleError)
-    );
-  }
-
   add(listId: number, requestBody: AddCard): Observable<Card> {
     return this.http.post<Card>(`${this.url}/list/${listId}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)

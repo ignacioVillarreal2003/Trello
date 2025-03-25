@@ -1,0 +1,6 @@
+<ul class="user-list">
+  <li class="user-list__item" *ngFor="let user of filteredUsers">
+    <app-user-item [user]="user" [card]="card"></app-user-item>
+  </li>
+  <li class="user-list__no-match" *ngIf="filteredUsers.length === 0">No matches</li>
+</ul>

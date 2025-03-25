@@ -1,0 +1,17 @@
+<div class="board-page" *ngIf="board">
+  <app-header></app-header>
+
+  <section class="board-page__container" [style.backgroundImage]="'url(' + boardBackgroundPath + board?.background + ')'">
+    <header class="board-page__header">
+      <app-board-update-title-form [board]="board"></app-board-update-title-form>
+      <app-btn-menu [size]="'38px'" (click)="isOpenBoardMenu = true"></app-btn-menu>
+    </header>
+
+    <app-list-list [boardId]="board.id" style="height: 100%"></app-list-list>
+  </section>
+</div>
+<app-board-menu-page
+  [isOpen]="isOpenBoardMenu"
+  [board]="board"
+  (close)="isOpenBoardMenu = false">
+</app-board-menu-page>

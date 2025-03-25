@@ -1,0 +1,10 @@
+<form class="board-update-title-form"
+      [formGroup]="formUpdateBoardTitle"
+      (ngSubmit)="onSubmitUpdateBoardTitle()">
+  <input
+    class="board-update-title-form__input"
+    formControlName="title"
+    type="text"
+    placeholder="Board's title"
+    (blur)="onSubmitUpdateBoardTitle()" />
+</form>

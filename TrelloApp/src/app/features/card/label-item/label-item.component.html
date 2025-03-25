@@ -1,0 +1,4 @@
+<button class="label-item" (click)="updateAssignment(label)" *ngIf="label">
+  <app-checkbox [checked]="label.isAssigned"></app-checkbox>
+  <h2 class="label-item__label-name" [style]="{ backgroundColor: label.color}">{{ label.title }}</h2>
+</button>

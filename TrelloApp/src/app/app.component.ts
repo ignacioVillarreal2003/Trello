@@ -1,16 +1,13 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import {CardViewComponent} from './articles/CardView/card-view/card-view.component';
-import {AuthComponent} from './articles/auth/auth.component';
-import {BoardDashboardComponent} from './articles/BoardDashboard/board-dashboard/board-dashboard.component';
-import {BoardMenuComponent} from './articles/BoardMenu/board-menu/board-menu.component';
-import {UserMenuComponent} from './articles/user-menu/user-menu.component';
-import {BoardViewComponent} from './articles/board-view/board-view.component';
 import {SessionService} from './core/services/session/session.service';
+import {ThemeService} from './core/services/theme.service';
+import {UserCommunicationService} from './core/services/communication/user-communication.service';
+import {User} from './core/models/user';
 
 @Component({
   selector: 'app-root',
-  imports: [CardViewComponent, AuthComponent, BoardDashboardComponent, BoardMenuComponent, UserMenuComponent, BoardViewComponent, RouterOutlet],
+  imports: [RouterOutlet],
   templateUrl: './app.component.html',
   standalone: true,
   styleUrl: './app.component.css'
@@ -18,10 +15,19 @@ import {SessionService} from './core/services/session/session.service';
 export class AppComponent {
   title = 'TrelloApp';
 
-  constructor(private sessionService: SessionService) {
-  }
+  constructor(private sessionService: SessionService,
+              private themeService: ThemeService,
+              private userCommunicationService: UserCommunicationService) {}
 
   ngOnInit(): void {
-
+    const theme: string | undefined = this.sessionService.getSessionData()?.theme;
+    if (theme != undefined) {
+      this.themeService.applyTheme(theme);
+    }
+    this.userCommunicationService.updateUser$.subscribe((user: User | null): void => {
+      if (user != null) {
+        this.themeService.applyTheme(user.theme);
+      }
+    })
   }
 }

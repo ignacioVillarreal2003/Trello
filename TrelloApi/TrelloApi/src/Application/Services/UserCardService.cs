@@ -42,10 +42,13 @@ public class UserCardService: BaseService, IUserCardService
     {
         try
         {
-            UserCard userCard = new UserCard(dto.UserId, cardId);
-            await _userCardRepository.CreateAsync(userCard);
+            UserCard newUserCard = new UserCard(dto.UserId, cardId);
+            await _userCardRepository.CreateAsync(newUserCard);
             await _unitOfWork.CommitAsync();
 
+            var userCard = await _userCardRepository
+                .GetUserCardByIdAsync(newUserCard.UserId, newUserCard.CardId);
+            
             _logger.LogInformation("Card {CardId} added to User {UserId}", cardId, dto.UserId);
             return _mapper.Map<UserCardResponse>(userCard);
         }

@@ -1,0 +1,4 @@
+<button class="user-item" (click)="updateAssignment()" *ngIf="user">
+  <app-checkbox [checked]="user.isAssigned"></app-checkbox>
+  <h1 class="user-item__username">{{ user.username }}</h1>
+</button>

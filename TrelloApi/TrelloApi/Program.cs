@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using TrelloApi.app;
 using TrelloApi.Application.Filters;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Mappings;
 using TrelloApi.Application.Middlewares;
 using TrelloApi.Infrastructure.Persistence.Data;
@@ -45,6 +46,9 @@ builder.Services.AddControllers(options =>
     options.Filters.Add<ExceptionFilter>();
     options.Filters.Add<LoggingFilter>();
 });
+
+// Websoket
+builder.Services.AddSignalR();
 
 // Configurar FluentValidation
 builder.Services.AddFluentValidationAutoValidation()
@@ -153,10 +157,21 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ResponseEmitterMiddleware>();
 app.UseHttpsRedirection();
+
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Rate limit
 app.UseRateLimiter();
+
+// Board id middleware
+app.UseMiddleware<BoardCookieMiddleware>();
+
 app.MapControllers();
+
+// Hub
+app.MapHub<BoardHub>("/boardHub");
+
 app.Run();
 
 public partial class Program {}

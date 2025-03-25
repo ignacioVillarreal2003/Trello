@@ -1,0 +1,29 @@
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.card-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.card-list::-webkit-scrollbar-thumb {
+  background-color: var(--background-transparent-1);
+  border-radius: 5px;
+}
+
+.card-list::-webkit-scrollbar-thumb:hover {
+  background-color: var(--background-transparent-2);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0;
+}
+
+.cdk-drop-list-dragging .cdk-drag {
+  transition: transform .25s cubic-bezier(0, 0, 0.2, 1);
+}

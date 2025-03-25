@@ -1,0 +1,12 @@
+.background-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 0;
+  list-style: none;
+}
+
+.background-list__item {
+  width: 100%;
+}

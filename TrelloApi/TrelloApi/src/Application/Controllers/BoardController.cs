@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.Constants;
 using TrelloApi.Domain.DTOs.Board;
@@ -15,11 +17,13 @@ public class BoardController : BaseController
 {
     private readonly ILogger<BoardController> _logger;
     private readonly IBoardService _boardService;
-
-    public BoardController(ILogger<BoardController> logger, IBoardService boardService)
+    private readonly IHubContext<BoardHub> _hubContext;
+    
+    public BoardController(ILogger<BoardController> logger, IBoardService boardService, IHubContext<BoardHub> hubContext)
     {
         _logger = logger;
         _boardService = boardService;
+        _hubContext = hubContext;
     }
 
     [HttpGet("{boardId:int}")]
@@ -103,7 +107,10 @@ public class BoardController : BaseController
                 _logger.LogDebug("Board {BoardId} not found for update", boardId);
                 return NotFound(new { message = "Board not found." });
             }
-        
+            
+            await _hubContext.Clients.Group(boardId.ToString())
+                .SendAsync("BoardUpdated", board);
+            
             _logger.LogInformation("Board {BoardId} updated", boardId);
             return Ok(board);
         }
@@ -125,6 +132,9 @@ public class BoardController : BaseController
                 _logger.LogDebug("Board {BoardId} not found for deletion", boardId);
                 return NotFound(new { message = "Board not found." });
             }
+            
+            await _hubContext.Clients.Group(boardId.ToString())
+                .SendAsync("BoardDeleted", boardId);
 
             _logger.LogInformation("Board {BoardId} deleted", boardId);
             return NoContent();

@@ -1,0 +1,21 @@
+.board-list {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.board-list__item {
+  aspect-ratio: 2;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+@media (max-width: 800px) {
+  .board-list {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}

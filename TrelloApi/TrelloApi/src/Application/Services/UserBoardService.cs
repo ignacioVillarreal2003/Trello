@@ -43,10 +43,13 @@ public class UserBoardService: BaseService, IUserBoardService
     {
         try
         {
-            UserBoard userBoard = new UserBoard(dto.UserId, boardId, dto.Role);
-            await _userBoardRepository.CreateAsync(userBoard);
+            UserBoard newUserBoard = new UserBoard(dto.UserId, boardId, dto.Role);
+            await _userBoardRepository.CreateAsync(newUserBoard);
             await _unitOfWork.CommitAsync();
 
+            var userBoard = await _userBoardRepository
+                .GetUserBoardByIdAsync(newUserBoard.UserId, newUserBoard.BoardId);
+            
             _logger.LogInformation("User {UserId} added to board {BoardId}", dto.UserId, boardId);
             return _mapper.Map<UserBoardResponse>(userBoard);
         }

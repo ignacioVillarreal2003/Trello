@@ -1,0 +1,9 @@
+.change-username-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.change-username-form__title {
+  font-size: 18px;
+}

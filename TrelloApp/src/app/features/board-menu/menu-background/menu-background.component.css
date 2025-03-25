@@ -1,0 +1,11 @@
+.menu-background {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.menu-background__title {
+  text-align: center;
+  font-size: 18px;
+}

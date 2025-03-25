@@ -1,0 +1,21 @@
+.card-update-title-form {
+  width: 100%;
+}
+
+.card-update-title-form__input {
+  width: 100%;
+  background-color: transparent;
+  border: 2px solid transparent;
+  padding: 8px;
+  font-size: 20px;
+  border-radius: 4px;
+}
+
+.card-update-title-form__input:hover {
+  background-color: var(--background-1);
+}
+
+.card-update-title-form__input:focus-visible {
+  outline: none;
+  border: 2px solid var(--color-blue-500);
+}

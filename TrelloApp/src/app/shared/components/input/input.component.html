@@ -8,4 +8,5 @@
     (input)="updateValue($event)"
     (blur)="onTouched()"
     placeholder="{{placeholder}}">
+  <span *ngIf="error.length > 0 && value.length > 0">{{error}}</span>
 </div>

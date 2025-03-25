@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs.Comment;
 
@@ -14,11 +16,13 @@ public class CommentController: BaseController
 {
     private readonly ILogger<CommentController> _logger;
     private readonly ICommentService _commentService;
+    private readonly IHubContext<BoardHub> _hubContext;
 
-    public CommentController(ILogger<CommentController> logger, ICommentService commentService)
+    public CommentController(ILogger<CommentController> logger, ICommentService commentService, IHubContext<BoardHub> hubContext)
     {
         _logger = logger;
         _commentService = commentService;
+        _hubContext = hubContext;
     }
 
     [HttpGet("{commentId:int}")]
@@ -65,6 +69,10 @@ public class CommentController: BaseController
         try
         {
             CommentResponse comment = await _commentService.AddComment(cardId, dto, UserId);
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("CommentCreated", comment);
+            
             _logger.LogInformation("Comment added to card {CardId}", cardId);
             return CreatedAtAction(nameof(GetCommentById), new { commentId = comment.Id }, comment);
         }
@@ -86,6 +94,9 @@ public class CommentController: BaseController
                 _logger.LogDebug("Comment {CommentId} not found for update", commentId);
                 return NotFound(new { message = "Comment not found." });
             }
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("CommentUpdated", comment);
             
             _logger.LogInformation("Comment {CommentId} updated", commentId);
             return Ok(comment);
@@ -109,6 +120,9 @@ public class CommentController: BaseController
                 return NotFound(new { message = "Comment not found." });
             }
 
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("CommentDeleted", commentId);
+            
             _logger.LogInformation("Comment {CommentId} deleted", commentId);
             return NoContent();
         }

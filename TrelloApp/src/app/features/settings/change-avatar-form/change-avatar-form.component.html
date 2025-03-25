@@ -1,0 +1,10 @@
+<section class="change-avatar-form">
+  <h2 class="change-avatar-form__title">Change your avatar</h2>
+  <ul class="change-avatar-form__list">
+    <li class="change-avatar-form__item" *ngFor="let avatarBg of avatarBackgrounds">
+      <button class="change-avatar-form__btn" (click)="onSubmitUpdateAvatar(avatarBg)">
+        <app-avatar [username]="username" [backgroundColor]="avatarBg"></app-avatar>
+      </button>
+    </li>
+  </ul>
+</section>

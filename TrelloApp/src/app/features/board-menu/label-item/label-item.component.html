@@ -1,0 +1,4 @@
+<div class="label-item" *ngIf="label">
+  <span class="label-item__span" [style]="{ backgroundColor: label.color}">{{label.title}}</span>
+  <app-btn-delete [size]="'36px'" (click)="deleteLabel()"></app-btn-delete>
+</div>

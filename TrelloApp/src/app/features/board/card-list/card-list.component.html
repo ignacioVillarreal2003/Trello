@@ -1,0 +1,5 @@
+<ul class="card-list" *ngIf="list" cdkDropList [cdkDropListData]="list.cards" (cdkDropListDropped)="dropCards($event)">
+  <li class="card-list__item" *ngFor="let card of list.cards" cdkDrag cdkDragPreviewContainer="parent">
+    <app-card-item [card]="card"></app-card-item>
+  </li>
+</ul>

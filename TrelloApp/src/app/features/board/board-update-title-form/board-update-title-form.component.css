@@ -1,0 +1,23 @@
+.board-update-title-form {
+  width: 100%;
+}
+
+.board-update-title-form__input {
+  width: 100%;
+  padding: 10px;
+  background-color: transparent;
+  color: #ffffff;
+  border: none;
+  font-size: 22px;
+  border-radius: 5px;
+  transition: all 0.1s cubic-bezier(0.2, 0.5, 0.5, 1);
+}
+
+.board-update-title-form__input:hover {
+  background-color: rgba(255, 255, 255, 0.4);
+}
+
+.board-update-title-form__input:focus-visible {
+  outline: none;
+  background-color: rgba(255, 255, 255, 0.2);
+}

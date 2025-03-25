@@ -1,0 +1,31 @@
+<section class="create-board-modal">
+  <form class="create-board-modal__form" [formGroup]="formCreateBoard" (ngSubmit)="onSubmitCreateBoard()">
+    <h1 class="create-board-modal__title">Create a board</h1>
+    <app-input [textLabel]="'Select a title'"
+               [placeholder]="'Enter board title'"
+               formControlName="title"
+               [error]="getErrorMessage('title')"></app-input>
+    <app-input [textLabel]="'Select a description'"
+               [placeholder]="'Enter a description'"
+               formControlName="description"></app-input>
+
+    <fieldset class="create-board-modal__field">
+      <legend class="create-board-modal__label">Choose a background</legend>
+      <ul class="create-board-modal__background-list">
+        <li class="create-board-modal__background-item" *ngFor="let background of boardBackgrounds; let i = index">
+          <button type="button"
+                  class="btn-background"
+                  (click)="selectBackground(i)"
+                  [class.selected]="i === selectedBackground">
+            <img src="{{boardBackgroundPath}}{{background}}" alt="background">
+          </button>
+        </li>
+      </ul>
+    </fieldset>
+
+    <footer class="create-board-modal__footer">
+      <app-btn [type]="'submit'" [text]="'Create board'"></app-btn>
+      <app-btn [text]="'Close'" [color]="'red'" (click)="onClose()"></app-btn>
+    </footer>
+  </form>
+</section>

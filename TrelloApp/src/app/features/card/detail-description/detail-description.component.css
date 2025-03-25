@@ -1,0 +1,32 @@
+.detail-description {
+  width: 100%;
+}
+
+.detail-description__btn {
+  width: 100%;
+  padding: 10px;
+  font-size: 16px;
+  background-color: var(--background-4);
+  border: none;
+  border-radius: 5px;
+  color: var(--text-1);
+}
+
+.detail-description__btn:hover {
+  opacity: 0.8;
+}
+
+.detail-description__textarea {
+  width: 100%;
+  background-color: transparent;
+  border: 2px solid transparent;
+  padding: 8px;
+  font-size: 14px;
+  border-radius: 4px;
+}
+
+.detail-description__textarea:focus-visible {
+  outline: none;
+  border: 2px solid var(--color-blue-500);
+  background-color: var(--background-3);
+}

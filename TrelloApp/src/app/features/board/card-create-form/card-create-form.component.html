@@ -1,0 +1,18 @@
+<section class="card-create-form">
+  <form class="card-create-form__form" [formGroup]="formCreateCard" (ngSubmit)="onSubmitCreateCard()">
+    <h1 class="card-create-form__title">Create a card</h1>
+    <app-input [placeholder]="'Enter task title'"
+               [textLabel]="'Select a title'"
+               formControlName="title"
+               [error]="getErrorMessage('title')"></app-input>
+    <app-input [placeholder]="'Description'"
+               [textLabel]="'Select a description'"
+               formControlName="description"
+               [error]="getErrorMessage('description')"></app-input>
+
+    <footer class="card-create-form__footer">
+      <app-btn [appearance]="'appearance-solid'" [type]="'submit'" [text]="'Create list'"></app-btn>
+      <app-btn [appearance]="'appearance-solid'" (click)="onClose()" [color]="'red'" [text]="'Close'"></app-btn>
+    </footer>
+  </form>
+</section>

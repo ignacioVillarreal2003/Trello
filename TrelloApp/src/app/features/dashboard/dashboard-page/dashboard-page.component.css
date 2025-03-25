@@ -1,0 +1,13 @@
+.dashboard-page {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.dashboard-page__container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+}

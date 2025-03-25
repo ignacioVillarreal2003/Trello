@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
-import {BehaviorSubject, Observable} from 'rxjs';
-import {BoardData, SessionData} from './session-data';
+import {SessionData} from './session-data';
 
 @Injectable({
   providedIn: 'root'
@@ -29,17 +28,7 @@ export class SessionService {
     this.setSessionData(updatedData);
   }
 
-  getBoardData(): BoardData | undefined {
-    const data: string | null = this.storage.getItem('boardData');
-    return data ? JSON.parse(data) : undefined;
-  }
-
-  setBoardData(data: BoardData): void {
-    this.storage.setItem('boardData', JSON.stringify(data));
-  }
-
   clearSession(): void {
     this.storage.removeItem('userData');
-    this.storage.removeItem('boardData');
   }
 }

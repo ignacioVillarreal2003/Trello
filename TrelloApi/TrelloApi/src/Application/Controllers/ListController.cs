@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs.List;
 
@@ -14,11 +16,13 @@ public class ListController: BaseController
 {
     private readonly ILogger<ListController> _logger;
     private readonly IListService _listService;
-    
-    public ListController(ILogger<ListController> logger, IListService listService)
+    private readonly IHubContext<BoardHub> _hubContext;
+
+    public ListController(ILogger<ListController> logger, IListService listService, IHubContext<BoardHub> hubContext)
     {
         _logger = logger;
         _listService = listService;
+        _hubContext = hubContext;
     }
     
     [HttpGet("{listId:int}")]
@@ -65,6 +69,10 @@ public class ListController: BaseController
         try
         {
             ListResponse list = await _listService.AddList(boardId, dto);
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("ListCreated", list);
+            
             _logger.LogInformation("List added to board {BoardId}", boardId);
             return CreatedAtAction(nameof(GetListById), new { listId = list.Id }, list);
         }
@@ -86,6 +94,9 @@ public class ListController: BaseController
                 _logger.LogDebug("List {ListId} not found for update", listId);
                 return NotFound(new { message = "List not found." });
             }
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("ListUpdated", list);
 
             _logger.LogInformation("List {ListId} updated", listId);
             return Ok(list);
@@ -108,6 +119,9 @@ public class ListController: BaseController
                 _logger.LogDebug("List {ListId} not found for deletion", listId);
                 return NotFound(new { message = "List not found." });
             }
+            
+            await _hubContext.Clients.Group(BoardId.ToString())
+                .SendAsync("ListDeleted", listId);
             
             _logger.LogInformation("List {ListId} deleted", listId);
             return NoContent();

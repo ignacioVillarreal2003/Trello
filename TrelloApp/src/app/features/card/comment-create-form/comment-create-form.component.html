@@ -1,0 +1,4 @@
+<form class="comment-create-form" [formGroup]="formAddComment" (ngSubmit)="addComment()">
+  <app-textarea [placeholder]="'A comment'" formControlName="text"></app-textarea>
+  <app-btn [type]="'submit'" [text]="'Send'"></app-btn>
+</form>

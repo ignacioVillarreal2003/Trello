@@ -1,11 +1,10 @@
 import {Component, forwardRef, Input} from '@angular/core';
-import {NgClass, NgIf} from '@angular/common';
+import {NgIf} from '@angular/common';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 
 @Component({
   selector: 'app-input',
   imports: [
-    NgClass,
     NgIf
   ],
   templateUrl: './input.component.html',
@@ -23,6 +22,7 @@ export class InputComponent implements ControlValueAccessor {
   @Input() type: 'text' | 'password' = 'text';
   @Input() textLabel: string = '';
   @Input() placeholder: string = '';
+  @Input() error: string = '';
 
   value: string = '';
   disabled = false;

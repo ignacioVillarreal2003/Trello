@@ -1,0 +1,24 @@
+.member-add-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.member-add-form__title {
+  text-align: center;
+  font-size: 18px;
+}
+
+.member-add-form__list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+}
+
+.member-add-form__item {
+  width: 100%;
+}

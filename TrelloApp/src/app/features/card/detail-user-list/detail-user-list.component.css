@@ -1,0 +1,19 @@
+.detail-user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.detail-user-list__title {
+  font-size: 14px;
+}
+
+.detail-user-list__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.detail-user-list__item {
+  width: auto;
+}

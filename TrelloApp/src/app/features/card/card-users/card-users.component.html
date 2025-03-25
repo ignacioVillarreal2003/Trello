@@ -1,0 +1,4 @@
+<div class="card-users">
+  <app-input [placeholder]="'Enter a username'" [(ngModel)]="searchTerm"></app-input>
+  <app-user-list [searchTerm]="searchTerm" [boardId]="boardId" [card]="card"></app-user-list>
+</div>

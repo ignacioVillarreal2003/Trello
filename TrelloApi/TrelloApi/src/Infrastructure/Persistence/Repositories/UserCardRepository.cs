@@ -20,4 +20,12 @@ public class UserCardRepository: GenericRepository<UserCard>, IUserCardRepositor
             .Select(uc => uc.user)
             .ToListAsync();
     }
+
+    public async Task<UserCard> GetUserCardByIdAsync(int userId, int cardId)
+    {
+        return await Context.UserCards
+            .Include(uc => uc.User)
+            .Include(uc => uc.Card)
+            .FirstOrDefaultAsync(uc => uc.UserId.Equals(userId) && uc.CardId.Equals(cardId));
+    }
 }

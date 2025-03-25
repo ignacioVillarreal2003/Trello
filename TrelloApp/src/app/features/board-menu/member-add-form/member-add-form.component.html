@@ -1,0 +1,9 @@
+<div class="member-add-form">
+  <h1 class="member-add-form__title">Add members</h1>
+  <app-input [textLabel]="'Search a user'" [placeholder]="'Username'" (input)="getUsersByUsername($event)"></app-input>
+  <ul class="member-add-form__list">
+    <li class="member-add-form__item" *ngFor="let user of usersByUsername">
+      <app-btn [text]="user.username" (click)="addUserToBoard(user)"></app-btn>
+    </li>
+  </ul>
+</div>

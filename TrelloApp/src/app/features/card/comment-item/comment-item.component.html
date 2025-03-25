@@ -1,0 +1,7 @@
+<div class="comment-item" *ngIf="comment">
+  <header class="comment-item__header">
+    <h1 class="comment-item__author">{{comment.authorId}}</h1>
+    <label class="comment-item__date">{{comment.createdAt}}</label>
+  </header>
+  <p class="comment-item__text">{{comment.text}}</p>
+</div>

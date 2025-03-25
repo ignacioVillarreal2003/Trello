@@ -1,0 +1,12 @@
+.label-item {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.label-item__span {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  color: white;
+}

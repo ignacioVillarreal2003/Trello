@@ -1,0 +1,23 @@
+<section class="auth-page">
+  <div class="auth-page__container">
+    <header class="auth-page__header">
+      <img class="auth-page__logo" src="./Trello.svg" alt="Trello Logo">
+      <h1 class="auth-page__title">Trello</h1>
+    </header>
+
+    <div class="auth-page__form">
+      <router-outlet></router-outlet>
+    </div>
+
+    <footer class="auth-page__footer">
+      <a class="auth-page__link"
+         routerLink="/auth/register"
+         *ngIf="currentMode == 'login'"
+         (click)="setMode('register')">Create an account</a>
+      <a class="auth-page__link"
+         routerLink="/auth/login"
+         *ngIf="currentMode == 'register'"
+         (click)="setMode('login')">Log in</a>
+    </footer>
+  </div>
+</section>

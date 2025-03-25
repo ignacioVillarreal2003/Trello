@@ -27,8 +27,7 @@ export class LabelHttpService extends BaseHttpService {
     );
   }
 
-  add(boardId: number, title: string, color: string): Observable<Label> {
-    const requestBody: AddLabel = { title, color}
+  add(boardId: number, requestBody: AddLabel): Observable<Label> {
     return this.http.post<Label>(`${this.url}/board/${boardId}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );

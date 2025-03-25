@@ -6,7 +6,3 @@ export interface SessionData {
   theme: string,
   avatarBackground: string
 }
-
-export interface BoardData {
-  boardId: number
-}

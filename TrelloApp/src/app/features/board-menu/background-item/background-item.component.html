@@ -1,0 +1,7 @@
+<button class="background-item"
+        *ngIf="background"
+        (click)="onSubmitUpdateBoardBackground()">
+  <img class="background-item__image"
+       [src]="backgroundPath + background"
+       alt="background">
+</button>

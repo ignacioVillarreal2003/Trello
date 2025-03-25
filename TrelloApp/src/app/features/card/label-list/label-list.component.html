@@ -1,0 +1,6 @@
+<ul class="label-list">
+  <li class="label-list__item" *ngFor="let label of filteredLabels">
+    <app-label-item [label]="label" [card]="card"></app-label-item>
+  </li>
+  <li class="label-list__no-match" *ngIf="filteredLabels.length === 0">No matches</li>
+</ul>

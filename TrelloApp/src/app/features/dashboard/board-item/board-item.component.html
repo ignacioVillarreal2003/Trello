@@ -1,0 +1,7 @@
+<button
+  *ngIf="board"
+  class="board-item"
+  (click)="openBoard()"
+  [style.backgroundImage]="'url(' + boardBackgroundPath + board.background + ')'">
+  {{ board.title }}
+</button>

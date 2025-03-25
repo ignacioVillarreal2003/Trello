@@ -1,0 +1,13 @@
+<form class="label-create-form" [formGroup]="formCreateLabel" (ngSubmit)="onSubmitCreateLabel()">
+  <h1 class="label-create-form__title">Create label</h1>
+  <div class="label-create-form__preview">
+    <span class="label-create-form__label-preview" [style.backgroundColor]="labelColors[selectedColor]" >{{ title }}</span>
+  </div>
+  <app-input [placeholder]="'title'" [textLabel]="'Title'" formControlName="title" [error]="getErrorMessage('title')"></app-input>
+  <ul class="label-create-form__color-list">
+    <li class="label-create-form__color-item" *ngFor="let color of labelColors; let i = index">
+      <button class="label-create-form__btn-color" type="button" [style]="{ backgroundColor: color}" (click)="selectColor(i)"></button>
+    </li>
+  </ul>
+  <app-btn [text]="'Create'" [type]="'submit'"></app-btn>
+</form>

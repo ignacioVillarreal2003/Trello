@@ -1,0 +1,20 @@
+<section class="list-list" *ngIf="boardId">
+  <ul class="list-list__list"  cdkDropList [cdkDropListData]="lists" (cdkDropListDropped)="dropLists($event)" cdkDropListGroup cdkDropListOrientation="horizontal">
+    <li class="list-list__item" *ngFor="let list of lists" cdkDrag>
+      <app-list-item [list]="list" [lists]="lists" style="height: 100%"></app-list-item>
+    </li>
+    <li class="board__list-add">
+      <button
+        class="board__add-list-button"
+        (click)="openListCreateForm()">
+        + Add List
+      </button>
+    </li>
+  </ul>
+</section>
+<app-list-create-form
+  *ngIf="isListCreateFormOpen"
+  [boardId]="boardId"
+  [listsCount]="lists.length"
+  (close)="closeListCreateForm()">
+</app-list-create-form>

@@ -4,7 +4,10 @@ import { Observable, throwError } from 'rxjs';
 export abstract class BaseHttpService {
   protected http: HttpClient;
   protected baseUrl: string = 'http://localhost:5182';
-  protected httpOptions = { headers: new HttpHeaders({ 'Content-Type': 'application/json' }) };
+  protected httpOptions = {
+    headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
+    withCredentials: true
+  };
 
   constructor(http: HttpClient) {
     this.http = http;

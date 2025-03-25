@@ -34,6 +34,14 @@ ul {
   list-style: none;
 }
 
+app-input, app-header, app-btn {
+  width: 100%;
+}
+
+h1, h2, h3, h4, p, input {
+  color: var(--text-1);
+}
+
 @font-face {
   font-family: 'Nunito-Light';
   src: url('/fonts/Nunito-Light.ttf') format('truetype');

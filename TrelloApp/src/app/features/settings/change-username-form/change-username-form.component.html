@@ -1,0 +1,8 @@
+<form class="change-username-form" [formGroup]="formUpdateUsername" (ngSubmit)="onSubmitUpdateUsername()">
+  <h1 class="change-username-form__title">Change your username</h1>
+  <app-input [textLabel]="'Your new username'"
+             [placeholder]="'Username'"
+             formControlName="username"
+             [error]="getErrorMessage('username')"></app-input>
+  <app-btn [text]="'Change username'" [type]="'submit'"></app-btn>
+</form>
