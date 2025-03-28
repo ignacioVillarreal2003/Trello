@@ -32,13 +32,15 @@ public class TrelloContext: DbContext
         modelBuilder.Entity<UserCard>().ToTable("UserCard");
         modelBuilder.Entity<CardLabel>().ToTable("CardLabel");
 
-        
         modelBuilder.Entity<UserBoard>()
-            .HasKey(ub => new { ub.UserId, ub.BoardId });
+            .HasIndex(ub => new { ub.UserId, ub.BoardId })
+            .IsUnique();
         modelBuilder.Entity<UserCard>()
-            .HasKey(uc => new { uc.UserId, uc.CardId });
+            .HasIndex(uc => new { uc.UserId, uc.CardId })
+            .IsUnique();
         modelBuilder.Entity<CardLabel>()
-            .HasKey(cl => new { cl.CardId, cl.LabelId });
+            .HasIndex(cl => new { cl.CardId, cl.LabelId })
+            .IsUnique();
         modelBuilder.Entity<User>()
             .HasIndex(u => u.Email)
             .IsUnique();

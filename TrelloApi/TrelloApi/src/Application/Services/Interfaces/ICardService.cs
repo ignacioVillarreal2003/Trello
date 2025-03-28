@@ -9,4 +9,5 @@ public interface ICardService
     Task<CardResponse> AddCard(int listId, AddCardDto dto);
     Task<CardResponse?> UpdateCard(int cardId, UpdateCardDto dto);
     Task<Boolean> DeleteCard(int cardId);
+    Task<CardResponse> GetCardByIdToAccess(int cardId);
 }

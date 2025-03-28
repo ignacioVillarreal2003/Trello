@@ -9,4 +9,5 @@ public interface IBoardService
     Task<BoardResponse> AddBoard(AddBoardDto dto, int userId);
     Task<BoardResponse?> UpdateBoard(int boardId, UpdateBoardDto dto);
     Task<bool> DeleteBoard(int boardId);
+    Task<BoardResponse> GetBoardByIdToAccess(int boardId);
 }

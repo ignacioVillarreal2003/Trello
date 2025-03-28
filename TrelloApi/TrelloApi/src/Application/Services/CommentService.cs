@@ -128,4 +128,19 @@ public class CommentService: BaseService, ICommentService
             throw;
         }
     }
+    
+    public async Task<CommentResponse> GetCommentByIdToAccess(int commentId)
+    {
+        try
+        {
+            Comment comment = await _commentRepository.GetCommentByIdToAccessAsync(commentId);
+            _logger.LogInformation("Comment {CommentId} access success", commentId);
+            return _mapper.Map<CommentResponse>(comment);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Access error for comment {CommentId}", commentId);
+            throw;
+        }
+    }
 }

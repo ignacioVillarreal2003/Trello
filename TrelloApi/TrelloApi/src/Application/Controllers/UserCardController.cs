@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Domain.DTOs.Card;
 using TrelloApi.Domain.DTOs.User;
 using TrelloApi.Domain.DTOs.UserCard;
 
@@ -18,12 +19,16 @@ public class UserCardController: BaseController
     private readonly ILogger<UserCardController> _logger;
     private readonly IUserCardService _userCardService;
     private readonly IHubContext<BoardHub> _hubContext;
-
-    public UserCardController(ILogger<UserCardController> logger, IUserCardService userCardService, IHubContext<BoardHub> hubContext)
+    private readonly ICardService _cardService;
+    private readonly IAuthorizationService _authorizationService;
+    
+    public UserCardController(ILogger<UserCardController> logger, IUserCardService userCardService, ICardService cardService, IHubContext<BoardHub> hubContext, IAuthorizationService authorizationService)
     {
         _logger = logger;
         _userCardService = userCardService;
         _hubContext = hubContext;
+        _cardService = cardService;
+        _authorizationService = authorizationService;
     }
 
     [HttpGet("{cardId:int}")]
@@ -31,6 +36,19 @@ public class UserCardController: BaseController
     {
         try
         {
+            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
+            if (cardToAccess == null)
+            {
+                _logger.LogDebug("Card {CardId} not found for got.", cardId);
+                return NotFound(new { message = "Card not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             List<UserResponse> users = await _userCardService.GetUsersByCardId(cardId);
             _logger.LogDebug("Retrieved {Count} users for card {CardId}", users.Count, cardId);
             return Ok(users);
@@ -47,6 +65,19 @@ public class UserCardController: BaseController
     {
         try
         {
+            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
+            if (cardToAccess == null)
+            {
+                _logger.LogDebug("Card {CardId} not found for got.", cardId);
+                return NotFound(new { message = "Card not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             UserCardResponse userCard = await _userCardService.AddUserToCard(cardId, dto);
             
             await _hubContext.Clients.Group(BoardId.ToString())
@@ -67,6 +98,19 @@ public class UserCardController: BaseController
     {
         try
         {
+            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
+            if (cardToAccess == null)
+            {
+                _logger.LogDebug("Card {CardId} not found for got.", cardId);
+                return NotFound(new { message = "Card not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             Boolean isDeleted = await _userCardService.RemoveUserFromCard(userId, cardId);
             if (!isDeleted)
             {

@@ -8,4 +8,5 @@ public interface ICardLabelService
     Task<List<LabelResponse>> GetLabelsByCardId(int cardId);
     Task<CardLabelResponse> AddLabelToCard(int cardId, AddCardLabelDto dto);
     Task<bool> RemoveLabelFromCard(int cardId, int labelId);
+    Task<CardLabelResponse> GetCardLabelByIdToAccess(int cardId, int labelId);
 }

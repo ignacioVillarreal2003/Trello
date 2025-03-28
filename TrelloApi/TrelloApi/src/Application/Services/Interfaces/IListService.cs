@@ -9,4 +9,5 @@ public interface IListService
     Task<ListResponse> AddList(int boardId, AddListDto dto);
     Task<ListResponse?> UpdateList(int listId, UpdateListDto dto);
     Task<Boolean> DeleteList(int listId);
+    Task<ListResponse> GetListByIdToAccess(int listId);
 }

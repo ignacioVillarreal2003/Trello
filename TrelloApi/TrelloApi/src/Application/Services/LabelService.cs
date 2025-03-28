@@ -133,4 +133,19 @@ public class LabelService: BaseService, ILabelService
             throw;
         }
     }
+    
+    public async Task<LabelResponse> GetLabelByIdToAccess(int labelId)
+    {
+        try
+        {
+            Label label = await _labelRepository.GetLabelByIdToAccessAsync(labelId);
+            _logger.LogInformation("Label {LabelId} access success", labelId);
+            return _mapper.Map<LabelResponse>(label);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Access error for label {LabelId}", labelId);
+            throw;
+        }
+    }
 }

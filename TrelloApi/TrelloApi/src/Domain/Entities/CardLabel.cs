@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace TrelloApi.Domain.Entities;
 
 [Table("CardLabel")]
-public class CardLabel
+public class CardLabel: Entity
 {
     [ForeignKey("Card")]
     public int CardId { get; set; }
@@ -17,5 +17,7 @@ public class CardLabel
     {
         CardId = cardId;
         LabelId = labelId;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = null;
     }
 }

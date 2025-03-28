@@ -4,5 +4,5 @@ namespace TrelloApi.Infrastructure.Persistence.Interfaces;
 
 public interface ILabelRepository: IGenericRepository<Label>
 {
-    
+    Task<Label> GetLabelByIdToAccessAsync(int labelId);
 }

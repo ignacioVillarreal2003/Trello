@@ -5,4 +5,5 @@ namespace TrelloApi.Infrastructure.Persistence.Interfaces;
 public interface IBoardRepository: IGenericRepository<Board>
 {
     Task<IEnumerable<Board>> GetBoardsByUserIdAsync(int userId);
+    Task<Board> GetBoardByIdToAccessAsync(int boardId);
 }

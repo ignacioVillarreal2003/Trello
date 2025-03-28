@@ -12,12 +12,6 @@ public class Card: Entity
     [StringLength(256), Required]
     public string Description { get; set; }
     
-    [DataType(DataType.DateTime)]
-    public DateTime? DueDate { get; set; }
-    
-    [StringLength(16)]
-    public string? Priority { get; set; }
-    
     public bool IsCompleted { get; set; }
     
     public int Position { get; set; }
@@ -30,13 +24,11 @@ public class Card: Entity
     
     public ICollection<CardLabel> CardLabels { get; set; }
     
-    public Card(string title, string description, int listId, string? priority, int position)
+    public Card(string title, string description, int listId, int position)
     {
         Title = title;
         Description = description;
         ListId = listId;
-        Priority = priority;
-        DueDate = null;
         IsCompleted = false;
         CreatedAt = DateTime.UtcNow;
         UpdatedAt = null;

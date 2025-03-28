@@ -1,7 +1,5 @@
 using AutoMapper;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.Constants;
-using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.DTOs.User;
 using TrelloApi.Domain.DTOs.UserBoard;
 using TrelloApi.Domain.Entities;
@@ -43,7 +41,7 @@ public class UserBoardService: BaseService, IUserBoardService
     {
         try
         {
-            UserBoard newUserBoard = new UserBoard(dto.UserId, boardId, dto.Role);
+            UserBoard newUserBoard = new UserBoard(dto.UserId, boardId);
             await _userBoardRepository.CreateAsync(newUserBoard);
             await _unitOfWork.CommitAsync();
 
@@ -80,6 +78,21 @@ public class UserBoardService: BaseService, IUserBoardService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting user {UserId} for board {BoardId}", userId, boardId);
+            throw;
+        }
+    }
+    
+    public async Task<UserBoardResponse> GetUserBoardByIdToAccess(int userId, int boardId)
+    {
+        try
+        {
+            UserBoard userBoard = await _userBoardRepository.GetUserBoardByIdToAccessAsync(userId, boardId);
+            _logger.LogInformation("User {UserId} to board {BoardId} access success", userId, boardId);
+            return _mapper.Map<UserBoardResponse>(userBoard);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Access error for user {UserId} board {BoardId}", userId, boardId);
             throw;
         }
     }

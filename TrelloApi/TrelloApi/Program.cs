@@ -11,6 +11,7 @@ using TrelloApi.Application.Filters;
 using TrelloApi.Application.Hub;
 using TrelloApi.Application.Mappings;
 using TrelloApi.Application.Middlewares;
+using TrelloApi.Application.Utils;
 using TrelloApi.Infrastructure.Persistence.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +29,11 @@ builder.Services.AddCors(options =>
 });
 
 // Autenticación y Autorización
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("BoardAccessPolicy", policy =>
+        policy.Requirements.Add(new BoardAccessRequirement()));
+});
 builder.Services.AddAuthentication("Bearer").AddJwtBearer(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters

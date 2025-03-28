@@ -28,4 +28,11 @@ public class UserCardRepository: GenericRepository<UserCard>, IUserCardRepositor
             .Include(uc => uc.Card)
             .FirstOrDefaultAsync(uc => uc.UserId.Equals(userId) && uc.CardId.Equals(cardId));
     }
+
+    public async Task<UserCard> GetUserCardByIdToAccessAsync(int userId, int cardId)
+    {
+        return await Context.UserCards
+            .Include(uc => uc.Card.List.Board)
+            .FirstOrDefaultAsync(uc => uc.UserId.Equals(userId) && uc.CardId.Equals(cardId));
+    }
 }

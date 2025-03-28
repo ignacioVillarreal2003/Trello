@@ -44,6 +44,7 @@ public class User: Entity
         AvatarBackground = avatarBackground;
         Theme = theme;
         CreatedAt = DateTime.UtcNow;
+        UpdatedAt = null;
         LastLogin = DateTime.UtcNow;
         RefreshToken = null;
         RefreshTokenExpiryTime = null;

@@ -29,7 +29,7 @@ public class BoardService: BaseService, IBoardService
     {
         try
         {
-            Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId) && b.IsArchived.Equals(false));
+            Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId));
             if (board == null)
             {
                 _logger.LogWarning("Board {BoardId} not found", boardId);
@@ -65,12 +65,12 @@ public class BoardService: BaseService, IBoardService
     {
         try
         {
-            Board board = new Board(dto.Title, dto.Background, dto.Description);
+            Board board = new Board(dto.Title, dto.Background);
             
             await _boardRepository.CreateAsync(board);
             await _unitOfWork.CommitAsync();
 
-            var userBoard = new UserBoard(userId, board.Id, RoleValues.RolesAllowed[0]);
+            var userBoard = new UserBoard(userId, board.Id);
             await _userBoardRepository.CreateAsync(userBoard);
 
             await _unitOfWork.CommitAsync();
@@ -88,7 +88,7 @@ public class BoardService: BaseService, IBoardService
     {
         try
         {
-            Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId) && b.IsArchived.Equals(false));
+            Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId));
             if (board == null)
             {
                 _logger.LogWarning("Board {BoardId} not found for update", boardId);
@@ -103,16 +103,7 @@ public class BoardService: BaseService, IBoardService
             {
                 board.Background = dto.Background;
             }
-            if (!string.IsNullOrEmpty(dto.Description))
-            {
-                board.Description = dto.Description;
-            }
-            if (dto.IsArchived != null)
-            {
-                board.IsArchived = dto.IsArchived.Value;
-                board.ArchivedAt = DateTime.UtcNow;
-            }
-
+            
             await _boardRepository.UpdateAsync(board);
             await _unitOfWork.CommitAsync();
 
@@ -130,7 +121,7 @@ public class BoardService: BaseService, IBoardService
     {
         try
         {
-            Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId) && b.IsArchived.Equals(false));
+            Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId));
             if (board == null)
             {
                 _logger.LogWarning("Board {BoardId} not found for deletion", boardId);
@@ -146,6 +137,21 @@ public class BoardService: BaseService, IBoardService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting board {BoardId}", boardId);
+            throw;
+        }
+    }
+    
+    public async Task<BoardResponse> GetBoardByIdToAccess(int boardId)
+    {
+        try
+        {
+            Board board = await _boardRepository.GetBoardByIdToAccessAsync(boardId);
+            _logger.LogInformation("Board {BoardId} access success", boardId);
+            return _mapper.Map<BoardResponse>(board);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Access error for board {BoardId}", boardId);
             throw;
         }
     }

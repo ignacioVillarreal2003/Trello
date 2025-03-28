@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using TrelloApi.Application.Services;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Application.Utils;
@@ -19,6 +20,7 @@ public static class ConfigureServices
         services.AddScoped<IUserCardService, UserCardService>();
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IEncrypt, Encrypt>();
+        services.AddScoped<IAuthorizationHandler, BoardAccessHandler>();
         return services;
     }
 }

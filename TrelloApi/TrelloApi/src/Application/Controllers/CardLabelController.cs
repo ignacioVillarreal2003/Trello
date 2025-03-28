@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs;
+using TrelloApi.Domain.DTOs.Card;
 using TrelloApi.Domain.DTOs.CardLabel;
 using TrelloApi.Domain.DTOs.Label;
 
@@ -18,13 +19,17 @@ public class CardLabelController: BaseController
 {
     private readonly ILogger<CardLabelController> _logger;
     private readonly ICardLabelService _cardLabelService;
+    private readonly ICardService _cardService;
     private readonly IHubContext<BoardHub> _hubContext;
+    private readonly IAuthorizationService _authorizationService;
 
-    public CardLabelController(ILogger<CardLabelController> logger, ICardLabelService cardLabelService, IHubContext<BoardHub> hubContext)
+    public CardLabelController(ILogger<CardLabelController> logger, ICardLabelService cardLabelService, ICardService cardService, IHubContext<BoardHub> hubContext, IAuthorizationService authorizationService)
     {
         _logger = logger;
         _cardLabelService = cardLabelService;
         _hubContext = hubContext;
+        _cardService = cardService;
+        _authorizationService = authorizationService;
     }
 
     [HttpGet("card/{cardId:int}")]
@@ -32,6 +37,19 @@ public class CardLabelController: BaseController
     {
         try
         {
+            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
+            if (cardToAccess == null)
+            {
+                _logger.LogDebug("Card {CardId} not found for got.", cardId);
+                return NotFound(new { message = "Card not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             List<LabelResponse> labels = await _cardLabelService.GetLabelsByCardId(cardId);
             _logger.LogDebug("Retrieved {Count} labels for card {CardId}", labels.Count, cardId);
             return Ok(labels);
@@ -48,6 +66,19 @@ public class CardLabelController: BaseController
     {
         try
         {
+            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
+            if (cardToAccess == null)
+            {
+                _logger.LogDebug("Card {CardId} not found for got.", cardId);
+                return NotFound(new { message = "Card not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             CardLabelResponse cardLabel = await _cardLabelService.AddLabelToCard(cardId, dto);
             
             await _hubContext.Clients.Group(BoardId.ToString())
@@ -68,6 +99,19 @@ public class CardLabelController: BaseController
     {
         try
         {
+            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
+            if (cardToAccess == null)
+            {
+                _logger.LogDebug("Card {CardId} not found for got.", cardId);
+                return NotFound(new { message = "Card not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             bool isDeleted = await _cardLabelService.RemoveLabelFromCard(cardId, labelId);
             if (!isDeleted)
             {

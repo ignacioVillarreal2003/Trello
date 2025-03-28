@@ -1,11 +1,9 @@
-using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using TrelloApi.Domain.Constants;
 
 namespace TrelloApi.Domain.Entities;
     
 [Table("UserBoard")]
-public class UserBoard
+public class UserBoard: Entity
 {
     [ForeignKey("User")]
     public int UserId { get; set; }
@@ -14,14 +12,12 @@ public class UserBoard
     [ForeignKey("Board")]
     public int BoardId { get; set; }
     public Board Board { get; set; }
-    
-    [StringLength(32)]
-    public string Role { get; set; }
 
-    public UserBoard(int userId, int boardId, string role)
+    public UserBoard(int userId, int boardId)
     {
         UserId = userId;
         BoardId = boardId;
-        Role = role;
+        CreatedAt = DateTime.UtcNow;
+        UpdatedAt = null;
     }
 }

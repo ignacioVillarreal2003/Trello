@@ -82,4 +82,19 @@ public class UserCardService: BaseService, IUserCardService
             throw;
         }
     }
+    
+    public async Task<UserCardResponse> GetUserCardByIdToAccess(int userId, int cardId)
+    {
+        try
+        {
+            UserCard userCard = await _userCardRepository.GetUserCardByIdToAccessAsync(userId, cardId);
+            _logger.LogInformation("User {UserId} to card {CardId} access success", userId, cardId);
+            return _mapper.Map<UserCardResponse>(userCard);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Access error for user {UserId} card {CardId}", userId, cardId);
+            throw;
+        }
+    }
 }

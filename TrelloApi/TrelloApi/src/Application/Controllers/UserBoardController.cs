@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Domain.DTOs.Board;
 using TrelloApi.Domain.DTOs.User;
 using TrelloApi.Domain.DTOs.UserBoard;
 
@@ -18,12 +19,16 @@ public class UserBoardController: BaseController
     private readonly ILogger<UserBoardController> _logger;
     private readonly IUserBoardService _userBoardService;
     private readonly IHubContext<BoardHub> _hubContext;
-
-    public UserBoardController(ILogger<UserBoardController> logger, IUserBoardService userBoardService, IHubContext<BoardHub> hubContext)
+    private readonly IBoardService _boardService;
+    private readonly IAuthorizationService _authorizationService;
+    
+    public UserBoardController(ILogger<UserBoardController> logger, IUserBoardService userBoardService, IBoardService boardService, IHubContext<BoardHub> hubContext, IAuthorizationService authorizationService)
     {
         _logger = logger;
         _userBoardService = userBoardService;
         _hubContext = hubContext;
+        _boardService = boardService;
+        _authorizationService = authorizationService;
     }   
     
     [HttpGet("board/{boardId:int}")]
@@ -31,6 +36,19 @@ public class UserBoardController: BaseController
     {
         try
         {
+            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
+            if (boardToAccess == null)
+            {
+                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
+                return NotFound(new { message = "Board not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             List<UserResponse> users = await _userBoardService.GetUsersByBoardId(boardId);
             _logger.LogDebug("Retrieved {Count} users for board {BoardId}", users.Count, boardId);
             return Ok(users);
@@ -48,6 +66,19 @@ public class UserBoardController: BaseController
     {
         try
         {
+            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
+            if (boardToAccess == null)
+            {
+                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
+                return NotFound(new { message = "Board not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             UserBoardResponse userBoard = await _userBoardService.AddUserToBoard(boardId, dto);
             
             await _hubContext.Clients.Group(BoardId.ToString())
@@ -69,6 +100,19 @@ public class UserBoardController: BaseController
     {
         try
         {
+            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
+            if (boardToAccess == null)
+            {
+                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
+                return NotFound(new { message = "Board not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+
             Boolean isDeleted = await _userBoardService.RemoveUserFromBoard(boardId, userId);
             if (!isDeleted)
             {

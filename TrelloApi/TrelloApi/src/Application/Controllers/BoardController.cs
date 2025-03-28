@@ -18,12 +18,14 @@ public class BoardController : BaseController
     private readonly ILogger<BoardController> _logger;
     private readonly IBoardService _boardService;
     private readonly IHubContext<BoardHub> _hubContext;
+    private readonly IAuthorizationService _authorizationService;
     
-    public BoardController(ILogger<BoardController> logger, IBoardService boardService, IHubContext<BoardHub> hubContext)
+    public BoardController(ILogger<BoardController> logger, IBoardService boardService, IHubContext<BoardHub> hubContext, IAuthorizationService authorizationService)
     {
         _logger = logger;
         _boardService = boardService;
         _hubContext = hubContext;
+        _authorizationService = authorizationService;
     }
 
     [HttpGet("{boardId:int}")]
@@ -31,6 +33,19 @@ public class BoardController : BaseController
     {
         try
         {
+            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
+            if (boardToAccess == null)
+            {
+                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
+                return NotFound(new { message = "Board not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             BoardResponse? board = await _boardService.GetBoardById(boardId);
             if (board == null)
             {
@@ -101,6 +116,19 @@ public class BoardController : BaseController
     {
         try
         {
+            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
+            if (boardToAccess == null)
+            {
+                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
+                return NotFound(new { message = "Board not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             BoardResponse? board = await _boardService.UpdateBoard(boardId, dto);
             if (board == null)
             {
@@ -126,6 +154,19 @@ public class BoardController : BaseController
     {
         try
         {
+            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
+            if (boardToAccess == null)
+            {
+                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
+                return NotFound(new { message = "Board not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             bool isDeleted = await _boardService.DeleteBoard(boardId);
             if (!isDeleted)
             {

@@ -9,4 +9,5 @@ public interface ILabelService
     Task<LabelResponse> AddLabel(int boardId, AddLabelDto dto);
     Task<LabelResponse?> UpdateLabel(int labelId, UpdateLabelDto dto);
     Task<bool> DeleteLabel(int labelId);
+    Task<LabelResponse> GetLabelByIdToAccess(int labelId);
 }

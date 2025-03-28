@@ -9,4 +9,5 @@ public interface ICommentService
     Task<CommentResponse> AddComment(int taskId, AddCommentDto dto, int userId);
     Task<CommentResponse?> UpdateComment(int commentId, UpdateCommentDto dto);
     Task<Boolean> DeleteComment(int commentId);
+    Task<CommentResponse> GetCommentByIdToAccess(int commentId);
 }

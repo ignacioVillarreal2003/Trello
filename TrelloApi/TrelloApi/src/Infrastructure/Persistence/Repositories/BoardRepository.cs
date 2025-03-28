@@ -16,8 +16,13 @@ public class BoardRepository : GenericRepository<Board>, IBoardRepository
                 board => board.Id,
                 userBoard => userBoard.BoardId,
                 (board, userBoard) => new { board, userBoard })
-            .Where(ub => ub.userBoard.UserId == userId && ub.board.IsArchived == false)
+            .Where(ub => ub.userBoard.UserId == userId)
             .Select(ub => ub.board)
             .ToListAsync();
+    }
+
+    public async Task<Board> GetBoardByIdToAccessAsync(int boardId)
+    {
+        return await Context.Boards.FirstOrDefaultAsync(b=> b.Id.Equals(boardId));
     }
 }

@@ -134,4 +134,19 @@ public class ListService: BaseService, IListService
             throw;
         }
     }
+    
+    public async Task<ListResponse> GetListByIdToAccess(int listId)
+    {
+        try
+        {
+            List list = await _listRepository.GetListByIdToAccessAsync(listId);
+            _logger.LogInformation("List {ListId} access success", listId);
+            return _mapper.Map<ListResponse>(list);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Access error for list {ListId}", listId);
+            throw;
+        }
+    }
 }

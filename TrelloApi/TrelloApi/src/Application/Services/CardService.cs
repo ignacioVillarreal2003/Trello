@@ -64,7 +64,7 @@ public class CardService: BaseService, ICardService
     {
         try
         {
-            Card card = new Card(dto.Title, dto.Description, listId, dto.Priority, dto.Position);
+            Card card = new Card(dto.Title, dto.Description, listId, dto.Position);
             await _cardRepository.CreateAsync(card);
             await _unitOfWork.CommitAsync();
 
@@ -101,17 +101,9 @@ public class CardService: BaseService, ICardService
             {
                 card.ListId = dto.ListId.Value;
             }
-            if (dto.DueDate.HasValue)
-            {
-                card.DueDate = dto.DueDate;
-            }
             if (dto.IsCompleted.HasValue)
             {
                 card.IsCompleted = dto.IsCompleted.Value;
-            }
-            if (!string.IsNullOrEmpty(dto.Priority))
-            {
-                card.Priority = dto.Priority;
             }
             if (dto.Position != null)
             {
@@ -151,6 +143,21 @@ public class CardService: BaseService, ICardService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting card {CardId}", cardId);
+            throw;
+        }
+    }
+    
+    public async Task<CardResponse> GetCardByIdToAccess(int cardId)
+    {
+        try
+        {
+            Card card = await _cardRepository.GetCardByIdToAccessAsync(cardId);
+            _logger.LogInformation("Card {CardId} access success", cardId);
+            return _mapper.Map<CardResponse>(card);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Access error for card {CardId}", cardId);
             throw;
         }
     }

@@ -82,4 +82,19 @@ public class CardLabelService: BaseService, ICardLabelService
             throw;
         }
     }
+    
+    public async Task<CardLabelResponse> GetCardLabelByIdToAccess(int cardId, int labelId)
+    {
+        try
+        {
+            CardLabel cardLabel = await _cardLabelRepository.GetCardLabelByIdToAccessAsync(cardId, labelId);
+            _logger.LogInformation("Card {CardId} to label {LabelId} access success", cardId, labelId);
+            return _mapper.Map<CardLabelResponse>(cardLabel);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Access error for card {CardId} to label {LabelId}", cardId, labelId);
+            throw;
+        }
+    }
 }

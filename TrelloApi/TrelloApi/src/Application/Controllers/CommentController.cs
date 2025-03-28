@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
+using TrelloApi.Domain.DTOs.Card;
 using TrelloApi.Domain.DTOs.Comment;
 
 namespace TrelloApi.Application.Controllers;
@@ -17,12 +18,16 @@ public class CommentController: BaseController
     private readonly ILogger<CommentController> _logger;
     private readonly ICommentService _commentService;
     private readonly IHubContext<BoardHub> _hubContext;
+    private readonly IAuthorizationService _authorizationService;
+    private readonly ICardService _cardService;
 
-    public CommentController(ILogger<CommentController> logger, ICommentService commentService, IHubContext<BoardHub> hubContext)
+    public CommentController(ILogger<CommentController> logger, ICommentService commentService, ICardService cardService, IHubContext<BoardHub> hubContext, IAuthorizationService authorizationService)
     {
         _logger = logger;
         _commentService = commentService;
         _hubContext = hubContext;
+        _authorizationService = authorizationService;
+        _cardService = cardService;
     }
 
     [HttpGet("{commentId:int}")]
@@ -30,6 +35,19 @@ public class CommentController: BaseController
     {
         try
         {
+            CommentResponse? commentToAccess = await _commentService.GetCommentByIdToAccess(commentId);
+            if (commentToAccess == null)
+            {
+                _logger.LogDebug("Comment {CommentId} not found for got.", commentId);
+                return NotFound(new { message = "Comment not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, commentToAccess.Card.List.BoardId, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             CommentResponse? comment = await _commentService.GetCommentById(commentId);
             if (comment == null)
             {
@@ -52,6 +70,19 @@ public class CommentController: BaseController
     {
         try
         {
+            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
+            if (cardToAccess == null)
+            {
+                _logger.LogDebug("Card {CardId} not found for got.", cardId);
+                return NotFound(new { message = "Card not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             List<CommentResponse> comments = await _commentService.GetCommentsByCardId(cardId);
             _logger.LogDebug("Retrieved {Count} comments for card {CardId}", comments.Count, cardId);
             return Ok(comments);
@@ -68,6 +99,19 @@ public class CommentController: BaseController
     {
         try
         {
+            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
+            if (cardToAccess == null)
+            {
+                _logger.LogDebug("Card {CardId} not found for got.", cardId);
+                return NotFound(new { message = "Card not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             CommentResponse comment = await _commentService.AddComment(cardId, dto, UserId);
             
             await _hubContext.Clients.Group(BoardId.ToString())
@@ -88,6 +132,19 @@ public class CommentController: BaseController
     {
         try
         {
+            CommentResponse? commentToAccess = await _commentService.GetCommentByIdToAccess(commentId);
+            if (commentToAccess == null)
+            {
+                _logger.LogDebug("Comment {CommentId} not found for got.", commentId);
+                return NotFound(new { message = "Comment not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, commentToAccess.Card.List.BoardId, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             CommentResponse? comment = await _commentService.UpdateComment(commentId, dto);
             if (comment == null)
             {
@@ -113,6 +170,19 @@ public class CommentController: BaseController
     {
         try
         {
+            CommentResponse? commentToAccess = await _commentService.GetCommentByIdToAccess(commentId);
+            if (commentToAccess == null)
+            {
+                _logger.LogDebug("Comment {CommentId} not found for got.", commentId);
+                return NotFound(new { message = "Comment not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, commentToAccess.Card.List.BoardId, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             Boolean isDeleted = await _commentService.DeleteComment(commentId);
             if (!isDeleted)
             {

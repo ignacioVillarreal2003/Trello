@@ -28,4 +28,11 @@ public class CardLabelRepository: GenericRepository<CardLabel>, ICardLabelReposi
             .Include(cl => cl.Card)
             .FirstOrDefaultAsync(cl => cl.CardId.Equals(cardId) && cl.LabelId.Equals(labelId));
     }
+
+    public async Task<CardLabel> GetCardLabelByIdToAccessAsync(int cardId, int labelId)
+    {
+        return await Context.CardLabels
+            .Include(cl => cl.Card.List.Board)
+            .FirstOrDefaultAsync(cl => cl.CardId.Equals(cardId) && cl.LabelId.Equals(labelId));
+    }
 }

@@ -12,11 +12,6 @@ public class UpdateCardDtoValidator: AbstractValidator<UpdateCardDto>
 
         RuleFor(card => card.Description)
             .MaximumLength(256).WithMessage("The description should be of maximum 256 characters");
-
-        RuleFor(card => card.Priority)
-            .MaximumLength(32).WithMessage("The priority should be of maximum 32 characters")
-            .Must(priority => priority == null || PriorityValues.PrioritiesAllowed.Contains(priority))
-            .WithMessage($"The priority must bo one of : {string.Join(", ", PriorityValues.PrioritiesAllowed)}");
         
         RuleFor(card => card.Position)
             .GreaterThanOrEqualTo(0).WithMessage("The position must be 0 or greater");

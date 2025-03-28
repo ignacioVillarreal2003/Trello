@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.SignalR;
 using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.Constants;
+using TrelloApi.Domain.DTOs.Board;
 using TrelloApi.Domain.DTOs.Label;
 
 namespace TrelloApi.Application.Controllers;
@@ -18,12 +19,16 @@ public class LabelController : BaseController
     private readonly ILogger<LabelController> _logger;
     private readonly ILabelService _labelService;
     private readonly IHubContext<BoardHub> _hubContext;
+    private readonly IAuthorizationService _authorizationService;
+    private readonly IBoardService _boardService;
 
-    public LabelController(ILogger<LabelController> logger, ILabelService labelService, IHubContext<BoardHub> hubContext)
+    public LabelController(ILogger<LabelController> logger, ILabelService labelService, IBoardService boardService, IHubContext<BoardHub> hubContext, IAuthorizationService authorizationService)
     {
         _logger = logger;
         _labelService = labelService;
         _hubContext = hubContext;
+        _authorizationService = authorizationService;
+        _boardService = boardService;
     }
 
     [HttpGet("{labelId:int}")]
@@ -31,6 +36,19 @@ public class LabelController : BaseController
     {
         try
         {
+            LabelResponse? labelToAccess = await _labelService.GetLabelByIdToAccess(labelId);
+            if (labelToAccess == null)
+            {
+                _logger.LogDebug("Label {LabelId} not found for got.", labelId);
+                return NotFound(new { message = "Label not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, labelToAccess.Board.Id, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             LabelResponse? label = await _labelService.GetLabelById(labelId);
             if (label == null)
             {
@@ -53,6 +71,19 @@ public class LabelController : BaseController
     {
         try
         {
+            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
+            if (boardToAccess == null)
+            {
+                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
+                return NotFound(new { message = "Board not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             List<LabelResponse> labels = await _labelService.GetLabelsByBoardId(boardId);
             _logger.LogDebug("Retrieved {Count} labels for board {BoardId}", labels.Count, boardId);
             return Ok(labels);
@@ -85,6 +116,19 @@ public class LabelController : BaseController
     {
         try
         {
+            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
+            if (boardToAccess == null)
+            {
+                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
+                return NotFound(new { message = "Board not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             LabelResponse label = await _labelService.AddLabel(boardId, dto);
             
             await _hubContext.Clients.Group(BoardId.ToString())
@@ -105,6 +149,19 @@ public class LabelController : BaseController
     {
         try
         {
+            LabelResponse? labelToAccess = await _labelService.GetLabelByIdToAccess(labelId);
+            if (labelToAccess == null)
+            {
+                _logger.LogDebug("Label {LabelId} not found for got.", labelId);
+                return NotFound(new { message = "Label not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, labelToAccess.Board.Id, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             LabelResponse? label = await _labelService.UpdateLabel(labelId, dto);
             if (label == null)
             {
@@ -130,6 +187,19 @@ public class LabelController : BaseController
     {
         try
         {
+            LabelResponse? labelToAccess = await _labelService.GetLabelByIdToAccess(labelId);
+            if (labelToAccess == null)
+            {
+                _logger.LogDebug("Label {LabelId} not found for got.", labelId);
+                return NotFound(new { message = "Label not found." });
+            }
+        
+            var authResult = await _authorizationService.AuthorizeAsync(User, labelToAccess.Board.Id, "BoardAccessPolicy");
+            if (!authResult.Succeeded)
+            {
+                return Forbid();
+            }
+            
             Boolean isDeleted = await _labelService.DeleteLabel(labelId);
             if (!isDeleted)
             {
