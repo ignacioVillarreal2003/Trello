@@ -56,13 +56,6 @@ export class UserListComponent {
         });
       }
     });
-    this.userBoardCommunicationService.updateUserBoard$.subscribe((userBoard: UserBoard | null): void => {
-      if (userBoard !== null) {
-        this.users = this.users.map(u => u.id == userBoard.user.id ? {...userBoard.user,
-          isAssigned: u.isAssigned
-        } : u);
-      }
-    });
     this.userBoardCommunicationService.deleteUserBoard$.subscribe((value: { userId: number, boardId: number } | null): void => {
       if (value !== null) {
         this.users = this.users.filter(u => u.id != value.userId);

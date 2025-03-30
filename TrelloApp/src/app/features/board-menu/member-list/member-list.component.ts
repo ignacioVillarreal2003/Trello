@@ -31,8 +31,6 @@ export class MemberListComponent {
         this.usersFromBoard.push(userBoard.user);
       }
     });
-    this.userBoardCommunicationService.updateUserBoard$.subscribe((userBoard: UserBoard | null): void => {
-    });
     this.userBoardCommunicationService.deleteUserBoard$.subscribe((value: { userId: number, boardId: number } | null): void => {
       if (value !== null) {
         this.usersFromBoard = this.usersFromBoard.filter(u => u.id !== value.userId);

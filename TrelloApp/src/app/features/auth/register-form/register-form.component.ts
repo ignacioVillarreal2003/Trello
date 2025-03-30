@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import {BtnComponent} from "../../../shared/components/btn/btn.component";
 import {InputComponent} from "../../../shared/components/input/input.component";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {UserHttpService} from '../../../core/services/http/user-http.service';
 import {SessionService} from '../../../core/services/session/session.service';
 import {ThemeService} from '../../../core/services/theme.service';
@@ -19,6 +19,7 @@ import {RegisterUser, UserAuth} from '../../../core/models/user';
   styleUrl: './register-form.component.css'
 })
 export class RegisterFormComponent {
+  returnUrl: string | undefined = undefined;
 
   formRegister: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(64)]),
@@ -43,10 +44,19 @@ export class RegisterFormComponent {
     }
   };
 
-  constructor(private router: Router,
+  constructor(private route: ActivatedRoute,
+              private router: Router,
               private userHttpService: UserHttpService,
               private sessionService: SessionService,
               private themeService: ThemeService) {}
+
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['returnUrl']) {
+        this.returnUrl = params['returnUrl'];
+      }
+    });
+  }
 
   getErrorMessage(controlName: string): string {
     const control = this.formRegister.get(controlName);
@@ -83,7 +93,11 @@ export class RegisterFormComponent {
           avatarBackground: result.user.avatarBackground
         });
         this.themeService.applyTheme(result.user.theme);
-        this.router.navigate(['/dashboard']);
+        if (this.returnUrl != undefined) {
+          this.router.navigate([this.returnUrl]);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }
       }
     });
   }

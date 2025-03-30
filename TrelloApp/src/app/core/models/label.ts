@@ -1,4 +1,5 @@
-import {User} from './user';
+import {Board} from './board';
+import {CardLabel} from './card-label';
 
 export interface Label {
   id: number,
@@ -6,7 +7,9 @@ export interface Label {
   color: string,
   boardId: number,
   createdAt: string,
-  updatedAt: string
+  updatedAt?: string,
+  board: Board,
+  cardLabels: CardLabel[],
 }
 
 export interface LabelWithAssignment extends Label {

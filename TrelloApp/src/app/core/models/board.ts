@@ -1,24 +1,25 @@
+import {Label} from './label';
+import {UserBoard} from './user-board';
+import {List} from './list';
+
 export interface Board {
   id: number,
   title: string,
-  description: string,
   background: string,
   createdAt: string,
   updatedAt?: string,
-  isArchived: boolean,
-  archivedAt?: string
+  lists: List[],
+  userBoards: UserBoard[],
+  labels: Label[]
 }
 
 export interface AddBoard {
   title: string;
-  description?: string;
   background: string;
 }
 
 export interface UpdateBoard {
   title?: string;
-  description?: string;
   background?: string;
-  isArchived?: boolean,
 }
 

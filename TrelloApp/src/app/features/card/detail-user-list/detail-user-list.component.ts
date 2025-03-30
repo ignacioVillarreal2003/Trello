@@ -5,7 +5,6 @@ import {User} from '../../../core/models/user';
 import {Card} from '../../../core/models/card';
 import {UserCardHttpService} from '../../../core/services/http/user-card-http.service';
 import {UserCardCommunicationService} from '../../../core/services/communication/user-card-communication.service';
-import {CardLabel} from '../../../core/models/card-label';
 import {UserCard} from '../../../core/models/user-card';
 
 @Component({

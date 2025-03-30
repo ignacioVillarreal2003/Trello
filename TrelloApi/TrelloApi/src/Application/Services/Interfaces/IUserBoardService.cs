@@ -8,5 +8,4 @@ public interface IUserBoardService
     Task<List<UserResponse>> GetUsersByBoardId(int boardId);
     Task<UserBoardResponse> AddUserToBoard(int boardId, AddUserBoardDto dto);
     Task<Boolean> RemoveUserFromBoard(int boardId, int userId);
-    Task<UserBoardResponse> GetUserBoardByIdToAccess(int userId, int boardId);
 }

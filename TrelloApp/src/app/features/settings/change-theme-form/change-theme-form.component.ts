@@ -1,15 +1,15 @@
 import { Component } from '@angular/core';
-import {BtnThemeComponent} from "../../../shared/components/btn-theme/btn-theme.component";
 import {UserHttpService} from '../../../core/services/http/user-http.service';
 import {SessionService} from '../../../core/services/session/session.service';
 import {UpdateUser, User} from '../../../core/models/user';
 import {UserCommunicationService} from '../../../core/services/communication/user-communication.service';
+import {NgIf} from '@angular/common';
 
 @Component({
   selector: 'app-change-theme-form',
-    imports: [
-        BtnThemeComponent
-    ],
+  imports: [
+    NgIf
+  ],
   templateUrl: './change-theme-form.component.html',
   styleUrl: './change-theme-form.component.css'
 })

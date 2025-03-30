@@ -1,9 +1,12 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs.User;
 using TrelloApi.Domain.DTOs.UserBoard;
@@ -15,12 +18,19 @@ namespace TrelloApi.Tests.Controllers
         private readonly Mock<IUserBoardService> _mockUserBoardService;
         private readonly Mock<ILogger<UserBoardController>> _mockLogger;
         private readonly UserBoardController _controller;
-
+        private readonly Mock<IBoardService> _mockBoardService;
+        private readonly Mock<IHubContext<BoardHub>> _mockHubContext;
+        private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+        
         public UserBoardControllerTests()
         {
             _mockUserBoardService = new Mock<IUserBoardService>();
             _mockLogger = new Mock<ILogger<UserBoardController>>();
-            _controller = new UserBoardController(_mockLogger.Object, _mockUserBoardService.Object);
+            _mockBoardService = new Mock<IBoardService>();
+            _mockHubContext = new Mock<IHubContext<BoardHub>>();
+            _mockAuthorizationService = new Mock<IAuthorizationService>();
+            
+            _controller = new UserBoardController(_mockLogger.Object, _mockUserBoardService.Object, _mockBoardService.Object, _mockHubContext.Object, _mockAuthorizationService.Object);
             SetUserId(1);
         }
         
@@ -76,8 +86,8 @@ namespace TrelloApi.Tests.Controllers
         public async Task AddUserToBoard_ShouldReturnsCreated_WhenAddedSuccessful()
         {
             const int boardId = 1;
-            var dto = new AddUserBoardDto { UserId = 1, Role = "role" };
-            var response = new UserBoardResponse { UserId = dto.UserId, BoardId = boardId, Role = dto.Role };
+            var dto = new AddUserBoardDto { UserId = 1 };
+            var response = new UserBoardResponse { UserId = dto.UserId, BoardId = boardId };
 
             _mockUserBoardService.Setup(s => s.AddUserToBoard(boardId, dto)).ReturnsAsync(response);
 
@@ -91,7 +101,7 @@ namespace TrelloApi.Tests.Controllers
         public async Task AddUserToBoard_ShouldReturnsBadRequest_WhenAddedUnsuccessful()
         {
             const int boardId = 1;
-            var dto = new AddUserBoardDto { UserId = 1, Role = "role" };
+            var dto = new AddUserBoardDto { UserId = 1 };
 
             _mockUserBoardService.Setup(s => s.AddUserToBoard(boardId, dto)).ReturnsAsync((UserBoardResponse?)null);
 

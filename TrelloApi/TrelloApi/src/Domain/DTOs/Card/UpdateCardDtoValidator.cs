@@ -15,5 +15,8 @@ public class UpdateCardDtoValidator: AbstractValidator<UpdateCardDto>
         
         RuleFor(card => card.Position)
             .GreaterThanOrEqualTo(0).WithMessage("The position must be 0 or greater");
+        
+        RuleFor(card => card.ListId)
+            .GreaterThanOrEqualTo(0).WithMessage("The list id must be 0 or greater");
     }
 }

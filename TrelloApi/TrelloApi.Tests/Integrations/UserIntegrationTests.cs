@@ -111,7 +111,7 @@ public class UserIntegrationTests : IClassFixture<CustomWebApplicationFactory<Pr
         const int cardId = 1;
         var user1 = new User("user1@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
         var user2 = new User("user2@email.com", "username", "password", "avatar background", "theme") { Id = 2 };
-        var card = new Card("title", "description", 1, null, 1) {Id = cardId};
+        var card = new Card("title", "description", 1, 1) {Id = cardId};
         var userCard1 = new UserCard(user1.Id, card.Id);
         var userCard2 = new UserCard(user2.Id, card.Id);
 

@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import {NgIf} from "@angular/common";
 import {ReactiveFormsModule} from "@angular/forms";
-import {RouterLink, RouterOutlet} from '@angular/router';
+import {ActivatedRoute, RouterLink, RouterOutlet} from '@angular/router';
 
 @Component({
   selector: 'app-auth-page',

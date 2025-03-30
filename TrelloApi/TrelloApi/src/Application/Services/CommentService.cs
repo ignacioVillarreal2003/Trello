@@ -1,6 +1,5 @@
 using AutoMapper;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.DTOs.Comment;
 using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Persistence.Interfaces;
@@ -24,123 +23,75 @@ public class CommentService: BaseService, ICommentService
     
     public async Task<CommentResponse?> GetCommentById(int commentId)
     {
-        try
+        Comment? comment = await _commentRepository.GetAsync(c => c.Id.Equals(commentId));
+        if (comment == null)
         {
-            Comment? comment = await _commentRepository.GetAsync(c => c.Id.Equals(commentId));
-            if (comment == null)
-            {
-                _logger.LogWarning("Comment {CommentId} not found", commentId);
-                return null;
-            }
+            _logger.LogWarning("Comment {CommentId} not found", commentId);
+            return null;
+        }
 
-            _logger.LogDebug("Comment {CommentId} retrieved", commentId);
-            return _mapper.Map<CommentResponse>(comment);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving comment {CommentId}", commentId);
-            throw;
-        }
+        _logger.LogDebug("Comment {CommentId} retrieved", commentId);
+        return _mapper.Map<CommentResponse>(comment);
     }
     
     public async Task<List<CommentResponse>> GetCommentsByCardId(int cardId)
     {
-        try
-        {
-            List<Comment> comments = (await _commentRepository.GetListAsync(c => c.CardId.Equals(cardId))).ToList();
-            _logger.LogDebug("Retrieved {Count} comments for card {CardId}", comments.Count, cardId);
-            return _mapper.Map<List<CommentResponse>>(comments);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving comments for card {CardId}", cardId);
-            throw;
-        }
+        List<Comment> comments = (await _commentRepository.GetListAsync(c => c.CardId.Equals(cardId))).ToList();
+        _logger.LogDebug("Retrieved {Count} comments for card {CardId}", comments.Count, cardId);
+        return _mapper.Map<List<CommentResponse>>(comments);
     }
 
     public async Task<CommentResponse> AddComment(int cardId, AddCommentDto dto, int userId)
     {
-        try
-        {
-            Comment comment = new Comment(dto.Text, cardId, userId);
-            await _commentRepository.CreateAsync(comment);
-            await _unitOfWork.CommitAsync();
+        Comment comment = new Comment(dto.Text, cardId, userId);
+        await _commentRepository.CreateAsync(comment);
+        await _unitOfWork.CommitAsync();
 
-            _logger.LogInformation("Comment added to card {CardId}", cardId);
-            return _mapper.Map<CommentResponse>(comment);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding comment to card {CardId}", cardId);
-            throw;
-        }
+        _logger.LogInformation("Comment added to card {CardId}", cardId);
+        return _mapper.Map<CommentResponse>(comment);
     }
 
     public async Task<CommentResponse?> UpdateComment(int commentId, UpdateCommentDto dto)
     {
-        try
+        Comment? comment = await _commentRepository.GetAsync(c => c.Id.Equals(commentId));
+        if (comment == null)
         {
-            Comment? comment = await _commentRepository.GetAsync(c => c.Id.Equals(commentId));
-            if (comment == null)
-            {
-                _logger.LogWarning("Comment {CommentId} not found for update", commentId);
-                return null;
-            }
-
-            if (!string.IsNullOrEmpty(dto.Text))
-            {
-                comment.Text = dto.Text;
-            }
-
-            await _commentRepository.UpdateAsync(comment);
-            await _unitOfWork.CommitAsync();
-
-            _logger.LogInformation("Comment {CommentId} updated", commentId);
-            return _mapper.Map<CommentResponse>(comment);
+            _logger.LogWarning("Comment {CommentId} not found for update", commentId);
+            return null;
         }
-        catch (Exception ex)
+
+        if (!string.IsNullOrEmpty(dto.Text))
         {
-            _logger.LogError(ex, "Error updating comment {CommentId}", commentId);
-            throw;
+            comment.Text = dto.Text;
         }
+
+        await _commentRepository.UpdateAsync(comment);
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("Comment {CommentId} updated", commentId);
+        return _mapper.Map<CommentResponse>(comment);
     }
 
     public async Task<Boolean> DeleteComment(int commentId)
     {
-        try
+        Comment? comment = await _commentRepository.GetAsync(c => c.Id.Equals(commentId));
+        if (comment == null)
         {
-            Comment? comment = await _commentRepository.GetAsync(c => c.Id.Equals(commentId));
-            if (comment == null)
-            {
-                _logger.LogWarning("Comment {CommentId} not found for deletion", commentId);
-                return false;
-            }
-
-            await _commentRepository.DeleteAsync(comment);
-            await _unitOfWork.CommitAsync();
-
-            _logger.LogInformation("Comment {CommentId} deleted", commentId);
-            return true;
+            _logger.LogWarning("Comment {CommentId} not found for deletion", commentId);
+            return false;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting comment {CommentId}", commentId);
-            throw;
-        }
+
+        await _commentRepository.DeleteAsync(comment);
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("Comment {CommentId} deleted", commentId);
+        return true;
     }
     
     public async Task<CommentResponse> GetCommentByIdToAccess(int commentId)
     {
-        try
-        {
-            Comment comment = await _commentRepository.GetCommentByIdToAccessAsync(commentId);
-            _logger.LogInformation("Comment {CommentId} access success", commentId);
-            return _mapper.Map<CommentResponse>(comment);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Access error for comment {CommentId}", commentId);
-            throw;
-        }
+        Comment comment = await _commentRepository.GetCommentByIdToAccessAsync(commentId);
+        _logger.LogInformation("Comment {CommentId} access success", commentId);
+        return _mapper.Map<CommentResponse>(comment);
     }
 }

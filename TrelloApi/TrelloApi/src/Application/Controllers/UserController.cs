@@ -27,88 +27,48 @@ public class UserController : BaseController
     [Authorize]
     public async Task<IActionResult> GetUsers()
     {
-        try
-        {
-            List<UserResponse> users = await _userService.GetUsers();
-            _logger.LogDebug("Retrieved {Count} users.", users.Count);
-            return Ok(users);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving users.");
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+        List<UserResponse> users = await _userService.GetUsers();
+        _logger.LogDebug("Retrieved {Count} users.", users.Count);
+        return Ok(users);
     }
 
     [HttpGet("username/{username}")]
     [Authorize]
     public async Task<IActionResult> GetUsersByUsername(string username)
     {
-        try
-        {
-            List<UserResponse> users = await _userService.GetUsersByUsername(username);
-            _logger.LogDebug("Retrieved {Count} users for username {Username}", users.Count, username);
-            return Ok(users);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving users for username {Username}", username);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+        List<UserResponse> users = await _userService.GetUsersByUsername(username);
+        _logger.LogDebug("Retrieved {Count} users for username {Username}", users.Count, username);
+        return Ok(users);
     }
     
     [HttpGet("card/{cardId:int}")]
     [Authorize]
     public async Task<IActionResult> GetUsersByCardId(int cardId)
     {
-        try
-        {
-            List<UserResponse> users = await _userService.GetUsersByCardId(cardId);
-            _logger.LogDebug("Retrieved {Count} users.", users.Count);
-            return Ok(users);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving users.");
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+        List<UserResponse> users = await _userService.GetUsersByCardId(cardId);
+        _logger.LogDebug("Retrieved {Count} users.", users.Count);
+        return Ok(users);
     }
     
     [HttpGet("avatar-backgrounds")]
     public Task<IActionResult> GetAvatarBackgrounds()
     {
-        try
-        {
-            List<string> avatarBackgroundsAllowed = AvatarBackgroundValues.AvatarBackgroundsAllowed;
-            _logger.LogDebug("Retrieved {Count} avatar backgrounds for board", avatarBackgroundsAllowed.Count);
-            return Task.FromResult<IActionResult>(Ok(avatarBackgroundsAllowed));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving backgrounds for avatar");
-            return Task.FromResult<IActionResult>(StatusCode(500, new { message = "An unexpected error occurred." }));
-        }
+        List<string> avatarBackgroundsAllowed = AvatarBackgroundValues.AvatarBackgroundsAllowed;
+        _logger.LogDebug("Retrieved {Count} avatar backgrounds for board", avatarBackgroundsAllowed.Count);
+        return Task.FromResult<IActionResult>(Ok(avatarBackgroundsAllowed));
     }
     
     [HttpPost("register")]
     public async Task<IActionResult> RegisterUser([FromBody] RegisterUserDto registerUserDto)
     {
-        try
-        {
-            UserResponse user = await _userService.RegisterUser(registerUserDto);
+        UserResponse user = await _userService.RegisterUser(registerUserDto);
             
-            string accessToken = _jwtService.GenerateAccessToken(user.Id);
-            string refreshToken = _jwtService.GenerateRefreshToken();
-            await _jwtService.SaveRefreshToken(user.Id, refreshToken);
+        string accessToken = _jwtService.GenerateAccessToken(user.Id);
+        string refreshToken = _jwtService.GenerateRefreshToken();
+        await _jwtService.SaveRefreshToken(user.Id, refreshToken);
             
-            _logger.LogInformation("User {UserId} register", user.Id);
-            return CreatedAtAction(nameof(GetUsersByUsername), new { username = user.Username }, new { accessToken, refreshToken, user });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error register user {Email}", registerUserDto.Email);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+        _logger.LogInformation("User {UserId} register", user.Id);
+        return CreatedAtAction(nameof(GetUsersByUsername), new { username = user.Username }, new { accessToken, refreshToken, user });
     }
 
     [HttpPost("login")]
@@ -129,17 +89,12 @@ public class UserController : BaseController
             await _jwtService.SaveRefreshToken(user.Id, refreshToken);
             
             _logger.LogInformation("User {UserId} login", user.Id);
-            return Ok (new { accessToken, refreshToken, user });
+            return Ok (new { accessToken, refreshToken, user }); 
         }
         catch (UnauthorizedAccessException ex)
         {
             _logger.LogWarning(ex, "Invalid user credentials for {Email}", loginUserDto.Email);
             return Unauthorized(new { message = "Invalid user credentials." });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error login user {Email}", loginUserDto.Email);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
         }
     }
     
@@ -175,10 +130,10 @@ public class UserController : BaseController
             _logger.LogInformation("User {UserId} updated", UserId);
             return Ok(user);
         }
-        catch (Exception ex)
+        catch (UnauthorizedAccessException ex)
         {
-            _logger.LogError(ex, "Error updating user {UserId}", UserId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
+            _logger.LogWarning(ex, "Invalid user credentials");
+            return Unauthorized(new { message = "Invalid user credentials." });
         }
     }
 
@@ -186,22 +141,14 @@ public class UserController : BaseController
     [Authorize]
     public async Task<IActionResult> DeleteUser()
     {
-        try
+        Boolean isDeleted = await _userService.DeleteUser(UserId);
+        if (!isDeleted)
         {
-            Boolean isDeleted = await _userService.DeleteUser(UserId);
-            if (!isDeleted)
-            {
-                _logger.LogDebug("User {UserId} not found for deletion", UserId);
-                return NotFound(new { message = "User not found." });
-            }
+            _logger.LogDebug("User {UserId} not found for deletion", UserId);
+            return NotFound(new { message = "User not found." });
+        }
 
-            _logger.LogInformation("User {UserId} deleted", UserId);
-            return NoContent();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting user {UserId}", UserId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+        _logger.LogInformation("User {UserId} deleted", UserId);
+        return NoContent();
     }
 }

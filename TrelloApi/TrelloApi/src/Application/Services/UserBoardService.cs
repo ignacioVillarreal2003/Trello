@@ -24,76 +24,37 @@ public class UserBoardService: BaseService, IUserBoardService
     
     public async Task<List<UserResponse>> GetUsersByBoardId(int boardId)
     {
-        try
-        {
-            List<User> users = (await _userBoardRepository.GetUsersByBoardIdAsync(boardId)).ToList();
-            _logger.LogDebug("Retrieved {Count} users for board {BoardId}", users.Count, boardId);
-            return _mapper.Map<List<UserResponse>>(users);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving users for board {BoardId}", boardId);
-            throw;
-        }
+        List<User> users = (await _userBoardRepository.GetUsersByBoardIdAsync(boardId)).ToList();
+        _logger.LogDebug("Retrieved {Count} users for board {BoardId}", users.Count, boardId);
+        return _mapper.Map<List<UserResponse>>(users);
     }
 
     public async Task<UserBoardResponse> AddUserToBoard(int boardId, AddUserBoardDto dto)
     {
-        try
-        {
-            UserBoard newUserBoard = new UserBoard(dto.UserId, boardId);
-            await _userBoardRepository.CreateAsync(newUserBoard);
-            await _unitOfWork.CommitAsync();
+        UserBoard newUserBoard = new UserBoard(dto.UserId, boardId);
+        await _userBoardRepository.CreateAsync(newUserBoard);
+        await _unitOfWork.CommitAsync();
 
-            var userBoard = await _userBoardRepository
-                .GetUserBoardByIdAsync(newUserBoard.UserId, newUserBoard.BoardId);
+        var userBoard = await _userBoardRepository
+            .GetUserBoardByIdAsync(newUserBoard.UserId, newUserBoard.BoardId);
             
-            _logger.LogInformation("User {UserId} added to board {BoardId}", dto.UserId, boardId);
-            return _mapper.Map<UserBoardResponse>(userBoard);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding user {UserId} to board {BoardId}", dto.UserId, boardId);
-            throw;
-        }
+        _logger.LogInformation("User {UserId} added to board {BoardId}", dto.UserId, boardId);
+        return _mapper.Map<UserBoardResponse>(userBoard);
     }
 
     public async Task<Boolean> RemoveUserFromBoard(int boardId, int userId)
     {
-        try
+        UserBoard? userBoard = await _userBoardRepository.GetAsync(ub => ub.UserId.Equals(userId) && ub.BoardId.Equals(boardId));
+        if (userBoard == null)
         {
-            UserBoard? userBoard = await _userBoardRepository.GetAsync(ub => ub.UserId.Equals(userId) && ub.BoardId.Equals(boardId));
-            if (userBoard == null)
-            {
-                _logger.LogWarning("User {UserId} for board {BoardId} not found for deletion", userId, boardId);
-                return false;
-            }
+            _logger.LogWarning("User {UserId} for board {BoardId} not found for deletion", userId, boardId);
+            return false;
+        }
 
-            await _userBoardRepository.DeleteAsync(userBoard);
-            await _unitOfWork.CommitAsync();
+        await _userBoardRepository.DeleteAsync(userBoard);
+        await _unitOfWork.CommitAsync();
 
-            _logger.LogInformation("User {UserId} for board {BoardId} deleted", userId, boardId);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting user {UserId} for board {BoardId}", userId, boardId);
-            throw;
-        }
-    }
-    
-    public async Task<UserBoardResponse> GetUserBoardByIdToAccess(int userId, int boardId)
-    {
-        try
-        {
-            UserBoard userBoard = await _userBoardRepository.GetUserBoardByIdToAccessAsync(userId, boardId);
-            _logger.LogInformation("User {UserId} to board {BoardId} access success", userId, boardId);
-            return _mapper.Map<UserBoardResponse>(userBoard);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Access error for user {UserId} board {BoardId}", userId, boardId);
-            throw;
-        }
+        _logger.LogInformation("User {UserId} for board {BoardId} deleted", userId, boardId);
+        return true;
     }
 }

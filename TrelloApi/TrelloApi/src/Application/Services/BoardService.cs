@@ -27,132 +27,97 @@ public class BoardService: BaseService, IBoardService
     
     public async Task<BoardResponse?> GetBoardById(int boardId)
     {
-        try
+        Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId));
+        if (board == null)
         {
-            Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId));
-            if (board == null)
-            {
-                _logger.LogWarning("Board {BoardId} not found", boardId);
-                return null;
-            }
+            _logger.LogWarning("Board {BoardId} not found", boardId);
+            return null;
+        }
 
-            _logger.LogDebug("Board {BoardId} retrieved", boardId);
-            return _mapper.Map<BoardResponse>(board);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving board {BoardId}", boardId);
-            throw;
-        }
+        _logger.LogDebug("Board {BoardId} retrieved", boardId);
+        return _mapper.Map<BoardResponse>(board);
     }
     
     public async Task<List<BoardResponse>> GetBoardsByUserId(int userId)
     {
-        try
-        {
-            List<Board> boards = (await _boardRepository.GetBoardsByUserIdAsync(userId)).ToList();
-            _logger.LogDebug("Retrieved {Count} boards for user {UserId}", boards.Count, userId);
-            return _mapper.Map<List<BoardResponse>>(boards);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving boards for user {UserId}", userId);
-            throw;
-        }
+        List<Board> boards = (await _boardRepository.GetBoardsByUserIdAsync(userId)).ToList();
+        _logger.LogDebug("Retrieved {Count} boards for user {UserId}", boards.Count, userId);
+        return _mapper.Map<List<BoardResponse>>(boards);
     }
 
     public async Task<BoardResponse> AddBoard(AddBoardDto dto, int userId)
     {
-        try
-        {
-            Board board = new Board(dto.Title, dto.Background);
+        Board board = new Board(dto.Title, dto.Background);
             
-            await _boardRepository.CreateAsync(board);
-            await _unitOfWork.CommitAsync();
+        await _boardRepository.CreateAsync(board);
+        await _unitOfWork.CommitAsync();
 
-            var userBoard = new UserBoard(userId, board.Id);
-            await _userBoardRepository.CreateAsync(userBoard);
+        var userBoard = new UserBoard(userId, board.Id);
+        await _userBoardRepository.CreateAsync(userBoard);
 
-            await _unitOfWork.CommitAsync();
-            _logger.LogInformation("Board added to user {UserId}", userId);
-            return _mapper.Map<BoardResponse>(board);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding board to user {UserId}", userId);
-            throw;
-        }
+        await _unitOfWork.CommitAsync();
+        _logger.LogInformation("Board added to user {UserId}", userId);
+        return _mapper.Map<BoardResponse>(board);
     }
     
     public async Task<BoardResponse?> UpdateBoard(int boardId, UpdateBoardDto dto)
     {
-        try
+        Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId));
+        if (board == null)
         {
-            Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId));
-            if (board == null)
-            {
-                _logger.LogWarning("Board {BoardId} not found for update", boardId);
-                return null;
-            }
+            _logger.LogWarning("Board {BoardId} not found for update", boardId);
+            return null;
+        }
 
-            if (!string.IsNullOrEmpty(dto.Title))
-            {
-                board.Title = dto.Title;
-            }
-            if (!string.IsNullOrEmpty(dto.Background))
-            {
-                board.Background = dto.Background;
-            }
+        if (!string.IsNullOrEmpty(dto.Title))
+        {
+            board.Title = dto.Title;
+        }
+        if (!string.IsNullOrEmpty(dto.Background))
+        {
+            board.Background = dto.Background;
+        }
             
-            await _boardRepository.UpdateAsync(board);
-            await _unitOfWork.CommitAsync();
+        await _boardRepository.UpdateAsync(board);
+        await _unitOfWork.CommitAsync();
 
-            _logger.LogInformation("Board {BoardId} updated", boardId);
-            return _mapper.Map<BoardResponse>(board);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating board {BoardId}", boardId);
-            throw;
-        }
+        _logger.LogInformation("Board {BoardId} updated", boardId);
+        return _mapper.Map<BoardResponse>(board);
     }
     
     public async Task<Boolean> DeleteBoard(int boardId)
     {
-        try
+        Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId));
+        if (board == null)
         {
-            Board? board = await _boardRepository.GetAsync(b => b.Id.Equals(boardId));
-            if (board == null)
-            {
-                _logger.LogWarning("Board {BoardId} not found for deletion", boardId);
-                return false;
-            }
-
-            await _boardRepository.DeleteAsync(board);
-            await _unitOfWork.CommitAsync();
-
-            _logger.LogInformation("Board {BoardId} deleted", boardId);
-            return true;
+            _logger.LogWarning("Board {BoardId} not found for deletion", boardId);
+            return false;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting board {BoardId}", boardId);
-            throw;
-        }
+
+        await _boardRepository.DeleteAsync(board);
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("Board {BoardId} deleted", boardId);
+        return true;
     }
     
     public async Task<BoardResponse> GetBoardByIdToAccess(int boardId)
     {
-        try
+        Board board = await _boardRepository.GetBoardByIdToAccessAsync(boardId);
+        _logger.LogInformation("Board {BoardId} access success", boardId);
+        return _mapper.Map<BoardResponse>(board);
+    }
+
+    public async Task<BoardResponse?> GetBoardByIdComplete(int boardId)
+    {
+        Board? board = await _boardRepository.GetBoardByIdCompleteAsync(boardId);
+        if (board == null)
         {
-            Board board = await _boardRepository.GetBoardByIdToAccessAsync(boardId);
-            _logger.LogInformation("Board {BoardId} access success", boardId);
-            return _mapper.Map<BoardResponse>(board);
+            _logger.LogWarning("Board {BoardId} not found", boardId);
+            return null;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Access error for board {BoardId}", boardId);
-            throw;
-        }
+
+        _logger.LogDebug("Board {BoardId} retrieved", boardId);
+        return _mapper.Map<BoardResponse>(board);
     }
 }

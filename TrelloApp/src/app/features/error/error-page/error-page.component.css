@@ -1,0 +1,35 @@
+.error-page {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.error-page__content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.error-page___title {
+  font-size: clamp(20px, 5vw, 36px);
+  text-align: center;
+}
+
+.error-page___subtitle {
+  font-size: clamp(16px, 4vw, 26px);
+  color: #9a9a9a;
+  text-align: center;
+}
+
+.error-page___redirect-link {
+  padding: 10px 30px;
+  text-decoration: none;
+  font-size: clamp(12px, 3vw, 16px);
+}
+
+.error-page___redirect-link:hover {
+  text-decoration: underline;
+}

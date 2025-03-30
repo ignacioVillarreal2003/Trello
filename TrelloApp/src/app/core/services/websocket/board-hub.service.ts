@@ -23,7 +23,6 @@ import {User} from '../../models/user';
 })
 export class BoardHubService {
   private hubConnection!: signalR.HubConnection;
-  private boardId: number | undefined = undefined;
 
   constructor(private boardCommunicationService: BoardCommunicationService,
               private cardCommunicationService: CardCommunicationService,
@@ -36,8 +35,6 @@ export class BoardHubService {
   }
 
   connectToBoard(boardId: number): void {
-    this.boardId = boardId;
-
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl("http://localhost:5182/boardHub")
       .build();

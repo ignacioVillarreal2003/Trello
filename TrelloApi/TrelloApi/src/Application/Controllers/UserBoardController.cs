@@ -34,102 +34,75 @@ public class UserBoardController: BaseController
     [HttpGet("board/{boardId:int}")]
     public async Task<IActionResult> GetUsersByBoardId(int boardId)
     {
-        try
+        var authorize = await TryAuthorizeBoardAsync(boardId);
+        if (authorize != null)
         {
-            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
-            if (boardToAccess == null)
-            {
-                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
-                return NotFound(new { message = "Board not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
             
-            List<UserResponse> users = await _userBoardService.GetUsersByBoardId(boardId);
-            _logger.LogDebug("Retrieved {Count} users for board {BoardId}", users.Count, boardId);
-            return Ok(users);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving board members for board {BoardId}", boardId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+        List<UserResponse> users = await _userBoardService.GetUsersByBoardId(boardId);
+        _logger.LogDebug("Retrieved {Count} users for board {BoardId}", users.Count, boardId);
+        return Ok(users);
     }
 
     
     [HttpPost("board/{boardId:int}")]
     public async Task<IActionResult> AddUserToBoard(int boardId, [FromBody] AddUserBoardDto dto)
     {
-        try
+        var authorize = await TryAuthorizeBoardAsync(boardId);
+        if (authorize != null)
         {
-            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
-            if (boardToAccess == null)
-            {
-                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
-                return NotFound(new { message = "Board not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
 
-            UserBoardResponse userBoard = await _userBoardService.AddUserToBoard(boardId, dto);
+        UserBoardResponse userBoard = await _userBoardService.AddUserToBoard(boardId, dto);
             
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("UserBoardCreated", userBoard);
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("UserBoardCreated", userBoard);
 
-            _logger.LogInformation("User {UserId} added to board {BoardId}", dto.UserId, boardId);
-            return CreatedAtAction(nameof(GetUsersByBoardId), new { boardId = userBoard.BoardId }, userBoard);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding user {UserId} to board {BoardId}", dto.UserId, boardId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+        _logger.LogInformation("User {UserId} added to board {BoardId}", dto.UserId, boardId);
+        return CreatedAtAction(nameof(GetUsersByBoardId), new { boardId = userBoard.BoardId }, userBoard);
     }
 
 
     [HttpDelete("board/{boardId:int}/user/{userId:int}")]
     public async Task<IActionResult> RemoveUserFromBoard(int boardId, int userId)
     {
-        try
+        var authorize = await TryAuthorizeBoardAsync(boardId);
+        if (authorize != null)
         {
-            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
-            if (boardToAccess == null)
-            {
-                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
-                return NotFound(new { message = "Board not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
 
-            Boolean isDeleted = await _userBoardService.RemoveUserFromBoard(boardId, userId);
-            if (!isDeleted)
-            {
-                _logger.LogDebug("User {UserId} not found in board {BoardId} for deletion.", userId, boardId);
-                return NotFound(new { message = "User membership not found." });
-            }
+        Boolean isDeleted = await _userBoardService.RemoveUserFromBoard(boardId, userId);
+        if (!isDeleted)
+        {
+            _logger.LogDebug("User {UserId} not found in board {BoardId} for deletion.", userId, boardId);
+            return NotFound(new { message = "User membership not found." });
+        }
             
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("UserBoardDeleted", boardId, userId);
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("UserBoardDeleted", boardId, userId);
 
-            _logger.LogInformation("User {UserId} removed from board {BoardId}.", userId, boardId);
-            return NoContent();
-        }
-        catch (Exception ex)
+        _logger.LogInformation("User {UserId} removed from board {BoardId}.", userId, boardId);
+        return NoContent();
+    }
+    
+    private async Task<IActionResult?> TryAuthorizeBoardAsync (int boardId)
+    {
+        BoardResponse? board = await _boardService.GetBoardByIdToAccess(boardId);
+        if (board == null)
         {
-            _logger.LogError(ex, "Error removing user {UserId} from board {BoardId}.", userId, boardId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
+            _logger.LogDebug("Board {BoardId} not found for access.", boardId);
+            return NotFound(new { message = "Board not found." });
         }
+
+        var authResult = await _authorizationService.AuthorizeAsync(User, board.Id, "BoardAccessPolicy");
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        return null;
     }
 }

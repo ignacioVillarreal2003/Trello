@@ -58,11 +58,11 @@ public class MappingProfile: Profile
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
             .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt))
-            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.UpdatedAt))
-            .ForMember(dest => dest.Color, opt => opt.MapFrom(src => src.UpdatedAt))
-            .ForMember(dest => dest.BoardId, opt => opt.MapFrom(src => src.UpdatedAt))
-            .ForMember(dest => dest.Board, opt => opt.MapFrom(src => src.UpdatedAt))
-            .ForMember(dest => dest.CardLabels, opt => opt.MapFrom(src => src.UpdatedAt));
+            .ForMember(dest => dest.Title, opt => opt.MapFrom(src => src.Title))
+            .ForMember(dest => dest.Color, opt => opt.MapFrom(src => src.Color))
+            .ForMember(dest => dest.BoardId, opt => opt.MapFrom(src => src.BoardId))
+            .ForMember(dest => dest.Board, opt => opt.MapFrom(src => src.Board))
+            .ForMember(dest => dest.CardLabels, opt => opt.MapFrom(src => src.CardLabels));
         CreateMap<List, ListResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))

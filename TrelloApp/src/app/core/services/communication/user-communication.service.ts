@@ -6,13 +6,6 @@ import {User} from '../../models/user';
   providedIn: 'root'
 })
 export class UserCommunicationService {
-  private userAddSubject = new BehaviorSubject<User | null>(null);
-  addUser$ = this.userAddSubject.asObservable();
-
-  setAddUser(User: User) {
-    this.userAddSubject.next(User);
-  }
-
   private userUpdateSubject = new BehaviorSubject<User | null>(null);
   updateUser$ = this.userUpdateSubject.asObservable();
 

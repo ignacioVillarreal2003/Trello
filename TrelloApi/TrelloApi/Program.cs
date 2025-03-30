@@ -16,7 +16,6 @@ using TrelloApi.Infrastructure.Persistence.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngularApp", policy =>
@@ -28,7 +27,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Autenticación y Autorización
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("BoardAccessPolicy", policy =>
@@ -45,37 +43,29 @@ builder.Services.AddAuthentication("Bearer").AddJwtBearer(options =>
     };
 });
 
-// Configurar Controladores y Filtros Globales
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ExceptionFilter>();
     options.Filters.Add<LoggingFilter>();
 });
 
-// Websoket
 builder.Services.AddSignalR();
 
-// Configurar FluentValidation
 builder.Services.AddFluentValidationAutoValidation()
                 .AddFluentValidationClientsideAdapters();
 
-// Registro de Validadores
 builder.Services.AddValidatorsFromAssemblies(); 
 
-// Configuración de Logging
 builder.Services.AddLogging();
 
-// Configuración de Base de Datos
 builder.Services.AddDbContext<TrelloContext>(options =>
 {
     options.UseNpgsql(builder.Configuration.GetConnectionString("TrelloConnection"));
 });
 
-// Registro de Servicios de Aplicación
 builder.Services.AddApplicationServices();
 builder.Services.AddApplicationRepositories();
 
-// Configuración de Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -105,7 +95,6 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-// Configuración de AutoMapper
 var mapperConfig = new MapperConfiguration(mc =>
 {
     mc.AddProfile(new MappingProfile());
@@ -113,7 +102,6 @@ var mapperConfig = new MapperConfiguration(mc =>
 IMapper mapper = mapperConfig.CreateMapper();
 builder.Services.AddSingleton(mapper);
 
-// Rate limit
 builder.Services.AddRateLimiter(options =>
 {
     options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -139,7 +127,6 @@ var app = builder.Build();
 
 app.UseCors("AllowAngularApp");
 
-// Aplicar Migraciones Solo en Desarrollo
 if (app.Environment.IsDevelopment())
 {
     using (var scope = app.Services.CreateScope())
@@ -153,28 +140,25 @@ if (app.Environment.IsDevelopment())
     }
 }
 
-// Middleware y Configuración de API
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<ResponseEmitterMiddleware>();
+app.UseMiddleware<BoardCookieMiddleware>();
+
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Rate limit
 app.UseRateLimiter();
-
-// Board id middleware
-app.UseMiddleware<BoardCookieMiddleware>();
 
 app.MapControllers();
 
-// Hub
 app.MapHub<BoardHub>("/boardHub");
 
 app.Run();

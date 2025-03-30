@@ -57,8 +57,8 @@ public class BoardIntegrationTests : IClassFixture<CustomWebApplicationFactory<P
         var board1 = new Board(title: "title 1", background: "background") { Id = 1 };
         var board2 = new Board(title: "title 2", background: "background") { Id = 2 };
         var user = new User(email: "user@email.com", username: "user", password: "password", "avatar background", "theme") { Id = 1 };
-        var userBoard1 = new UserBoard(user.Id, board1.Id, "Role");
-        var userBoard2 = new UserBoard(user.Id, board2.Id, "Role");
+        var userBoard1 = new UserBoard(user.Id, board1.Id);
+        var userBoard2 = new UserBoard(user.Id, board2.Id);
         
         _dbContext.Boards.Add(board1);
         _dbContext.Boards.Add(board2);

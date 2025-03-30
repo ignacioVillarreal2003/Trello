@@ -1,9 +1,12 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs.Board;
 
@@ -14,13 +17,17 @@ namespace TrelloApi.Tests.Controllers
         private readonly Mock<IBoardService> _mockBoardService;
         private readonly Mock<ILogger<BoardController>> _mockLogger;
         private readonly BoardController _controller;
-
+        private readonly Mock<IHubContext<BoardHub>> _mockHubContext;
+        private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+        
         public BoardControllerTests()
         {
             _mockBoardService = new Mock<IBoardService>();
             _mockLogger = new Mock<ILogger<BoardController>>();
-
-            _controller = new BoardController(_mockLogger.Object, _mockBoardService.Object);
+            _mockHubContext = new Mock<IHubContext<BoardHub>>();
+            _mockAuthorizationService = new Mock<IAuthorizationService>();
+            
+            _controller = new BoardController(_mockLogger.Object, _mockBoardService.Object, _mockHubContext.Object, _mockAuthorizationService.Object);
             SetUserId(1);
         }
 
@@ -45,12 +52,9 @@ namespace TrelloApi.Tests.Controllers
             {
                 Id = boardId,
                 Title = "title",
-                Description = "description",
                 Background = "background",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = null,
-                IsArchived = false,
-                ArchivedAt = null
             };
 
             _mockBoardService.Setup(s => s.GetBoardById(boardId)).ReturnsAsync(response);
@@ -82,8 +86,8 @@ namespace TrelloApi.Tests.Controllers
             const int userId = 1;
             var response = new List<BoardResponse>
             {
-                new BoardResponse { Id = 1, Title = "title 1", Description = "description 1", Background = "background", CreatedAt = DateTime.UtcNow, UpdatedAt = null, IsArchived = false, ArchivedAt = null },
-                new BoardResponse { Id = 2, Title = "title 2", Description = "description 2", Background = "background", CreatedAt = DateTime.UtcNow, UpdatedAt = null, IsArchived = false, ArchivedAt = null }
+                new BoardResponse { Id = 1, Title = "title 1", Background = "background", CreatedAt = DateTime.UtcNow, UpdatedAt = null },
+                new BoardResponse { Id = 2, Title = "title 2", Background = "background", CreatedAt = DateTime.UtcNow, UpdatedAt = null }
             };
 
             _mockBoardService.Setup(s => s.GetBoardsByUserId(userId)).ReturnsAsync(response);
@@ -112,9 +116,9 @@ namespace TrelloApi.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetBoardColors_ShouldReturnsOk_WhenColorsFound()
+        public async Task GetBoardBackgrounds_ShouldReturnsOk_WhenColorsFound()
         {
-            var result = await _controller.GetBoardColors();
+            var result = await _controller.GetBoardBackgrounds();
             var okResult = Assert.IsType<OkObjectResult>(result);
             var value = Assert.IsAssignableFrom<List<string>>(okResult.Value);
 
@@ -126,17 +130,14 @@ namespace TrelloApi.Tests.Controllers
         public async Task AddBoard_ShouldReturnsCreated_WhenAddedSuccessful()
         {
             const int userId = 1;
-            var dto = new AddBoardDto { Title = "title", Background = "background", Description = "description" };
+            var dto = new AddBoardDto { Title = "title", Background = "background" };
             var response = new BoardResponse
             {
                 Id = 1,
                 Title = dto.Title,
-                Description = dto.Description,
                 Background = dto.Background,
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = null,
-                IsArchived = false,
-                ArchivedAt = null
+                UpdatedAt = null
             };
 
             _mockBoardService.Setup(s => s.AddBoard(dto, userId)).ReturnsAsync(response);
@@ -151,7 +152,7 @@ namespace TrelloApi.Tests.Controllers
         public async Task AddBoard_ReturnsBadRequest_WhenAddedUnsuccessful()
         {
             const int userId = 1;
-            var dto = new AddBoardDto { Title = "title", Description = "description", Background = "background" };
+            var dto = new AddBoardDto { Title = "title", Background = "background" };
 
             _mockBoardService.Setup(s => s.AddBoard(dto, userId)).ReturnsAsync((BoardResponse?)null);
 
@@ -170,12 +171,9 @@ namespace TrelloApi.Tests.Controllers
             {
                 Id = boardId,
                 Title = "title",
-                Description = "description",
                 Background = "background",
                 CreatedAt = DateTime.UtcNow,
-                UpdatedAt = null,
-                IsArchived = false,
-                ArchivedAt = null
+                UpdatedAt = null
             };
 
             _mockBoardService.Setup(s => s.UpdateBoard(boardId, dto)).ReturnsAsync(response);

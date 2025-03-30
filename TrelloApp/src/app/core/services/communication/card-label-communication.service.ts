@@ -13,13 +13,6 @@ export class CardLabelCommunicationService {
     this.cardLabelAddSubject.next(cardLabel);
   }
 
-  private cardLabelUpdateSubject = new BehaviorSubject<CardLabel | null>(null);
-  updateCardLabel$ = this.cardLabelUpdateSubject.asObservable();
-
-  setUpdateCardLabel(CardLabel: CardLabel) {
-    this.cardLabelUpdateSubject.next(CardLabel);
-  }
-
   private cardLabelDeleteSubject = new BehaviorSubject<{ labelId: number, cardId: number } | null>(null);
   deleteCardLabel$ = this.cardLabelDeleteSubject.asObservable();
 

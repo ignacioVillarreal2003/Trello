@@ -1,9 +1,12 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs.Card;
 
@@ -14,12 +17,19 @@ namespace TrelloApi.Tests.Controllers
         private readonly Mock<ICardService> _mockCardService;
         private readonly Mock<ILogger<CardController>> _mockLogger;
         private readonly CardController _controller;
-
+        private readonly Mock<IListService> _mockListService;
+        private readonly Mock<IHubContext<BoardHub>> _mockHubContext;
+        private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+        
         public CardControllerTests()
         {
             _mockCardService = new Mock<ICardService>();
             _mockLogger = new Mock<ILogger<CardController>>();
-            _controller = new CardController(_mockLogger.Object, _mockCardService.Object);
+            _mockListService = new Mock<IListService>();
+            _mockHubContext = new Mock<IHubContext<BoardHub>>();
+            _mockAuthorizationService = new Mock<IAuthorizationService>();
+            
+            _controller = new CardController(_mockLogger.Object, _mockCardService.Object, _mockListService.Object, _mockHubContext.Object, _mockAuthorizationService.Object);
             SetUserId(1);
         }
 
@@ -46,8 +56,6 @@ namespace TrelloApi.Tests.Controllers
                 Title = "title",
                 Description = "description",
                 ListId = 1,
-                DueDate = null,
-                Priority = "priority",
                 IsCompleted = false,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = null
@@ -80,8 +88,8 @@ namespace TrelloApi.Tests.Controllers
             const int listId = 1;
             var response = new List<CardResponse>
             {
-                new CardResponse { Id = 1, Title = "title 1", Description = "description 1", ListId = listId, Priority = "priority", IsCompleted = false, CreatedAt = DateTime.UtcNow },
-                new CardResponse { Id = 2, Title = "title 2", Description = "description 2", ListId = listId, Priority = "priority", IsCompleted = false, CreatedAt = DateTime.UtcNow }
+                new CardResponse { Id = 1, Title = "title 1", Description = "description 1", ListId = listId, IsCompleted = false, CreatedAt = DateTime.UtcNow },
+                new CardResponse { Id = 2, Title = "title 2", Description = "description 2", ListId = listId, IsCompleted = false, CreatedAt = DateTime.UtcNow }
             };
 
             _mockCardService.Setup(s => s.GetCardsByListId(listId)).ReturnsAsync(response);
@@ -110,28 +118,16 @@ namespace TrelloApi.Tests.Controllers
         }
 
         [Fact]
-        public async Task GetPriorities_ShouldReturnsOk_WhenPrioritiesFound()
-        {
-            var result = await _controller.GetPriorities();
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            var value = Assert.IsType<List<string>>(okResult.Value);
-
-            Assert.Equal(200, okResult.StatusCode);
-            Assert.NotEmpty(value);
-        }
-
-        [Fact]
         public async Task AddCard_ShouldReturnsCreated_WhenAddedSuccessful()
         {
             const int listId = 1;
-            var dto = new AddCardDto { Title = "title", Description = "description", Priority = "priority" };
+            var dto = new AddCardDto { Title = "title", Description = "description" };
             var response = new CardResponse
             {
                 Id = 1,
                 Title = dto.Title,
                 Description = dto.Description,
                 ListId = listId,
-                Priority = dto.Priority,
                 IsCompleted = false,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = null
@@ -149,7 +145,7 @@ namespace TrelloApi.Tests.Controllers
         public async Task AddCard_ReturnsBadRequest_WhenAddedUnsuccessful()
         {
             const int listId = 1;
-            var dto = new AddCardDto { Title = "title", Description = "description", Priority = "priority" };
+            var dto = new AddCardDto { Title = "title", Description = "description" };
 
             _mockCardService.Setup(s => s.AddCard(listId, dto)).ReturnsAsync((CardResponse?)null);
 
@@ -170,11 +166,9 @@ namespace TrelloApi.Tests.Controllers
                 Title = dto.Title,
                 Description = "description",
                 ListId = 1,
-                Priority = "priority",
                 IsCompleted = false,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = null,
-                DueDate = null
             };
 
             _mockCardService.Setup(s => s.UpdateCard(cardId, dto)).ReturnsAsync(response);

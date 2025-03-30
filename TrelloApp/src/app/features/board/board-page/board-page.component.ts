@@ -53,7 +53,7 @@ export class BoardPageComponent {
     });
     this.boardBackgroundPath = this.resourcesService.boardBackgroundPath;
     this.boardCommunicationService.updateBoard$.subscribe((board: Board | null): void => {
-      if (board != null && this.board != undefined && this.board.id == board.id) {
+      if (board != null && this.board != undefined) {
         this.board = board;
       }
     });

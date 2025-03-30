@@ -4,7 +4,6 @@ import {User} from '../../../core/models/user';
 import {Board} from '../../../core/models/board';
 import {UserBoardHttpService} from '../../../core/services/http/user-board-http.service';
 import {NgIf} from '@angular/common';
-import {UserBoardCommunicationService} from '../../../core/services/communication/user-board-communication.service';
 
 @Component({
   selector: 'app-member-item',

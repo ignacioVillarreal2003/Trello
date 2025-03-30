@@ -35,6 +35,7 @@ export class LabelListComponent {
       }
     });
     this.labelCommunicationService.deleteLabel$.subscribe((labelId: number | null): void => {
+      console.log(labelId)
       if (labelId !== null) {
         this.labels = this.labels.filter(l => l.id != labelId);
       }

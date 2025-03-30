@@ -33,173 +33,134 @@ public class ListController: BaseController
     [HttpGet("{listId:int}")]
     public async Task<IActionResult> GetListById(int listId)
     {
-        try
+        var authorize = await TryAuthorizeListAsync(listId);
+        if (authorize != null)
         {
-            ListResponse? listToAccess = await _listService.GetListByIdToAccess(listId);
-            if (listToAccess == null)
-            {
-                _logger.LogDebug("List {ListId} not found for got.", listId);
-                return NotFound(new { message = "List not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, listToAccess.Board.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
             
-            ListResponse? list = await _listService.GetListById(listId);
-            if (list == null)
-            {
-                _logger.LogDebug("List {ListId} not found", listId);
-                return NotFound(new { message = "List not found." });
-            }
-
-            _logger.LogDebug("List {ListId} retrieved", listId);
-            return Ok(list);
-        }
-        catch (Exception ex)
+        ListResponse? list = await _listService.GetListById(listId);
+        if (list == null)
         {
-            _logger.LogError(ex, "Error retrieving list {ListId}", listId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
+            _logger.LogDebug("List {ListId} not found", listId);
+            return NotFound(new { message = "List not found." });
         }
+
+        _logger.LogDebug("List {ListId} retrieved", listId);
+        return Ok(list);
     }
 
     [HttpGet("board/{boardId:int}")]
     public async Task<IActionResult> GetListsByBoardId(int boardId)
     {
-        try
+        var authorize = await TryAuthorizeBoardAsync(boardId);
+        if (authorize != null)
         {
-            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
-            if (boardToAccess == null)
-            {
-                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
-                return NotFound(new { message = "Board not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
             
-            List<ListResponse> lists = await _listService.GetListsByBoardId(boardId);
-            _logger.LogDebug("Retrieved {Count} lists for board {BoardId}", lists.Count, boardId);
-            return Ok(lists);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving lists for board {BoardId}", boardId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+        List<ListResponse> lists = await _listService.GetListsByBoardId(boardId);
+        _logger.LogDebug("Retrieved {Count} lists for board {BoardId}", lists.Count, boardId);
+        return Ok(lists);
     }
 
     [HttpPost("board/{boardId:int}")]
     public async Task<IActionResult> AddList(int boardId, [FromBody] AddListDto dto)
     {
-        try
+        var authorize = await TryAuthorizeBoardAsync(boardId);
+        if (authorize != null)
         {
-            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
-            if (boardToAccess == null)
-            {
-                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
-                return NotFound(new { message = "Board not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
-            
-            ListResponse list = await _listService.AddList(boardId, dto);
-            
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("ListCreated", list);
-            
-            _logger.LogInformation("List added to board {BoardId}", boardId);
-            return CreatedAtAction(nameof(GetListById), new { listId = list.Id }, list);
+            return authorize;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding list to board {BoardId}", boardId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+            
+        ListResponse list = await _listService.AddList(boardId, dto);
+            
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("ListCreated", list);
+            
+        _logger.LogInformation("List added to board {BoardId}", boardId);
+        return CreatedAtAction(nameof(GetListById), new { listId = list.Id }, list);
     }
 
     [HttpPut("{listId:int}")]
     public async Task<IActionResult> UpdateList(int listId, [FromBody] UpdateListDto dto)
     {
-        try
+        var authorize = await TryAuthorizeListAsync(listId);
+        if (authorize != null)
         {
-            ListResponse? listToAccess = await _listService.GetListByIdToAccess(listId);
-            if (listToAccess == null)
-            {
-                _logger.LogDebug("List {ListId} not found for got.", listId);
-                return NotFound(new { message = "List not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, listToAccess.Board.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
             
-            ListResponse? list = await _listService.UpdateList(listId, dto);
-            if (list == null)
-            {
-                _logger.LogDebug("List {ListId} not found for update", listId);
-                return NotFound(new { message = "List not found." });
-            }
+        ListResponse? list = await _listService.UpdateList(listId, dto);
+        if (list == null)
+        {
+            _logger.LogDebug("List {ListId} not found for update", listId);
+            return NotFound(new { message = "List not found." });
+        }
             
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("ListUpdated", list);
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("ListUpdated", list);
 
-            _logger.LogInformation("List {ListId} updated", listId);
-            return Ok(list);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error updating list {ListId}", listId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+        _logger.LogInformation("List {ListId} updated", listId);
+        return Ok(list);
     }
 
     [HttpDelete("{listId:int}")]
     public async Task<IActionResult> DeleteList(int listId)
     {
-        try
+        var authorize = await TryAuthorizeListAsync(listId);
+        if (authorize != null)
         {
-            ListResponse? listToAccess = await _listService.GetListByIdToAccess(listId);
-            if (listToAccess == null)
-            {
-                _logger.LogDebug("List {ListId} not found for got.", listId);
-                return NotFound(new { message = "List not found." });
-            }
+            return authorize;
+        }
+            
+        Boolean isDeleted = await _listService.DeleteList(listId);
+        if (!isDeleted)
+        {
+            _logger.LogDebug("List {ListId} not found for deletion", listId);
+            return NotFound(new { message = "List not found." });
+        }
+            
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("ListDeleted", listId);
+            
+        _logger.LogInformation("List {ListId} deleted", listId);
+        return NoContent();
+    }
+    
+    private async Task<IActionResult?> TryAuthorizeBoardAsync (int boardId)
+    {
+        BoardResponse? board = await _boardService.GetBoardByIdToAccess(boardId);
+        if (board == null)
+        {
+            _logger.LogDebug("Board {BoardId} not found for access.", boardId);
+            return NotFound(new { message = "Board not found." });
+        }
+
+        var authResult = await _authorizationService.AuthorizeAsync(User, board.Id, "BoardAccessPolicy");
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        return null;
+    }
+    
+    private async Task<IActionResult?> TryAuthorizeListAsync (int listId)
+    {
+        ListResponse? list = await _listService.GetListByIdToAccess(listId);
+        if (list == null)
+        {
+            _logger.LogDebug("List {ListId} not found for access.", listId);
+            return NotFound(new { message = "List not found." });
+        }
         
-            var authResult = await _authorizationService.AuthorizeAsync(User, listToAccess.Board.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
-            
-            Boolean isDeleted = await _listService.DeleteList(listId);
-            if (!isDeleted)
-            {
-                _logger.LogDebug("List {ListId} not found for deletion", listId);
-                return NotFound(new { message = "List not found." });
-            }
-            
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("ListDeleted", listId);
-            
-            _logger.LogInformation("List {ListId} deleted", listId);
-            return NoContent();
-        }
-        catch (Exception ex)
+        var authResult = await _authorizationService.AuthorizeAsync(User, list.Board.Id, "BoardAccessPolicy");
+        if (!authResult.Succeeded)
         {
-            _logger.LogError(ex, "Error deleting list {ListId}", listId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
+            return Forbid();
         }
+
+        return null;
     }
 }

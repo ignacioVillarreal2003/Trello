@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { BtnIconComponent } from './btn-icon.component';
+import { ErrorPageComponent } from './error-page.component';
 
-describe('BtnIconComponent', () => {
-  let component: BtnIconComponent;
-  let fixture: ComponentFixture<BtnIconComponent>;
+describe('ErrorPageComponent', () => {
+  let component: ErrorPageComponent;
+  let fixture: ComponentFixture<ErrorPageComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [BtnIconComponent]
+      imports: [ErrorPageComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(BtnIconComponent);
+    fixture = TestBed.createComponent(ErrorPageComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

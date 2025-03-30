@@ -39,13 +39,13 @@ public class UserBoardServiceTests
         const int boardId = 1;
         var users = new List<User>()
         {
-            new User(email: "email1@gmail.com", username: "username 1", password: "password", "avatar background", theme: "theme"),
-            new User(email: "email2@gmail.com", username: "username 2", password: "password", "avatar background", theme: "theme")
+            new User(email: "email1@gmail.com", username: "username 1", password: "password", "avatar background", theme: "theme") { Id = 1},
+            new User(email: "email2@gmail.com", username: "username 2", password: "password", "avatar background", theme: "theme") { Id = 2 }
         };
         var response = new List<UserResponse>()
         {
-            new UserResponse { Email = users[0].Email, Username = users[0].Username , Theme = users[0].Theme },
-            new UserResponse { Email = users[1].Email, Username = users[1].Username , Theme = users[1].Theme }
+            new UserResponse { Id = users[0].Id },
+            new UserResponse { Id = users[1].Id }
         };
 
         _mockUserBoardRepository.Setup(r => r.GetUsersByBoardIdAsync(boardId)).ReturnsAsync(users);
@@ -75,8 +75,8 @@ public class UserBoardServiceTests
     public async Task AddUsersToBoard_ShouldReturnsNull_WhenAddedSuccessful()
     {
         const int boardId = 1;
-        var dto = new AddUserBoardDto { UserId = 1, Role = "Member" };
-        var response = new UserBoardResponse { BoardId = boardId, UserId = dto.UserId, Role = dto.Role };
+        var dto = new AddUserBoardDto { UserId = 1 };
+        var response = new UserBoardResponse { BoardId = boardId, UserId = dto.UserId };
         
         _mockUserBoardRepository.Setup(r => r.CreateAsync(It.IsAny<UserBoard>()));
         _mockMapper.Setup(m => m.Map<UserBoardResponse>(It.IsAny<UserBoard>())).Returns(response);
@@ -90,7 +90,7 @@ public class UserBoardServiceTests
     public async Task RemoveUserFromBoard_ShouldReturnsTrue_WhenDeletedSuccessful()
     {
         const int boardId = 1, userId = 1;
-        var userBoard = new UserBoard(userId: userId, boardId: boardId, role: "role");
+        var userBoard = new UserBoard(userId: userId, boardId: boardId);
         
         _mockUserBoardRepository.Setup(r => r
             .GetAsync(It.IsAny<Expression<Func<UserBoard, bool>>>())).ReturnsAsync(userBoard);
@@ -105,7 +105,7 @@ public class UserBoardServiceTests
     public async Task RemoveUserFromBoard_ShouldReturnsFalse_WhenDeletedUnsuccessful()
     {
         const int boardId = 1, userId = 1;
-        var userBoard = new UserBoard(userId: userId, boardId: boardId, role: "role");
+        var userBoard = new UserBoard(userId: userId, boardId: boardId);
         
         _mockUserBoardRepository.Setup(r => r
             .GetAsync(It.IsAny<Expression<Func<UserBoard, bool>>>())).ReturnsAsync((UserBoard?)null);

@@ -1,9 +1,6 @@
 using AutoMapper;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.Constants;
-using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.DTOs.Card;
-using TrelloApi.Domain.DTOs.CardLabel;
 using TrelloApi.Domain.Entities;
 using TrelloApi.Infrastructure.Persistence.Interfaces;
 
@@ -26,139 +23,104 @@ public class CardService: BaseService, ICardService
     
     public async Task<CardResponse?> GetCardById(int cardId)
     {
-        try
+        Card? card = await _cardRepository.GetAsync(c => c.Id.Equals(cardId));
+        if (card == null)
         {
-            Card? card = await _cardRepository.GetAsync(c => c.Id.Equals(cardId));
-            if (card == null)
-            {
-                _logger.LogWarning("Card {CardId} not found", cardId);
-                return null;
-            }
+            _logger.LogWarning("Card {CardId} not found", cardId);
+            return null;
+        }
 
-            _logger.LogDebug("Card {CardId} retrieved", cardId);
-            return _mapper.Map<CardResponse>(card);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving card {CardId}", cardId);
-            throw;
-        }
+        _logger.LogDebug("Card {CardId} retrieved", cardId);
+        return _mapper.Map<CardResponse>(card);
     }
 
     public async Task<List<CardResponse>> GetCardsByListId(int listId)
     {
-        try
-        {
-            List<Card> cards = (await _cardRepository.GetListAsync(c => c.ListId.Equals(listId))).ToList();
-            _logger.LogDebug("Retrieved {Count} cards for list {ListId}", cards.Count, listId);
-            return _mapper.Map<List<CardResponse>>(cards);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving cards for list {ListId}", listId);
-            throw;
-        }
+        List<Card> cards = (await _cardRepository.GetListAsync(c => c.ListId.Equals(listId))).ToList();
+        _logger.LogDebug("Retrieved {Count} cards for list {ListId}", cards.Count, listId);
+        return _mapper.Map<List<CardResponse>>(cards);
     }
 
     public async Task<CardResponse> AddCard(int listId, AddCardDto dto)
     {
-        try
-        {
-            Card card = new Card(dto.Title, dto.Description, listId, dto.Position);
-            await _cardRepository.CreateAsync(card);
-            await _unitOfWork.CommitAsync();
+        Card card = new Card(dto.Title, dto.Description, listId, dto.Position);
+        await _cardRepository.CreateAsync(card);
+        await _unitOfWork.CommitAsync();
 
-            _logger.LogInformation("Card added to list {ListId}", listId);
-            return _mapper.Map<CardResponse>(card);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding card to list {ListId}", listId);
-            throw;
-        }
+        _logger.LogInformation("Card added to list {ListId}", listId);
+        return _mapper.Map<CardResponse>(card);
     }
 
     public async Task<CardResponse?> UpdateCard(int cardId, UpdateCardDto dto)
     {
-        try
+        Card? card = await _cardRepository.GetAsync(c => c.Id.Equals(cardId));
+        if (card == null)
         {
-            Card? card = await _cardRepository.GetAsync(c => c.Id.Equals(cardId));
-            if (card == null)
-            {
-                _logger.LogWarning("Task {cardId} not found for update", cardId);
-                return null;
-            }
-
-            if (!string.IsNullOrEmpty(dto.Title))
-            {
-                card.Title = dto.Title;
-            }
-            if (!string.IsNullOrEmpty(dto.Description))
-            {
-                card.Description = dto.Description;
-            }
-            if (dto.ListId.HasValue)
-            {
-                card.ListId = dto.ListId.Value;
-            }
-            if (dto.IsCompleted.HasValue)
-            {
-                card.IsCompleted = dto.IsCompleted.Value;
-            }
-            if (dto.Position != null)
-            {
-                card.Position = dto.Position.Value;
-            }
-
-            await _cardRepository.UpdateAsync(card);
-            await _unitOfWork.CommitAsync();
-
-            _logger.LogInformation("Card {CardId} updated", cardId);
-            return _mapper.Map<CardResponse>(card);
+            _logger.LogWarning("Task {cardId} not found for update", cardId);
+            return null;
         }
-        catch (Exception ex)
+
+        if (!string.IsNullOrEmpty(dto.Title))
         {
-            _logger.LogError(ex, "Error updating card {CardId}", cardId);
-            throw;
+            card.Title = dto.Title;
         }
+        if (!string.IsNullOrEmpty(dto.Description))
+        {
+            card.Description = dto.Description;
+        }
+        if (dto.ListId.HasValue)
+        {
+            card.ListId = dto.ListId.Value;
+        }
+        if (dto.IsCompleted.HasValue)
+        {
+            card.IsCompleted = dto.IsCompleted.Value;
+        }
+        if (dto.Position != null)
+        {
+            card.Position = dto.Position.Value;
+        }
+
+        await _cardRepository.UpdateAsync(card);
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("Card {CardId} updated", cardId);
+        return _mapper.Map<CardResponse>(card);
     }
 
     public async Task<Boolean> DeleteCard(int cardId)
     {
-        try
+        Card? card = await _cardRepository.GetAsync(c => c.Id.Equals(cardId));
+        if (card == null)
         {
-            Card? card = await _cardRepository.GetAsync(c => c.Id.Equals(cardId));
-            if (card == null)
-            {
-                _logger.LogWarning("Card {CardId} not found for deletion", cardId);
-                return false;
-            }
-
-            await _cardRepository.DeleteAsync(card);
-            await _unitOfWork.CommitAsync();
-
-            _logger.LogInformation("Card {CardId} deleted", cardId);
-            return true;
+            _logger.LogWarning("Card {CardId} not found for deletion", cardId);
+            return false;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting card {CardId}", cardId);
-            throw;
-        }
+
+        await _cardRepository.DeleteAsync(card);
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("Card {CardId} deleted", cardId);
+        return true;
     }
     
     public async Task<CardResponse> GetCardByIdToAccess(int cardId)
     {
-        try
+        Card card = await _cardRepository.GetCardByIdToAccessAsync(cardId);
+        _logger.LogInformation("Card {CardId} access success", cardId);
+        return _mapper.Map<CardResponse>(card);
+    }
+
+    public async Task<CardResponse?> GetCardByIdComplete(int cardId)
+    {
+        Card? card = await _cardRepository.GetCardByIdCompleteAsync(cardId);
+        if (card == null)
         {
-            Card card = await _cardRepository.GetCardByIdToAccessAsync(cardId);
-            _logger.LogInformation("Card {CardId} access success", cardId);
-            return _mapper.Map<CardResponse>(card);
+            _logger.LogWarning("Card {CardId} not found", cardId);
+            return null;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Access error for card {CardId}", cardId);
-            throw;
-        }
+
+        _logger.LogDebug("Card {CardId} retrieved", cardId);
+        return _mapper.Map<CardResponse>(card);
     }
 }

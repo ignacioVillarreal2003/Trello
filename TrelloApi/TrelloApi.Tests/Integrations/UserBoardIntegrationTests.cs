@@ -34,7 +34,7 @@ public class UserBoardIntegrationTests: IClassFixture<CustomWebApplicationFactor
     {
         var board = new Board("title", "background") { Id = 1 };
         var user = new User("user@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
-        var userBoard = new UserBoard(user.Id, board.Id, "Role");
+        var userBoard = new UserBoard(user.Id, board.Id);
         
         _dbContext.Boards.Add(board);
         _dbContext.Users.Add(user);
@@ -73,7 +73,7 @@ public class UserBoardIntegrationTests: IClassFixture<CustomWebApplicationFactor
     {
         var board = new Board("title", "background") { Id = 1 };
         var user = new User("user@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
-        var dto = new AddUserBoardDto { UserId = user.Id, Role = "Member" };
+        var dto = new AddUserBoardDto { UserId = user.Id };
 
         _dbContext.Boards.Add(board);
         _dbContext.Users.Add(user);
@@ -89,7 +89,7 @@ public class UserBoardIntegrationTests: IClassFixture<CustomWebApplicationFactor
     {
         var board = new Board("title", "background") { Id = 1 };
         var user = new User("user@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
-        var userBoard = new UserBoard(user.Id, board.Id, "Role");
+        var userBoard = new UserBoard(user.Id, board.Id);
 
         _dbContext.Boards.Add(board);
         _dbContext.Users.Add(user);

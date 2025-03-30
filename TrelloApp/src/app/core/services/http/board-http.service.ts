@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { catchError, Observable } from 'rxjs';
-import {AddBoard, UpdateBoard} from '../../models/board';
+import {AddBoard, Board, UpdateBoard} from '../../models/board';
 import {BaseHttpService} from './base-http.service';
 
 @Injectable({
@@ -15,32 +15,32 @@ export class BoardHttpService extends BaseHttpService {
     super(http);
   }
 
-  getBoard(id: number): Observable<any> {
-    return this.http.get<any>(`${this.url}/${id}`, this.httpOptions).pipe(
+  getBoard(id: number): Observable<Board> {
+    return this.http.get<Board>(`${this.url}/${id}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  getBoards(): Observable<any> {
-    return this.http.get<any>(`${this.url}`, this.httpOptions).pipe(
+  getBoards(): Observable<Board[]> {
+    return this.http.get<Board[]>(`${this.url}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  add(requestBody: AddBoard): Observable<any> {
-    return this.http.post<any>(`${this.url}`, requestBody, this.httpOptions).pipe(
+  add(requestBody: AddBoard): Observable<Board> {
+    return this.http.post<Board>(`${this.url}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  update(boardId: number, requestBody: UpdateBoard): Observable<any> {
-    return this.http.put<any>(`${this.url}/${boardId}`, requestBody, this.httpOptions).pipe(
+  update(boardId: number, requestBody: UpdateBoard): Observable<Board> {
+    return this.http.put<Board>(`${this.url}/${boardId}`, requestBody, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }
 
-  delete(boardId: number): Observable<any> {
-    return this.http.delete<any>(`${this.url}/${boardId}`, this.httpOptions).pipe(
+  delete(boardId: number): Observable<void> {
+    return this.http.delete<void>(`${this.url}/${boardId}`, this.httpOptions).pipe(
       catchError(this.handleError)
     );
   }

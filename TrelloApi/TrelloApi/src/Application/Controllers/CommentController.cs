@@ -33,173 +33,134 @@ public class CommentController: BaseController
     [HttpGet("{commentId:int}")]
     public async Task<IActionResult> GetCommentById(int commentId)
     {
-        try
+        var authorize = await TryAuthorizeCommentAsync(commentId);
+        if (authorize != null)
         {
-            CommentResponse? commentToAccess = await _commentService.GetCommentByIdToAccess(commentId);
-            if (commentToAccess == null)
-            {
-                _logger.LogDebug("Comment {CommentId} not found for got.", commentId);
-                return NotFound(new { message = "Comment not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, commentToAccess.Card.List.BoardId, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
             
-            CommentResponse? comment = await _commentService.GetCommentById(commentId);
-            if (comment == null)
-            {
-                _logger.LogDebug("Comment {CommentId} not found", commentId);
-                return NotFound(new { message = "Comment not found." });
-            }
-
-            _logger.LogDebug("Comment {CommentId} retrieved", commentId);
-            return Ok(comment);
-        }
-        catch (Exception ex)
+        CommentResponse? comment = await _commentService.GetCommentById(commentId);
+        if (comment == null)
         {
-            _logger.LogError(ex, "Error retrieving comment {CommentId}", commentId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
+            _logger.LogDebug("Comment {CommentId} not found", commentId);
+            return NotFound(new { message = "Comment not found." });
         }
+
+        _logger.LogDebug("Comment {CommentId} retrieved", commentId);
+        return Ok(comment);
     }
 
     [HttpGet("card/{cardId:int}")]
     public async Task<IActionResult> GetCommentsByCardId(int cardId)
     {
-        try
+        var authorize = await TryAuthorizeCardAsync(cardId);
+        if (authorize != null)
         {
-            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
-            if (cardToAccess == null)
-            {
-                _logger.LogDebug("Card {CardId} not found for got.", cardId);
-                return NotFound(new { message = "Card not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
             
-            List<CommentResponse> comments = await _commentService.GetCommentsByCardId(cardId);
-            _logger.LogDebug("Retrieved {Count} comments for card {CardId}", comments.Count, cardId);
-            return Ok(comments);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving comments for card {CardId}", cardId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+        List<CommentResponse> comments = await _commentService.GetCommentsByCardId(cardId);
+        _logger.LogDebug("Retrieved {Count} comments for card {CardId}", comments.Count, cardId);
+        return Ok(comments);
     }
 
     [HttpPost("card/{cardId:int}")]
     public async Task<IActionResult> AddComment(int cardId, [FromBody] AddCommentDto dto)
     {
-        try
+        var authorize = await TryAuthorizeCardAsync(cardId);
+        if (authorize != null)
         {
-            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
-            if (cardToAccess == null)
-            {
-                _logger.LogDebug("Card {CardId} not found for got.", cardId);
-                return NotFound(new { message = "Card not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
-            
-            CommentResponse comment = await _commentService.AddComment(cardId, dto, UserId);
-            
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("CommentCreated", comment);
-            
-            _logger.LogInformation("Comment added to card {CardId}", cardId);
-            return CreatedAtAction(nameof(GetCommentById), new { commentId = comment.Id }, comment);
+            return authorize;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding comment to card {CardId}", cardId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+            
+        CommentResponse comment = await _commentService.AddComment(cardId, dto, UserId);
+            
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("CommentCreated", comment);
+            
+        _logger.LogInformation("Comment added to card {CardId}", cardId);
+        return CreatedAtAction(nameof(GetCommentById), new { commentId = comment.Id }, comment);
     }
 
     [HttpPut("{commentId:int}")]
     public async Task<IActionResult> UpdateComment(int commentId, [FromBody] UpdateCommentDto dto)
     {
-        try
+        var authorize = await TryAuthorizeCommentAsync(commentId);
+        if (authorize != null)
         {
-            CommentResponse? commentToAccess = await _commentService.GetCommentByIdToAccess(commentId);
-            if (commentToAccess == null)
-            {
-                _logger.LogDebug("Comment {CommentId} not found for got.", commentId);
-                return NotFound(new { message = "Comment not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, commentToAccess.Card.List.BoardId, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
-            
-            CommentResponse? comment = await _commentService.UpdateComment(commentId, dto);
-            if (comment == null)
-            {
-                _logger.LogDebug("Comment {CommentId} not found for update", commentId);
-                return NotFound(new { message = "Comment not found." });
-            }
-            
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("CommentUpdated", comment);
-            
-            _logger.LogInformation("Comment {CommentId} updated", commentId);
-            return Ok(comment);
+            return authorize;
         }
-        catch (Exception ex)
+            
+        CommentResponse? comment = await _commentService.UpdateComment(commentId, dto);
+        if (comment == null)
         {
-            _logger.LogError(ex, "Error updating comment {CommentId}", commentId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
+            _logger.LogDebug("Comment {CommentId} not found for update", commentId);
+            return NotFound(new { message = "Comment not found." });
         }
+            
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("CommentUpdated", comment);
+            
+        _logger.LogInformation("Comment {CommentId} updated", commentId);
+        return Ok(comment);
     }
 
     [HttpDelete("{commentId:int}")]
     public async Task<IActionResult> DeleteComment(int commentId)
     {
-        try
+        var authorize = await TryAuthorizeCommentAsync(commentId);
+        if (authorize != null)
         {
-            CommentResponse? commentToAccess = await _commentService.GetCommentByIdToAccess(commentId);
-            if (commentToAccess == null)
-            {
-                _logger.LogDebug("Comment {CommentId} not found for got.", commentId);
-                return NotFound(new { message = "Comment not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, commentToAccess.Card.List.BoardId, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
             
-            Boolean isDeleted = await _commentService.DeleteComment(commentId);
-            if (!isDeleted)
-            {
-                _logger.LogDebug("Comment {CommentId} not found for deletion", commentId);
-                return NotFound(new { message = "Comment not found." });
-            }
+        Boolean isDeleted = await _commentService.DeleteComment(commentId);
+        if (!isDeleted)
+        {
+            _logger.LogDebug("Comment {CommentId} not found for deletion", commentId);
+            return NotFound(new { message = "Comment not found." });
+        }
 
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("CommentDeleted", commentId);
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("CommentDeleted", commentId);
             
-            _logger.LogInformation("Comment {CommentId} deleted", commentId);
-            return NoContent();
-        }
-        catch (Exception ex)
+        _logger.LogInformation("Comment {CommentId} deleted", commentId);
+        return NoContent();
+    }
+    
+    private async Task<IActionResult?> TryAuthorizeCardAsync (int cardId)
+    {
+        CardResponse? card = await _cardService.GetCardByIdToAccess(cardId);
+        if (card == null)
         {
-            _logger.LogError(ex, "Error deleting comment {CommentId}", commentId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
+            _logger.LogDebug("Card {CardId} not found for access.", cardId);
+            return NotFound(new { message = "Card not found." });
         }
+        
+        var authResult = await _authorizationService.AuthorizeAsync(User, card.List.BoardId, "BoardAccessPolicy");
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        return null;
+    }
+    
+    private async Task<IActionResult?> TryAuthorizeCommentAsync (int commentId)
+    {
+        CommentResponse? comment = await _commentService.GetCommentByIdToAccess(commentId);
+        if (comment == null)
+        {
+            _logger.LogDebug("Comment {CommentId} not found for access.", commentId);
+            return NotFound(new { message = "Comment not found." });
+        }
+        
+        var authResult = await _authorizationService.AuthorizeAsync(User, comment.Card.List.BoardId, "BoardAccessPolicy");
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        return null;
     }
 }

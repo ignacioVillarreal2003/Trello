@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.SignalR;
 using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.Constants;
 using TrelloApi.Domain.DTOs.Card;
 using TrelloApi.Domain.DTOs.List;
 
@@ -34,22 +33,49 @@ public class CardController: BaseController
     [HttpGet("{cardId:int}")]
     public async Task<IActionResult> GetCardById(int cardId)
     {
+        var authorize = await TryAuthorizeCardAsync(cardId);
+        if (authorize != null)
+        {
+            return authorize;
+        }
+            
+        CardResponse? card = await _cardService.GetCardById(cardId);
+        if (card == null)
+        {
+            _logger.LogDebug("Card {CardId} not found", cardId);
+            return NotFound(new { message = "Card not found." });
+        }
+            
+        _logger.LogDebug("Card {CardId} retrieved", cardId);
+        return Ok(card);
+    }
+
+    [HttpGet("list/{listId:int}")]
+    public async Task<IActionResult> GetCardsByListId(int listId)
+    {
+        var authorize = await TryAuthorizeListAsync(listId);
+        if (authorize != null)
+        {
+            return authorize;
+        }
+        
+        List<CardResponse> cards = await _cardService.GetCardsByListId(listId);
+        _logger.LogDebug("Retrieved {Count} cards for list {ListId}", cards.Count, listId);
+        return Ok(cards);
+    }
+    
+    [HttpGet("{cardId:int}/complete")]
+    public async Task<IActionResult> GetCardByIdComplete(int cardId)
+    {
         try
         {
-            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
-            if (cardToAccess == null)
+            var authorize = await TryAuthorizeCardAsync(cardId);
+            if (authorize != null)
             {
-                _logger.LogDebug("Card {CardId} not found for got.", cardId);
-                return NotFound(new { message = "Card not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
+                return authorize;
             }
             
-            CardResponse? card = await _cardService.GetCardById(cardId);
+            CardResponse? card = await _cardService.GetCardByIdComplete(cardId);
             if (card == null)
             {
                 _logger.LogDebug("Card {CardId} not found", cardId);
@@ -66,141 +92,104 @@ public class CardController: BaseController
         }
     }
 
-    [HttpGet("list/{listId:int}")]
-    public async Task<IActionResult> GetCardsByListId(int listId)
-    {
-        try
-        {
-            ListResponse? listToAccess = await _listService.GetListByIdToAccess(listId);
-            if (listToAccess == null)
-            {
-                _logger.LogDebug("List {ListId} not found for got.", listId);
-                return NotFound(new { message = "List not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, listToAccess.BoardId, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
-            
-            List<CardResponse> cards = await _cardService.GetCardsByListId(listId);
-            _logger.LogDebug("Retrieved {Count} cards for list {ListId}", cards.Count, listId);
-            return Ok(cards);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving cards for list {ListId}", listId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
-    }
     
     [HttpPost("list/{listId:int}")]
     public async Task<IActionResult> AddCard(int listId, [FromBody] AddCardDto dto)
     {
-        try
+        var authorize = await TryAuthorizeListAsync(listId);
+        if (authorize != null)
         {
-            ListResponse? listToAccess = await _listService.GetListByIdToAccess(listId);
-            if (listToAccess == null)
-            {
-                _logger.LogDebug("List {ListId} not found for added.", listId);
-                return NotFound(new { message = "List not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, listToAccess.BoardId, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
 
-            CardResponse card = await _cardService.AddCard(listId, dto);
+        CardResponse card = await _cardService.AddCard(listId, dto);
             
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("CardCreated", card);
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("CardCreated", card);
             
-            _logger.LogInformation("Card added to list {ListId}", listId);
-            return CreatedAtAction(nameof(GetCardById), new { cardId = card.Id }, card);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding card to list {ListId}", listId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+        _logger.LogInformation("Card added to list {ListId}", listId);
+        return CreatedAtAction(nameof(GetCardById), new { cardId = card.Id }, card);
     }
 
     [HttpPut("{cardId:int}")]
     public async Task<IActionResult> UpdateCard(int cardId, [FromBody] UpdateCardDto dto)
     {
-        try
+        var authorize = await TryAuthorizeCardAsync(cardId);
+        if (authorize != null)
         {
-            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
-            if (cardToAccess == null)
-            {
-                _logger.LogDebug("Card {CardId} not found for updated.", cardId);
-                return NotFound(new { message = "Card not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
-            
-            CardResponse? card = await _cardService.UpdateCard(cardId, dto);
-            if (card == null)
-            {
-                _logger.LogDebug("Card {CardId} not found for update", cardId);
-                return NotFound(new { message = "Card not found." });
-            }
-            
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("CardUpdated", card);
-            
-            _logger.LogInformation("Card {CardId} updated", cardId);
-            return Ok(card);
+            return authorize;
         }
-        catch (Exception ex)
+            
+        CardResponse? card = await _cardService.UpdateCard(cardId, dto);
+        if (card == null)
         {
-            _logger.LogError(ex, "Error updating card {CardId}.", cardId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
+            _logger.LogDebug("Card {CardId} not found for update", cardId);
+            return NotFound(new { message = "Card not found." });
         }
+            
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("CardUpdated", card);
+            
+        _logger.LogInformation("Card {CardId} updated", cardId);
+        return Ok(card);
     }
 
     [HttpDelete("{cardId:int}")]
     public async Task<IActionResult> DeleteCard(int cardId)
     {
-        try
+        var authorize = await TryAuthorizeCardAsync(cardId);
+        if (authorize != null)
         {
-            CardResponse? cardToAccess = await _cardService.GetCardByIdToAccess(cardId);
-            if (cardToAccess == null)
-            {
-                _logger.LogDebug("Card {CardId} not found for deletion.", cardId);
-                return NotFound(new { message = "Card not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, cardToAccess.List.BoardId, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
             
-            Boolean isDeleted = await _cardService.DeleteCard(cardId);
-            if (!isDeleted)
-            {
-                _logger.LogDebug("Card {CardId} not found for deletion.", cardId);
-                return NotFound(new { message = "Card not found." });
-            }
+        Boolean isDeleted = await _cardService.DeleteCard(cardId);
+        if (!isDeleted)
+        {
+            _logger.LogDebug("Card {CardId} not found for deletion.", cardId);
+            return NotFound(new { message = "Card not found." });
+        }
             
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("CardDeleted", cardId);
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("CardDeleted", cardId);
 
-            _logger.LogInformation("Card {CardId} deleted", cardId);
-            return NoContent();
-        }
-        catch (Exception ex)
+        _logger.LogInformation("Card {CardId} deleted", cardId);
+        return NoContent();
+    }
+    
+    private async Task<IActionResult?> TryAuthorizeCardAsync (int cardId)
+    {
+        CardResponse? card = await _cardService.GetCardByIdToAccess(cardId);
+        if (card == null)
         {
-            _logger.LogError(ex, "Error deleting card {CardId}.", cardId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
+            _logger.LogDebug("Card {CardId} not found for deletion.", cardId);
+            return NotFound(new { message = "Card not found." });
         }
+        
+        var authResult = await _authorizationService.AuthorizeAsync(User, card.List.BoardId, "BoardAccessPolicy");
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        return null;
+    }
+    
+    private async Task<IActionResult?> TryAuthorizeListAsync (int listId)
+    {
+        ListResponse? list = await _listService.GetListByIdToAccess(listId);
+        if (list == null)
+        {
+            _logger.LogDebug("List {ListId} not found for access.", listId);
+            return NotFound(new { message = "List not found." });
+        }
+        
+        var authResult = await _authorizationService.AuthorizeAsync(User, list.BoardId, "BoardAccessPolicy");
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        return null;
     }
 }

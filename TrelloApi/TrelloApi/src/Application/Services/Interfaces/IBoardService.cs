@@ -10,4 +10,5 @@ public interface IBoardService
     Task<BoardResponse?> UpdateBoard(int boardId, UpdateBoardDto dto);
     Task<bool> DeleteBoard(int boardId);
     Task<BoardResponse> GetBoardByIdToAccess(int boardId);
+    Task<BoardResponse?> GetBoardByIdComplete(int boardId);
 }

@@ -25,127 +25,79 @@ public class LabelService: BaseService, ILabelService
     
     public async Task<LabelResponse?> GetLabelById(int labelId)
     {
-        try
+        Label? label = await _labelRepository.GetAsync(l => l.Id.Equals(labelId));
+        if (label == null)
         {
-            Label? label = await _labelRepository.GetAsync(l => l.Id.Equals(labelId));
-            if (label == null)
-            {
-                _logger.LogWarning("Label {LabelId} not found", labelId);
-                return null;
-            }
+            _logger.LogWarning("Label {LabelId} not found", labelId);
+            return null;
+        }
 
-            _logger.LogDebug("Label {LabelId} retrieved", labelId);
-            return _mapper.Map<LabelResponse>(label);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving label {LabelId}", labelId);
-            throw;
-        }
+        _logger.LogDebug("Label {LabelId} retrieved", labelId);
+        return _mapper.Map<LabelResponse>(label);
     }
     
     public async Task<List<LabelResponse>> GetLabelsByBoardId(int boardId)
     {
-        try
-        {
-            List<Label> labels = (await _labelRepository.GetListAsync(l => l.BoardId.Equals(boardId))).ToList();
-            _logger.LogDebug("Retrieved {Count} labels for board {BoardId}", labels.Count, boardId);
-            return _mapper.Map<List<LabelResponse>>(labels);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving labels for board {BoardId}", boardId);
-            throw;
-        }
+        List<Label> labels = (await _labelRepository.GetListAsync(l => l.BoardId.Equals(boardId))).ToList();
+        _logger.LogDebug("Retrieved {Count} labels for board {BoardId}", labels.Count, boardId);
+        return _mapper.Map<List<LabelResponse>>(labels);
     }
 
     public async Task<LabelResponse> AddLabel(int boardId, AddLabelDto dto)
     {
-        try
-        {
-            Label label = new Label(dto.Title, dto.Color, boardId);
-            await _labelRepository.CreateAsync(label);
-            await _unitOfWork.CommitAsync();
+        Label label = new Label(dto.Title, dto.Color, boardId);
+        await _labelRepository.CreateAsync(label);
+        await _unitOfWork.CommitAsync();
 
-            _logger.LogInformation("Label added to board {BoardId}", boardId);
-            return _mapper.Map<LabelResponse>(label);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding label to board {BoardId}", boardId);
-            throw;
-        }
+        _logger.LogInformation("Label added to board {BoardId}", boardId);
+        return _mapper.Map<LabelResponse>(label);
     }
 
     public async Task<LabelResponse?> UpdateLabel(int labelId, UpdateLabelDto dto)
     {
-        try
+        Label? label = await _labelRepository.GetAsync(l => l.Id.Equals(labelId));
+        if (label == null)
         {
-            Label? label = await _labelRepository.GetAsync(l => l.Id.Equals(labelId));
-            if (label == null)
-            {
-                _logger.LogWarning("Label {LabelId} not found for update", labelId);
-                return null;
-            }
-
-            if (!string.IsNullOrEmpty(dto.Color))
-            {
-                label.Color = dto.Color;
-            }
-            if (!string.IsNullOrEmpty(dto.Title))
-            {
-                label.Title = dto.Title;
-            }
-
-            await _labelRepository.UpdateAsync(label);
-            await _unitOfWork.CommitAsync();
-
-            _logger.LogInformation("Label {LabelId} updated", labelId);
-            return _mapper.Map<LabelResponse>(label);
+            _logger.LogWarning("Label {LabelId} not found for update", labelId);
+            return null;
         }
-        catch (Exception ex)
+
+        if (!string.IsNullOrEmpty(dto.Color))
         {
-            _logger.LogError(ex, "Error updating label {LabelId}", labelId);
-            throw;
+            label.Color = dto.Color;
         }
+        if (!string.IsNullOrEmpty(dto.Title))
+        {
+            label.Title = dto.Title;
+        }
+
+        await _labelRepository.UpdateAsync(label);
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("Label {LabelId} updated", labelId);
+        return _mapper.Map<LabelResponse>(label);
     }
 
     public async Task<bool> DeleteLabel(int labelId)
     {
-        try
+        Label? label = await _labelRepository.GetAsync(l => l.Id.Equals(labelId));
+        if (label == null)
         {
-            Label? label = await _labelRepository.GetAsync(l => l.Id.Equals(labelId));
-            if (label == null)
-            {
-                _logger.LogWarning("Label {LabelId} not found for deletion", labelId);
-                return false;
-            }
-
-            await _labelRepository.DeleteAsync(label);
-            await _unitOfWork.CommitAsync();
-
-            _logger.LogInformation("Label {LabelId} deleted", labelId);
-            return true;
+            _logger.LogWarning("Label {LabelId} not found for deletion", labelId);
+            return false;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting label {LabelId}", labelId);
-            throw;
-        }
+
+        await _labelRepository.DeleteAsync(label);
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("Label {LabelId} deleted", labelId);
+        return true;
     }
     
     public async Task<LabelResponse> GetLabelByIdToAccess(int labelId)
     {
-        try
-        {
-            Label label = await _labelRepository.GetLabelByIdToAccessAsync(labelId);
-            _logger.LogInformation("Label {LabelId} access success", labelId);
-            return _mapper.Map<LabelResponse>(label);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Access error for label {LabelId}", labelId);
-            throw;
-        }
+        Label label = await _labelRepository.GetLabelByIdToAccessAsync(labelId);
+        _logger.LogInformation("Label {LabelId} access success", labelId);
+        return _mapper.Map<LabelResponse>(label);
     }
 }

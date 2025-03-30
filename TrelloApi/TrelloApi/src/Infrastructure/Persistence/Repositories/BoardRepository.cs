@@ -25,4 +25,12 @@ public class BoardRepository : GenericRepository<Board>, IBoardRepository
     {
         return await Context.Boards.FirstOrDefaultAsync(b=> b.Id.Equals(boardId));
     }
+
+    public async Task<Board?> GetBoardByIdCompleteAsync(int boardId)
+    {
+        return await Context.Boards
+            .Include(b => b.Lists)
+            .ThenInclude(l => l.Cards)
+            .FirstOrDefaultAsync(b => b.Id.Equals(boardId));
+    }
 }

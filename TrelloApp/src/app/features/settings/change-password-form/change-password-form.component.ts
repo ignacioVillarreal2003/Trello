@@ -63,7 +63,7 @@ export class ChangePasswordFormComponent {
     }
 
     this.userHttpService.update(body).subscribe({
-      next: (result: any): void => {
+      next: (): void => {
         this.alertService.SuccessMessage("Password changed successfully.");
       }
     });

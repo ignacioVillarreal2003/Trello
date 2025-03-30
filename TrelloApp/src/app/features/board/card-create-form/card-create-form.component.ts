@@ -4,8 +4,7 @@ import {InputComponent} from "../../../shared/components/input/input.component";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {List} from '../../../core/models/list';
 import {CardHttpService} from '../../../core/services/http/card-http.service';
-import {AddCard, Card} from '../../../core/models/card';
-import {CardCommunicationService} from '../../../core/services/communication/card-communication.service';
+import {AddCard} from '../../../core/models/card';
 
 @Component({
   selector: 'app-card-create-form',

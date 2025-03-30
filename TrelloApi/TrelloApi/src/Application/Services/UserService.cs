@@ -31,164 +31,108 @@ public class UserService: BaseService, IUserService
 
     public async Task<List<UserResponse>> GetUsers()
     {
-        try
-        {
-            List<User> users = (await _userRepository.GetListAsync()).ToList();
-            _logger.LogDebug("Retrieved {Count} users", users.Count);
-            return _mapper.Map<List<UserResponse>>(users);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving users");
-            throw;
-        }
+        List<User> users = (await _userRepository.GetListAsync()).ToList();
+        _logger.LogDebug("Retrieved {Count} users", users.Count);
+        return _mapper.Map<List<UserResponse>>(users);
     }
 
     public async Task<List<UserResponse>> GetUsersByUsername(string username)
     {
-        try
-        {
-            List<User> users = (await _userRepository.GetUsersByUsernameAsync(username)).ToList();
-            _logger.LogDebug("Retrieved {Count} users {Username}", users.Count, username);
-            return _mapper.Map<List<UserResponse>>(users);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving users {Username}", username);
-            throw;
-        }
+        List<User> users = (await _userRepository.GetUsersByUsernameAsync(username)).ToList();
+        _logger.LogDebug("Retrieved {Count} users {Username}", users.Count, username);
+        return _mapper.Map<List<UserResponse>>(users);
     }
 
     public async Task<List<UserResponse>> GetUsersByCardId(int cardId)
     {
-        try
-        {
-            List<User> users = (await _userRepository.GetUsersByCardIdAsync(cardId)).ToList();
-            _logger.LogDebug("Retrieved {Count} users for card {CardId}", users.Count, cardId);
-            return _mapper.Map<List<UserResponse>>(users);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving users for card {CardId}", cardId);
-            throw;
-        }
+        List<User> users = (await _userRepository.GetUsersByCardIdAsync(cardId)).ToList();
+        _logger.LogDebug("Retrieved {Count} users for card {CardId}", users.Count, cardId);
+        return _mapper.Map<List<UserResponse>>(users);
     }
     
     public async Task<UserResponse> RegisterUser(RegisterUserDto dto)
     {
-        try
-        {
-            User user = new User(dto.Email, dto.Username, _encrypt.HashPassword(dto.Password), AvatarBackgroundValues.AvatarBackgroundsAllowed[3], UserThemeValues.UserThemesAllowed[1]);
-            await _userRepository.CreateAsync(user);
+        User user = new User(dto.Email, dto.Username, _encrypt.HashPassword(dto.Password), AvatarBackgroundValues.AvatarBackgroundsAllowed[3], UserThemeValues.UserThemesAllowed[1]);
+        await _userRepository.CreateAsync(user);
 
-            await _unitOfWork.CommitAsync();
-            _logger.LogInformation("User {Email} register", dto.Email);
-            return _mapper.Map<UserResponse>(user);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogInformation("User {Email} register", dto.Email);
-            throw;
-        }
+        await _unitOfWork.CommitAsync();
+        _logger.LogInformation("User {Email} register", dto.Email);
+        return _mapper.Map<UserResponse>(user);
     }
 
     public async Task<UserResponse?> LoginUser(LoginUserDto dto)
     {
-        try
+        User? user = await _userRepository.GetAsync(u => u.Email.Equals(dto.Email));
+        if (user == null)
         {
-            User? user = await _userRepository.GetAsync(u => u.Email.Equals(dto.Email));
-            if (user == null)
-            {
-                _logger.LogError("Failed to login user {Email}", dto.Email);
-                return null;
-            }
-
-            if (!_encrypt.ComparePassword(dto.Password, user.Password))
-            {
-                throw new UnauthorizedAccessException("Invalid user credentials.");
-            }
-
-            user.LastLogin = DateTime.UtcNow;
-            await _userRepository.UpdateAsync(user);
-            await _unitOfWork.CommitAsync();
-
-            _logger.LogInformation("User {Email} login", dto.Email);
-            return _mapper.Map<UserResponse>(user);
+            _logger.LogError("Failed to login user {Email}", dto.Email);
+            return null;
         }
-        catch (Exception ex)
+
+        if (!_encrypt.ComparePassword(dto.Password, user.Password))
         {
-            _logger.LogError(ex, "Error login user {Email}", dto.Email);
-            throw;
+            throw new UnauthorizedAccessException("Invalid user credentials.");
         }
+
+        user.LastLogin = DateTime.UtcNow;
+        await _userRepository.UpdateAsync(user);
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("User {Email} login", dto.Email);
+        return _mapper.Map<UserResponse>(user);
     }
 
     public async Task<UserResponse?> UpdateUser(UpdateUserDto dto, int userId)
     {
-        try
+        User? user = await _userRepository.GetAsync(u => u.Id.Equals(userId));
+        if (user == null)
         {
-            User? user = await _userRepository.GetAsync(u => u.Id.Equals(userId));
-            if (user == null)
-            {
-                _logger.LogWarning("User {UserId} not found for update", userId);
-                return null;
-            }
+            _logger.LogWarning("User {UserId} not found for update", userId);
+            return null;
+        }
             
-            if (!string.IsNullOrEmpty(dto.Username))
-            {
-                user.Username = dto.Username;
-            }
-            if (!string.IsNullOrEmpty(dto.Theme))
-            {
-                user.Theme = dto.Theme;
-            }
-            if (!string.IsNullOrEmpty(dto.OldPassword) && !string.IsNullOrEmpty(dto.NewPassword))
-            {
-                if (!_encrypt.ComparePassword(dto.OldPassword, user.Password))
-                {
-                    _logger.LogWarning("User {UserId} password not found for update", userId);
-                    throw new UnauthorizedAccessException("Invalid user credentials.");
-                }
-                user.Password = _encrypt.HashPassword(dto.NewPassword);
-            }
-            if (!string.IsNullOrEmpty(dto.AvatarBackground))
-            {
-                user.AvatarBackground = dto.AvatarBackground;
-            }
-
-            await _userRepository.UpdateAsync(user);
-            await _unitOfWork.CommitAsync();
-
-            _logger.LogInformation("User {UserId} updated", userId);
-            return _mapper.Map<UserResponse>(user);
-        }
-        catch (Exception ex)
+        if (!string.IsNullOrEmpty(dto.Username))
         {
-            _logger.LogError(ex, "Error updating user {UserId}", userId);
-            throw;
+            user.Username = dto.Username;
         }
+        if (!string.IsNullOrEmpty(dto.Theme))
+        {
+            user.Theme = dto.Theme;
+        }
+        if (!string.IsNullOrEmpty(dto.OldPassword) && !string.IsNullOrEmpty(dto.NewPassword))
+        {
+            if (!_encrypt.ComparePassword(dto.OldPassword, user.Password))
+            {
+                _logger.LogWarning("User {UserId} password not found for update", userId);
+                throw new UnauthorizedAccessException("Invalid user credentials.");
+            }
+            user.Password = _encrypt.HashPassword(dto.NewPassword);
+        }
+        if (!string.IsNullOrEmpty(dto.AvatarBackground))
+        {
+            user.AvatarBackground = dto.AvatarBackground;
+        }
+
+        await _userRepository.UpdateAsync(user);
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("User {UserId} updated", userId);
+        return _mapper.Map<UserResponse>(user);
     }
 
     public async Task<Boolean> DeleteUser(int userId)
     {
-        try
+        User? user = await _userRepository.GetAsync(u => u.Id.Equals(userId));
+        if (user == null)
         {
-            User? user = await _userRepository.GetAsync(u => u.Id.Equals(userId));
-            if (user == null)
-            {
-                _logger.LogWarning("User {UserId} not found for deletion", userId);
-                return false;
-            }
-
-            await _userRepository.DeleteAsync(user);
-            await _unitOfWork.CommitAsync();
-
-            _logger.LogInformation("User {UserId} deleted", userId);
-            return true;
+            _logger.LogWarning("User {UserId} not found for deletion", userId);
+            return false;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting user {UserId}", userId);
-            throw;
-        }
+
+        await _userRepository.DeleteAsync(user);
+        await _unitOfWork.CommitAsync();
+
+        _logger.LogInformation("User {UserId} deleted", userId);
+        return true;
     }
 }

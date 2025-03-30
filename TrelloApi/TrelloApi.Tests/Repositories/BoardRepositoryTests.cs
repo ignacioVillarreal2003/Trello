@@ -32,7 +32,7 @@ public class BoardRepositoryTests
         _context.Boards.Add(board);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.GetAsync(b => b.Id == boardId && !b.IsArchived);
+        var result = await _repository.GetAsync(b => b.Id == boardId);
         
         Assert.NotNull(result);
         Assert.Equal(boardId, result.Id);
@@ -43,7 +43,7 @@ public class BoardRepositoryTests
     {
         int boardId = 1;
         
-        var result = await _repository.GetAsync(b => b.Id == boardId && !b.IsArchived);
+        var result = await _repository.GetAsync(b => b.Id == boardId);
         
         Assert.Null(result);
     }
@@ -55,14 +55,12 @@ public class BoardRepositoryTests
         var board = new Board("title", "background") 
         { 
             Id = boardId, 
-            IsArchived = true, 
-            ArchivedAt = DateTime.UtcNow 
         };
 
         _context.Boards.Add(board);
         await _context.SaveChangesAsync();
         
-        var result = await _repository.GetAsync(b => b.Id == boardId && !b.IsArchived);
+        var result = await _repository.GetAsync(b => b.Id == boardId);
         
         Assert.Null(result);
     }
@@ -74,8 +72,8 @@ public class BoardRepositoryTests
         var board1 = new Board("title", "background") { Id = 1 };
         var board2 = new Board("title", "background") { Id = 2 };
 
-        var userBoard1 = new UserBoard(userId, 1, "Role");
-        var userBoard2 = new UserBoard(userId, 2, "Role");
+        var userBoard1 = new UserBoard(userId, 1);
+        var userBoard2 = new UserBoard(userId, 2);
 
         _context.Boards.AddRange(board1, board2);
         _context.UserBoards.AddRange(userBoard1, userBoard2);
@@ -102,10 +100,10 @@ public class BoardRepositoryTests
     public async Task GetBoardsByUserId_ShouldNotReturnArchivedBoards()
     {
         int userId = 1;
-        var board1 = new Board("title", "background") { Id = 1, IsArchived = true, ArchivedAt = DateTime.UtcNow };
+        var board1 = new Board("title", "background") { Id = 1 };
         var board2 = new Board("title", "background") { Id = 2 };
-        var userBoard1 = new UserBoard(userId, 1, "Role");
-        var userBoard2 = new UserBoard(userId, 2, "Role");
+        var userBoard1 = new UserBoard(userId, 1);
+        var userBoard2 = new UserBoard(userId, 2);
 
         _context.Boards.AddRange(board1, board2);
         _context.UserBoards.AddRange(userBoard1, userBoard2);

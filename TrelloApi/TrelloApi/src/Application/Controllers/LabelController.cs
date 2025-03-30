@@ -34,189 +34,142 @@ public class LabelController : BaseController
     [HttpGet("{labelId:int}")]
     public async Task<IActionResult> GetLabelById(int labelId)
     {
-        try
+        var authorize = await TryAuthorizeLabelAsync(labelId);
+        if (authorize != null)
         {
-            LabelResponse? labelToAccess = await _labelService.GetLabelByIdToAccess(labelId);
-            if (labelToAccess == null)
-            {
-                _logger.LogDebug("Label {LabelId} not found for got.", labelId);
-                return NotFound(new { message = "Label not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, labelToAccess.Board.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
             
-            LabelResponse? label = await _labelService.GetLabelById(labelId);
-            if (label == null)
-            {
-                _logger.LogDebug("Label {LabelId} not found", labelId);
-                return NotFound(new { message = "Label not found." });
-            }
-
-            _logger.LogDebug("Label {LabelId} retrieved", labelId);
-            return Ok(label);
-        }
-        catch (Exception ex)
+        LabelResponse? label = await _labelService.GetLabelById(labelId);
+        if (label == null)
         {
-            _logger.LogError(ex, "Error retrieving label {LabelId}", labelId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
+            _logger.LogDebug("Label {LabelId} not found", labelId);
+            return NotFound(new { message = "Label not found." });
         }
+
+        _logger.LogDebug("Label {LabelId} retrieved", labelId);
+        return Ok(label);
     }
     
     [HttpGet("board/{boardId:int}")]
     public async Task<IActionResult> GetLabelsByBoardId(int boardId)
     {
-        try
+        var authorize = await TryAuthorizeBoardAsync(boardId);
+        if (authorize != null)
         {
-            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
-            if (boardToAccess == null)
-            {
-                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
-                return NotFound(new { message = "Board not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
             
-            List<LabelResponse> labels = await _labelService.GetLabelsByBoardId(boardId);
-            _logger.LogDebug("Retrieved {Count} labels for board {BoardId}", labels.Count, boardId);
-            return Ok(labels);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving labels for board {BoardId}", boardId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+        List<LabelResponse> labels = await _labelService.GetLabelsByBoardId(boardId);
+        _logger.LogDebug("Retrieved {Count} labels for board {BoardId}", labels.Count, boardId);
+        return Ok(labels);
     }
     
     [HttpGet("colors")]
     public Task<IActionResult> GetLabelColors()
     {
-        try
-        {
-            List<string> labelColorsAllowed = LabelColorValues.LabelColorsAllowed;
-            _logger.LogDebug("Retrieved {Count} colors for label", labelColorsAllowed.Count);
-            return Task.FromResult<IActionResult>(Ok(labelColorsAllowed));
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving colors for label");
-            return Task.FromResult<IActionResult>(StatusCode(500, new { message = "An unexpected error occurred." }));
-        }
+        List<string> labelColorsAllowed = LabelColorValues.LabelColorsAllowed;
+        _logger.LogDebug("Retrieved {Count} colors for label", labelColorsAllowed.Count);
+        return Task.FromResult<IActionResult>(Ok(labelColorsAllowed));
     }
 
     [HttpPost("board/{boardId:int}")]
     public async Task<IActionResult> AddLabel(int boardId, [FromBody] AddLabelDto dto)
     {
-        try
+        var authorize = await TryAuthorizeBoardAsync(boardId);
+        if (authorize != null)
         {
-            BoardResponse? boardToAccess = await _boardService.GetBoardByIdToAccess(boardId);
-            if (boardToAccess == null)
-            {
-                _logger.LogDebug("Board {BoardId} not found for got.", boardId);
-                return NotFound(new { message = "Board not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, boardToAccess.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
-            
-            LabelResponse label = await _labelService.AddLabel(boardId, dto);
-            
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("LabelCreated", label);
-            
-            _logger.LogInformation("Label added to board {BoardId}", boardId);
-            return CreatedAtAction(nameof(GetLabelById), new { labelId = label.Id }, label);
+            return authorize;
         }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding label to board {BoardId}", boardId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
-        }
+            
+        LabelResponse label = await _labelService.AddLabel(boardId, dto);
+            
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("LabelCreated", label);
+            
+        _logger.LogInformation("Label added to board {BoardId}", boardId);
+        return CreatedAtAction(nameof(GetLabelById), new { labelId = label.Id }, label);
     }
 
     [HttpPut("{labelId:int}")]
     public async Task<IActionResult> UpdateLabel(int labelId, [FromBody] UpdateLabelDto dto)
     {
-        try
+        var authorize = await TryAuthorizeLabelAsync(labelId);
+        if (authorize != null)
         {
-            LabelResponse? labelToAccess = await _labelService.GetLabelByIdToAccess(labelId);
-            if (labelToAccess == null)
-            {
-                _logger.LogDebug("Label {LabelId} not found for got.", labelId);
-                return NotFound(new { message = "Label not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, labelToAccess.Board.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
-            
-            LabelResponse? label = await _labelService.UpdateLabel(labelId, dto);
-            if (label == null)
-            {
-                _logger.LogDebug("Label {LabelId} not found for update", labelId);
-                return NotFound(new { message = "Label not found." });
-            }
-            
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("LabelUpdated", label);
-            
-            _logger.LogInformation("Label {LabelId} updated", labelId);
-            return Ok(label);
+            return authorize;
         }
-        catch (Exception ex)
+            
+        LabelResponse? label = await _labelService.UpdateLabel(labelId, dto);
+        if (label == null)
         {
-            _logger.LogError(ex, "Error updating label {LabelId}", labelId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
+            _logger.LogDebug("Label {LabelId} not found for update", labelId);
+            return NotFound(new { message = "Label not found." });
         }
+            
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("LabelUpdated", label);
+            
+        _logger.LogInformation("Label {LabelId} updated", labelId);
+        return Ok(label);
     }
 
     [HttpDelete("{labelId:int}")]
     public async Task<IActionResult> DeleteLabel(int labelId)
     {
-        try
+        var authorize = await TryAuthorizeLabelAsync(labelId);
+        if (authorize != null)
         {
-            LabelResponse? labelToAccess = await _labelService.GetLabelByIdToAccess(labelId);
-            if (labelToAccess == null)
-            {
-                _logger.LogDebug("Label {LabelId} not found for got.", labelId);
-                return NotFound(new { message = "Label not found." });
-            }
-        
-            var authResult = await _authorizationService.AuthorizeAsync(User, labelToAccess.Board.Id, "BoardAccessPolicy");
-            if (!authResult.Succeeded)
-            {
-                return Forbid();
-            }
+            return authorize;
+        }
             
-            Boolean isDeleted = await _labelService.DeleteLabel(labelId);
-            if (!isDeleted)
-            {
-                _logger.LogDebug("Label {LabelId} not found for deletion", labelId);
-                return NotFound(new { message = "Label not found." });
-            }
+        Boolean isDeleted = await _labelService.DeleteLabel(labelId);
+        if (!isDeleted)
+        {
+            _logger.LogDebug("Label {LabelId} not found for deletion", labelId);
+            return NotFound(new { message = "Label not found." });
+        }
 
-            await _hubContext.Clients.Group(BoardId.ToString())
-                .SendAsync("LabelDeleted", labelId);
+        await _hubContext.Clients.Group(BoardId.ToString())
+            .SendAsync("LabelDeleted", labelId);
             
-            _logger.LogInformation("Label {LabelId} deleted", labelId);
-            return NoContent();
-        }
-        catch (Exception ex)
+        _logger.LogInformation("Label {LabelId} deleted", labelId);
+        return NoContent();
+    }
+    
+    private async Task<IActionResult?> TryAuthorizeBoardAsync (int boardId)
+    {
+        BoardResponse? board = await _boardService.GetBoardByIdToAccess(boardId);
+        if (board == null)
         {
-            _logger.LogError(ex, "Error deleting label {LabelId}", labelId);
-            return StatusCode(500, new { message = "An unexpected error occurred." });
+            _logger.LogDebug("Board {BoardId} not found for access.", boardId);
+            return NotFound(new { message = "Board not found." });
         }
+
+        var authResult = await _authorizationService.AuthorizeAsync(User, board.Id, "BoardAccessPolicy");
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        return null;
+    }
+    
+    private async Task<IActionResult?> TryAuthorizeLabelAsync (int labelId)
+    {
+        LabelResponse? label = await _labelService.GetLabelByIdToAccess(labelId);
+        if (label == null)
+        {
+            _logger.LogDebug("Label {LabelId} not found for access.", labelId);
+            return NotFound(new { message = "Label not found." });
+        }
+        
+        var authResult = await _authorizationService.AuthorizeAsync(User, label.Board.Id, "BoardAccessPolicy");
+        if (!authResult.Succeeded)
+        {
+            return Forbid();
+        }
+
+        return null;
     }
 }

@@ -1,6 +1,5 @@
 import {Component, Input} from '@angular/core';
 import {ListHttpService} from '../../../core/services/http/list-http.service';
-import {ListCommunicationService} from '../../../core/services/communication/list-communication.service';
 import {List} from '../../../core/models/list';
 
 @Component({

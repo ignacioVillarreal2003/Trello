@@ -1,3 +1,6 @@
+import {UserCard} from './user-card';
+import {UserBoard} from './user-board';
+
 export interface User {
   id: number,
   email: string,
@@ -5,7 +8,11 @@ export interface User {
   theme: string,
   createdAt: string,
   updatedAt?: string,
-  avatarBackground: string
+  avatarBackground: string,
+  lastLogin?: string,
+  userBoards: UserBoard[],
+  userCards: UserCard[],
+  comments: Comment[]
 }
 
 export interface UserWithAssignment extends User {

@@ -13,13 +13,6 @@ export class UserCardCommunicationService {
     this.userCardAddSubject.next(userCard);
   }
 
-  private userCardUpdateSubject = new BehaviorSubject<UserCard | null>(null);
-  updateUserCard$ = this.userCardUpdateSubject.asObservable();
-
-  setUpdateUserCard(userCard: UserCard) {
-    this.userCardUpdateSubject.next(userCard);
-  }
-
   private userCardDeleteSubject = new BehaviorSubject<{ userId: number, cardId: number } | null>(null);
   deleteUserCard$ = this.userCardDeleteSubject.asObservable();
 

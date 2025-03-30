@@ -32,7 +32,7 @@ public class UserCardIntegrationTests: IClassFixture<CustomWebApplicationFactory
     [Fact]
     public async Task GetUsersByCardId_ShouldReturnUsers_WhenUsersFound()
     {
-        var card = new Card("title", "description", 1, null, 1) { Id = 1 };
+        var card = new Card("title", "description", 1, 1) { Id = 1 };
         var user = new User("user@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
         var userCard = new UserCard(user.Id, card.Id);
         
@@ -71,7 +71,7 @@ public class UserCardIntegrationTests: IClassFixture<CustomWebApplicationFactory
     [Fact]
     public async Task AddUserToCard_ShouldReturnCreated_WhenAddedSuccessful()
     {
-        var card = new Card("title", "description", 1, null, 1) { Id = 1 };
+        var card = new Card("title", "description", 1, 1) { Id = 1 };
         var user = new User("user@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
         var dto = new AddUserCardDto { UserId = user.Id };
 
@@ -87,7 +87,7 @@ public class UserCardIntegrationTests: IClassFixture<CustomWebApplicationFactory
     [Fact]
     public async Task RemoveUserFromCard_ShouldReturnNoContent_WhenDeletedSuccessful()
     {
-        var card = new Card("title", "description", 1, null, 1) { Id = 1 };
+        var card = new Card("title", "description", 1, 1) { Id = 1 };
         var user = new User("user@email.com", "username", "password", "avatar background", "theme") { Id = 1 };
         var userCard = new UserCard(user.Id, card.Id);
 

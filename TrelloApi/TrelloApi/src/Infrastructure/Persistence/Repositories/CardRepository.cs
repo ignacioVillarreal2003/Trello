@@ -15,4 +15,15 @@ public class CardRepository: GenericRepository<Card>, ICardRepository
             .Include(c => c.List.Board)
             .FirstOrDefaultAsync(c => c.Id.Equals(cardId));
     }
+
+    public async Task<Card?> GetCardByIdCompleteAsync(int cardId)
+    {
+        return await Context.Cards
+            .Include(c => c.Comments)
+            .Include(c => c.CardLabels)
+            .ThenInclude(cl => cl.Label)
+            .Include(c => c.UserCards)
+            .ThenInclude(uc => uc.User)
+            .FirstOrDefaultAsync(c => c.Id.Equals(cardId));
+    }
 }

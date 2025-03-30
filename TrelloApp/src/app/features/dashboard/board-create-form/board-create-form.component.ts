@@ -27,7 +27,6 @@ export class BoardCreateFormComponent {
 
   formCreateBoard: FormGroup = new FormGroup({
     title: new FormControl('', [Validators.required, Validators.maxLength(32)]),
-    description: new FormControl(''),
     background: new FormControl('', [Validators.required])
   });
 
@@ -75,7 +74,6 @@ export class BoardCreateFormComponent {
 
     const body: AddBoard = {
       title: this.formCreateBoard.value.title,
-      description: this.formCreateBoard.value.description,
       background: this.formCreateBoard.value.background,
     }
 

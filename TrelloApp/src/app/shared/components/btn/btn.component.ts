@@ -14,4 +14,5 @@ export class BtnComponent {
   @Input() appearance: 'appearance-solid' | 'appearance-outline' | 'appearance-light' | 'appearance-bordered' | 'appearance-flat' | 'appearance-ghost' | 'appearance-shadow' = 'appearance-solid';
   @Input() color: 'red' | 'blue' | 'skyblue' | 'orange' | 'grey' | 'yellow' | 'green' = 'blue';
   @Input() type: 'submit' | 'button' = 'button'
+  @Input() disabled: null | boolean = false;
 }

@@ -27,7 +27,7 @@ public class UserBoardRepositoryTests
     public async Task GetUserBoardById_ShouldReturnUserBoard_WhenUserBoardExists()
     {
         int userId = 1, boardId = 1;
-        var userBoard = new UserBoard(userId, boardId, "Role");
+        var userBoard = new UserBoard(userId, boardId);
         
         _context.UserBoards.Add(userBoard);
         await _context.SaveChangesAsync();
@@ -55,8 +55,8 @@ public class UserBoardRepositoryTests
         int boardId = 1;
         var user1 = new User("email1@gmail.com", "username", "password", "avatar background", "theme") { Id = 1 };
         var user2 = new User("email2@gmail.com", "username", "password", "avatar background", "theme") { Id = 2 };
-        var userBoard1 = new UserBoard(1, boardId, "Role");
-        var userBoard2 = new UserBoard(2, boardId, "Role");
+        var userBoard1 = new UserBoard(1, boardId);
+        var userBoard2 = new UserBoard(2, boardId);
         
         _context.Users.AddRange(user1, user2);
         _context.UserBoards.AddRange(userBoard1, userBoard2);
@@ -82,7 +82,7 @@ public class UserBoardRepositoryTests
     [Fact]
     public async Task AddUserBoard_ShouldPersistUserBoard_WhenAddedSuccessfully()
     {
-        var userBoard = new UserBoard(1, 1, "Role");
+        var userBoard = new UserBoard(1, 1);
         
         await _repository.CreateAsync(userBoard);
         await _unitOfWork.CommitAsync();
@@ -97,7 +97,7 @@ public class UserBoardRepositoryTests
     [Fact]
     public async Task DeleteUserBoard_ShouldRemoveUserBoard_WhenUserBoardExists()
     {
-        var userBoard = new UserBoard(1, 1, "Role");
+        var userBoard = new UserBoard(1, 1);
 
         _context.UserBoards.Add(userBoard);
         await _context.SaveChangesAsync();

@@ -20,24 +20,6 @@ export abstract class BaseHttpService {
 
     if (error.error instanceof ErrorEvent) {
       errorMessage = `Client Error: ${error.error.message}`;
-    } else {
-      switch (error.status) {
-        case 0:
-          errorMessage = 'No connection to the server.';
-          break;
-        case 400:
-          errorMessage = error.error?.message || 'Invalid request. Please check your input.';
-          break;
-        case 401:
-          errorMessage = 'Unauthorized. Check your credentials.';
-          break;
-        case 404:
-          errorMessage = 'Resource not found.';
-          break;
-        case 500:
-          errorMessage = 'Server error. Try again later.';
-          break;
-      }
     }
 
     return throwError(() => new Error(errorMessage));

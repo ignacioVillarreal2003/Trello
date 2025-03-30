@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import {NgForOf} from "@angular/common";
 import {BoardItemComponent} from '../board-item/board-item.component';
 import {Board} from '../../../core/models/board';
-import {Subject, takeUntil} from 'rxjs';
+import {Subject} from 'rxjs';
 import {BoardHttpService} from '../../../core/services/http/board-http.service';
 import {BoardCommunicationService} from '../../../core/services/communication/board-communication.service';
 
@@ -17,7 +17,6 @@ import {BoardCommunicationService} from '../../../core/services/communication/bo
 })
 export class BoardListComponent {
   boards: Board[] = [];
-  destroy: Subject<void> = new Subject<void>();
 
   constructor(private boardHttp: BoardHttpService,
               private boardCommunicationService: BoardCommunicationService) {}

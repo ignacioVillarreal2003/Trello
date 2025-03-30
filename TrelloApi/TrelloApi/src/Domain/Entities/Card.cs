@@ -24,6 +24,8 @@ public class Card: Entity
     
     public ICollection<CardLabel> CardLabels { get; set; }
     
+    public ICollection<UserCard> UserCards { get; set; }
+    
     public Card(string title, string description, int listId, int position)
     {
         Title = title;

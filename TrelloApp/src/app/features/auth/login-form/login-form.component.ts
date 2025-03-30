@@ -3,7 +3,7 @@ import {BtnComponent} from "../../../shared/components/btn/btn.component";
 import {InputComponent} from "../../../shared/components/input/input.component";
 import {FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {LoginUser, UserAuth} from '../../../core/models/user';
-import {Router} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {UserHttpService} from '../../../core/services/http/user-http.service';
 import {SessionService} from '../../../core/services/session/session.service';
 import {ThemeService} from '../../../core/services/theme.service';
@@ -19,6 +19,7 @@ import {ThemeService} from '../../../core/services/theme.service';
   styleUrl: './login-form.component.css'
 })
 export class LoginFormComponent {
+  returnUrl: string | undefined = undefined;
 
   formLogin: FormGroup = new FormGroup({
     email: new FormControl('', [Validators.required, Validators.email, Validators.maxLength(64)]),
@@ -38,7 +39,16 @@ export class LoginFormComponent {
     }
   };
 
-  constructor(private router: Router,
+  ngOnInit(): void {
+    this.route.queryParams.subscribe(params => {
+      if (params['returnUrl']) {
+        this.returnUrl = params['returnUrl'];
+      }
+    });
+  }
+
+  constructor(private route: ActivatedRoute,
+              private router: Router,
               private userHttpService: UserHttpService,
               private sessionService: SessionService,
               private themeService: ThemeService) { }
@@ -77,8 +87,11 @@ export class LoginFormComponent {
           avatarBackground: result.user.avatarBackground
         });
         this.themeService.applyTheme(result.user.theme);
-        this.router.navigate(['/dashboard']);
-      }
+        if (this.returnUrl != undefined) {
+          this.router.navigate([this.returnUrl]);
+        } else {
+          this.router.navigate(['/dashboard']);
+        }      }
     });
   }
 }

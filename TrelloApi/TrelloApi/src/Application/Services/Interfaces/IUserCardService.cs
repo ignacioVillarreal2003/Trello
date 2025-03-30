@@ -8,5 +8,4 @@ public interface IUserCardService
     Task<List<UserResponse>> GetUsersByCardId(int cardId);
     Task<UserCardResponse> AddUserToCard(int cardId, AddUserCardDto dto);
     Task<Boolean> RemoveUserFromCard(int userId, int cardId);
-    Task<UserCardResponse> GetUserCardByIdToAccess(int userId, int cardId);
 }

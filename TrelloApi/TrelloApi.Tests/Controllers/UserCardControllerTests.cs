@@ -1,9 +1,12 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs.User;
 using TrelloApi.Domain.DTOs.UserCard;
@@ -15,12 +18,19 @@ namespace TrelloApi.Tests.Controllers
         private readonly Mock<IUserCardService> _mockUserCardService;
         private readonly Mock<ILogger<UserCardController>> _mockLogger;
         private readonly UserCardController _controller;
+        private readonly Mock<ICardService> _mockCardService;
+        private readonly Mock<IHubContext<BoardHub>> _mockHubContext;
+        private readonly Mock<IAuthorizationService> _mockAuthorizationService;
 
         public UserCardControllerTests()
         {
             _mockUserCardService = new Mock<IUserCardService>();
             _mockLogger = new Mock<ILogger<UserCardController>>();
-            _controller = new UserCardController(_mockLogger.Object, _mockUserCardService.Object);
+            _mockCardService = new Mock<ICardService>();
+            _mockHubContext = new Mock<IHubContext<BoardHub>>();
+            _mockAuthorizationService = new Mock<IAuthorizationService>();
+
+            _controller = new UserCardController(_mockLogger.Object, _mockUserCardService.Object, _mockCardService.Object, _mockHubContext.Object, _mockAuthorizationService.Object);
             SetUserId(1);
         }
         

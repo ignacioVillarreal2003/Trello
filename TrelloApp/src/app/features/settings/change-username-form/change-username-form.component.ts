@@ -26,7 +26,6 @@ export class ChangeUsernameFormComponent {
   errorMessages: any = {
     username: {
       required: 'Username is required.',
-      minlength: 'Username must be at least 8 characters long.',
       maxlength: 'Username must be less than 64 characters.'
     }
   };

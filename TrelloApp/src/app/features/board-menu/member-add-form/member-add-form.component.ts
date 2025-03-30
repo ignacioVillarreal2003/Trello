@@ -44,7 +44,6 @@ export class MemberAddFormComponent {
     if (this.board !== undefined) {
       const body: AddUserBoard = {
         userId: user.id,
-        role: "Member"
       }
 
       this.userBoardHttpService.addUserToBoard(this.board.id, body).subscribe();

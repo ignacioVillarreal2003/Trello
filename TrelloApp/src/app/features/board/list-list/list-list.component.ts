@@ -41,6 +41,7 @@ export class ListListComponent {
     this.listCommunicationService.deleteList$.subscribe((listId: number | null): void => {
       if (listId !== null) {
         this.lists = this.lists.filter(l => l.id !== listId);
+        this.lists.sort((a, b) => a.position - b.position);
       }
     });
     this.listCommunicationService.updateList$.subscribe((list: List | null): void => {

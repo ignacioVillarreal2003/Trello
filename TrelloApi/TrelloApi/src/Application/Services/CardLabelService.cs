@@ -1,6 +1,5 @@
 using AutoMapper;
 using TrelloApi.Application.Services.Interfaces;
-using TrelloApi.Domain.DTOs;
 using TrelloApi.Domain.DTOs.CardLabel;
 using TrelloApi.Domain.DTOs.Label;
 using TrelloApi.Domain.Entities;
@@ -25,76 +24,37 @@ public class CardLabelService: BaseService, ICardLabelService
 
     public async Task<List<LabelResponse>> GetLabelsByCardId(int cardId)
     {
-        try
-        {
-            List<Label> labels = (await _cardLabelRepository.GetLabelsByCardIdAsync(cardId)).ToList();
-            _logger.LogDebug("Retrieved {Count} labels for card {CardId}", labels.Count, cardId);
-            return _mapper.Map<List<LabelResponse>>(labels);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving labels for card {CardId}", cardId);
-            throw;
-        }
+        List<Label> labels = (await _cardLabelRepository.GetLabelsByCardIdAsync(cardId)).ToList();
+        _logger.LogDebug("Retrieved {Count} labels for card {CardId}", labels.Count, cardId);
+        return _mapper.Map<List<LabelResponse>>(labels);
     }
 
     public async Task<CardLabelResponse> AddLabelToCard(int cardId, AddCardLabelDto dto)
     {
-        try
-        {
-            CardLabel newCardLabel = new CardLabel(cardId, dto.LabelId);
-            await _cardLabelRepository.CreateAsync(newCardLabel);
-            await _unitOfWork.CommitAsync();
+        CardLabel newCardLabel = new CardLabel(cardId, dto.LabelId);
+        await _cardLabelRepository.CreateAsync(newCardLabel);
+        await _unitOfWork.CommitAsync();
 
-            var cardLabel = await _cardLabelRepository
-                .GetCardLabelByIdAsync(newCardLabel.CardId, newCardLabel.LabelId);
+        var cardLabel = await _cardLabelRepository
+            .GetCardLabelByIdAsync(newCardLabel.CardId, newCardLabel.LabelId);
 
-            _logger.LogInformation("Label {LabelId} added to card {CardId}", dto.LabelId, cardId);
-            return _mapper.Map<CardLabelResponse>(cardLabel);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error adding label {LabelId} for card {CardId}", dto.LabelId, cardId);
-            throw;
-        }
+        _logger.LogInformation("Label {LabelId} added to card {CardId}", dto.LabelId, cardId);
+        return _mapper.Map<CardLabelResponse>(cardLabel);
     }
 
     public async Task<Boolean> RemoveLabelFromCard(int cardId, int labelId)
     {
-        try
+        CardLabel? cardLabel = await _cardLabelRepository.GetAsync(cl => cl.CardId.Equals(cardId) && cl.LabelId.Equals(labelId));
+        if (cardLabel == null)
         {
-            CardLabel? cardLabel = await _cardLabelRepository.GetAsync(cl => cl.CardId.Equals(cardId) && cl.LabelId.Equals(labelId));
-            if (cardLabel == null)
-            {
-                _logger.LogWarning("Label {LabelId} for card {CardId} not found for deletion", labelId, cardId);
-                return false;
-            }
+            _logger.LogWarning("Label {LabelId} for card {CardId} not found for deletion", labelId, cardId);
+            return false;
+        }
 
-            await _cardLabelRepository.DeleteAsync(cardLabel);
-            await _unitOfWork.CommitAsync();
+        await _cardLabelRepository.DeleteAsync(cardLabel);
+        await _unitOfWork.CommitAsync();
 
-            _logger.LogInformation("Label {LabelId} for card {CardId} deleted", labelId, cardId);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error deleting label {LabelId} for card {CardId}", labelId, cardId);
-            throw;
-        }
-    }
-    
-    public async Task<CardLabelResponse> GetCardLabelByIdToAccess(int cardId, int labelId)
-    {
-        try
-        {
-            CardLabel cardLabel = await _cardLabelRepository.GetCardLabelByIdToAccessAsync(cardId, labelId);
-            _logger.LogInformation("Card {CardId} to label {LabelId} access success", cardId, labelId);
-            return _mapper.Map<CardLabelResponse>(cardLabel);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Access error for card {CardId} to label {LabelId}", cardId, labelId);
-            throw;
-        }
+        _logger.LogInformation("Label {LabelId} for card {CardId} deleted", labelId, cardId);
+        return true;
     }
 }

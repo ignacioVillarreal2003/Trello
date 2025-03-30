@@ -1,9 +1,12 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs.List;
 
@@ -14,12 +17,19 @@ namespace TrelloApi.Tests.Controllers
         private readonly Mock<IListService> _mockListService;
         private readonly Mock<ILogger<ListController>> _mockLogger;
         private readonly ListController _controller;
-
+        private readonly Mock<IBoardService> _mockBoardService;
+        private readonly Mock<IHubContext<BoardHub>> _mockHubContext;
+        private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+        
         public ListControllerTests()
         {
             _mockListService = new Mock<IListService>();
             _mockLogger = new Mock<ILogger<ListController>>();
-            _controller = new ListController(_mockLogger.Object, _mockListService.Object);
+            _mockBoardService = new Mock<IBoardService>();
+            _mockHubContext = new Mock<IHubContext<BoardHub>>();
+            _mockAuthorizationService = new Mock<IAuthorizationService>();
+            
+            _controller = new ListController(_mockLogger.Object, _mockListService.Object, _mockBoardService.Object, _mockHubContext.Object, _mockAuthorizationService.Object);
             SetUserId(1);
         }
         

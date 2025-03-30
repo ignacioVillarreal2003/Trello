@@ -1,4 +1,5 @@
 import { Card } from "./card"
+import {Board} from './board';
 
 export interface List {
   id: number,
@@ -7,6 +8,7 @@ export interface List {
   boardId: number,
   createdAt: string,
   updatedAt?: string,
+  board: Board,
   cards: Card[]
 }
 

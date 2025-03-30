@@ -27,7 +27,7 @@ public class CardRepositoryTests
     public async Task GetCardById_ShouldReturnCard_WhenCardExists()
     {
         int cardId = 1;
-        var card = new Card("title", "description", listId: 1, null, 1) { Id = cardId };
+        var card = new Card("title", "description", listId: 1, 1) { Id = cardId };
 
         _context.Cards.Add(card);
         await _context.SaveChangesAsync();
@@ -52,8 +52,8 @@ public class CardRepositoryTests
     public async Task GetCardsByListId_ShouldReturnCards_WhenListHasCards()
     {
         int listId = 1;
-        var card1 = new Card("title1", "description1", listId, null, 1) { Id = 1 };
-        var card2 = new Card("title2", "description2", listId, null, 1) { Id = 2 };
+        var card1 = new Card("title1", "description1", listId, 1) { Id = 1 };
+        var card2 = new Card("title2", "description2", listId, 1) { Id = 2 };
 
         _context.Cards.AddRange(card1, card2);
         await _context.SaveChangesAsync();
@@ -77,7 +77,7 @@ public class CardRepositoryTests
     [Fact]
     public async Task AddCard_ShouldPersistCard_WhenAddedSuccessfully()
     {
-        var card = new Card("title", "description", listId: 1, null, 1);
+        var card = new Card("title", "description", listId: 1, 1);
 
         await _repository.CreateAsync(card);
         await _unitOfWork.CommitAsync();
@@ -91,7 +91,7 @@ public class CardRepositoryTests
     [Fact]
     public async Task UpdateCard_ShouldPersistChanges_WhenUpdateIsSuccessful()
     {
-        var card = new Card("title", "description", listId: 1, null, 1);
+        var card = new Card("title", "description", listId: 1, 1);
 
         _context.Cards.Add(card);
         await _context.SaveChangesAsync();
@@ -109,7 +109,7 @@ public class CardRepositoryTests
     [Fact]
     public async Task DeleteCard_ShouldRemoveCard_WhenCardExists()
     {
-        var card = new Card("title", "description", listId: 1, null, 1);
+        var card = new Card("title", "description", listId: 1, 1);
 
         _context.Cards.Add(card);
         await _context.SaveChangesAsync();

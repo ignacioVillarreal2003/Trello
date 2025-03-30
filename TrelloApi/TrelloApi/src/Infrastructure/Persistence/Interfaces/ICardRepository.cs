@@ -5,4 +5,5 @@ namespace TrelloApi.Infrastructure.Persistence.Interfaces;
 public interface ICardRepository: IGenericRepository<Card>
 {
     Task<Card> GetCardByIdToAccessAsync(int cardId);
+    Task<Card?> GetCardByIdCompleteAsync(int cardId);
 }

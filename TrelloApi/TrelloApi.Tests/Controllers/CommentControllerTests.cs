@@ -1,9 +1,12 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs.Comment;
 
@@ -14,13 +17,19 @@ namespace TrelloApi.Tests.Controllers
         private readonly Mock<ICommentService> _mockCommentService;
         private readonly Mock<ILogger<CommentController>> _mockLogger;
         private readonly CommentController _controller;
-
+        private readonly Mock<ICardService> _mockCardService;
+        private readonly Mock<IHubContext<BoardHub>> _mockHubContext;
+        private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+        
         public CommentControllerTests()
         {
             _mockCommentService = new Mock<ICommentService>();
             _mockLogger = new Mock<ILogger<CommentController>>();
-
-            _controller = new CommentController(_mockLogger.Object, _mockCommentService.Object);
+            _mockCardService = new Mock<ICardService>();
+            _mockHubContext = new Mock<IHubContext<BoardHub>>();
+            _mockAuthorizationService = new Mock<IAuthorizationService>();
+            
+            _controller = new CommentController(_mockLogger.Object, _mockCommentService.Object, _mockCardService.Object, _mockHubContext.Object, _mockAuthorizationService.Object);
             SetUserId(1);
         }
         

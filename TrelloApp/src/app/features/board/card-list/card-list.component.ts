@@ -37,6 +37,7 @@ export class CardListComponent {
     this.cardCommunicationService.deleteCard$.subscribe((cardId: number | null): void => {
       if (cardId != null && this.list != undefined) {
         this.list.cards = this.list.cards.filter(c => c.id != cardId);
+        this.list.cards = this.list.cards.sort((a, b) => a.position - b.position);
       }
     });
     this.cardCommunicationService.updateCard$.subscribe((card: Card | null): void => {

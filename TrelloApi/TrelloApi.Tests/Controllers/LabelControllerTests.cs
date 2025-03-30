@@ -1,9 +1,12 @@
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.Extensions.Logging;
 using Moq;
 using TrelloApi.Application.Controllers;
+using TrelloApi.Application.Hub;
 using TrelloApi.Application.Services.Interfaces;
 using TrelloApi.Domain.DTOs.Label;
 
@@ -14,12 +17,19 @@ namespace TrelloApi.Tests.Controllers
         private readonly Mock<ILabelService> _mockLabelService;
         private readonly Mock<ILogger<LabelController>> _mockLogger;
         private readonly LabelController _controller;
-
+        private readonly Mock<IBoardService> _mockBoardService;
+        private readonly Mock<IHubContext<BoardHub>> _mockHubContext;
+        private readonly Mock<IAuthorizationService> _mockAuthorizationService;
+        
         public LabelControllerTests()
         {
             _mockLabelService = new Mock<ILabelService>();
             _mockLogger = new Mock<ILogger<LabelController>>();
-            _controller = new LabelController(_mockLogger.Object, _mockLabelService.Object);
+            _mockBoardService = new Mock<IBoardService>();
+            _mockHubContext = new Mock<IHubContext<BoardHub>>();
+            _mockAuthorizationService = new Mock<IAuthorizationService>();
+            
+            _controller = new LabelController(_mockLogger.Object, _mockLabelService.Object, _mockBoardService.Object, _mockHubContext.Object, _mockAuthorizationService.Object);
             SetUserId(1);
         }
         
