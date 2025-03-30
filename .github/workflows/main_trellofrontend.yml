@@ -33,7 +33,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: angular-app
-          path: Trello/TrelloApp/dist/trello-app
+          path: TrelloApp/dist/trello-app
 
   deploy:
     runs-on: ubuntu-latest
@@ -65,5 +65,5 @@ jobs:
         with:
           app-name: 'TrelloFrontend'
           slot-name: 'Production'
-          package: dist
+          package: ./dist/trello-app
           
