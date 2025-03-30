@@ -31,6 +31,10 @@ jobs:
         working-directory: ./TrelloApi/TrelloApi
         run: dotnet publish TrelloApi.csproj -c Release -o ./publish
 
+      - name: Verificar contenido después de publish
+        working-directory: ./TrelloApi/TrelloApi
+        run: ls -R ./publish
+  
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
@@ -66,6 +70,4 @@ jobs:
         with:
           app-name: 'TrelloBackend'
           slot-name: 'Production'
-          package: ./.net-app
-
-          
+          package: ./.net-app/**
