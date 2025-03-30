@@ -1,9 +1,10 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
+import {environment} from '../../../../environments/environment';
 
 export abstract class BaseHttpService {
   protected http: HttpClient;
-  protected baseUrl: string = 'http://localhost:5182';
+  protected baseUrl: string = environment.apiUrl;
   protected httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
     withCredentials: true
