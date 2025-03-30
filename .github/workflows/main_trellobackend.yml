@@ -64,5 +64,5 @@ jobs:
         with:
           app-name: 'TrelloBackend'
           slot-name: 'Production'
-          package: .
+          package: ./TrelloApi/publish
           
