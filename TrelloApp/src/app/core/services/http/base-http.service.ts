@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import {environment} from '../../../../environments/environment';
+import {environment} from '../../../../environments/environment.prod';
 
 export abstract class BaseHttpService {
   protected http: HttpClient;
