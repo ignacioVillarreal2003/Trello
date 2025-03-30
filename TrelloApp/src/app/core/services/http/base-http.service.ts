@@ -1,10 +1,9 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
-import {environment} from '../../../../environments/environment.prod';
 
 export abstract class BaseHttpService {
   protected http: HttpClient;
-  protected baseUrl: string = environment.apiUrl;
+  protected baseUrl: string = "https://trellobackend-d7d3h2dxhwecf7az.brazilsouth-01.azurewebsites.net";
   protected httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
     withCredentials: true

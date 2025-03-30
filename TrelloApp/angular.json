@@ -46,10 +46,7 @@
                   "maximumError": "10kB"
                 }
               ],
-              "outputHashing": "all",
-              "define": {
-                "process.env.apiUrl": "''"
-              }
+              "outputHashing": "all"
             },
             "development": {
               "optimization": false,
