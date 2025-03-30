@@ -24,7 +24,7 @@ jobs:
           node-version: '22.x'
 
       - name: npm install, build, and test
-        working-directory: Trello/TrelloApp
+        working-directory: TrelloApp
         run: |
           npm install
           npm run build --configuration=production
