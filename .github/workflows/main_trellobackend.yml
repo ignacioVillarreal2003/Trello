@@ -28,14 +28,14 @@ jobs:
         run: dotnet build --configuration Release
 
       - name: dotnet publish
-        working-directory: ./TrelloApi
+        working-directory: ./TrelloApi/TrelloApi
         run: dotnet publish TrelloApi.csproj -c Release -o ./publish
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ./TrelloApi/publish
+          path: ./TrelloApi/TrelloApi/publish
 
   deploy:
     runs-on: windows-latest
@@ -66,5 +66,6 @@ jobs:
         with:
           app-name: 'TrelloBackend'
           slot-name: 'Production'
-          package: ./TrelloApi/publish
+          package: ./.net-app
+
           
