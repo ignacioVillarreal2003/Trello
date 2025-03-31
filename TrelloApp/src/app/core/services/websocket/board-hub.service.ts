@@ -36,7 +36,8 @@ export class BoardHubService {
 
   connectToBoard(boardId: number): void {
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:5182/boardHub")
+      .withUrl("https://trellobackend-d7d3h2dxhwecf7az.brazilsouth-01.azurewebsites.net/boardHub")
+      // .withUrl("http://localhost:5182/boardHub")
       .build();
 
     this.hubConnection
