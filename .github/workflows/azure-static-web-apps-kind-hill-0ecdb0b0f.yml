@@ -39,13 +39,11 @@ jobs:
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_KIND_HILL_0ECDB0B0F }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }}  # Used for GitHub integrations (e.g., PR comments)
+          repo_token: ${{ secrets.GITHUB_TOKEN }}  # Used for GitHub integrations
           action: "upload"
-          # Como ya tienes el build, dejamos app_location vacío
-          app_location: ""
-          api_location: ""
-          # Especificamos la carpeta donde se encuentra el artefacto preconstruido
-          app_artifact_location: "TrelloApp/dist/trello-app"
+          # Al tener el contenido ya construido, indicamos que no se realice el build
+          app_location: "/"                   
+          output_location: "TrelloApp/dist/trello-app"
           skip_app_build: true
 
   close_pull_request_job:
