@@ -4,6 +4,8 @@ import { Observable, throwError } from 'rxjs';
 export abstract class BaseHttpService {
   protected http: HttpClient;
   protected baseUrl: string = "https://trellobackend-d7d3h2dxhwecf7az.brazilsouth-01.azurewebsites.net";
+  //protected baseUrl: string = "http://localhost:5182";
+
   protected httpOptions = {
     headers: new HttpHeaders({ 'Content-Type': 'application/json' }),
     withCredentials: true

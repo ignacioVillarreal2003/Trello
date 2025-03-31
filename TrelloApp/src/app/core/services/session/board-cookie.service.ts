@@ -9,7 +9,13 @@ export class BoardCookieService {
   constructor(private cookieService: CookieService) {}
 
   setCookie(value: number): void {
-    this.cookieService.set("BoardId", value.toString(), { expires: 1, path: '/', domain: 'localhost' });
+    const cookieOptions: any = { expires: 1, path: '/' };
+
+    if (window.location.hostname === 'localhost') {
+      cookieOptions.domain = 'localhost';
+    }
+
+    this.cookieService.set("BoardId", value.toString(), cookieOptions);
   }
 
   getCookie(): number | undefined {
