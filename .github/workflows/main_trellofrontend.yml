@@ -24,16 +24,19 @@ jobs:
           node-version: '22.x'
 
       - name: npm install, build, and test
-        working-directory: TrelloApp
         run: |
           npm install
-          npm run build --configuration=production
+          npm run build --if-present
+          npm run test --if-present
+
+      - name: Zip artifact for deployment
+        run: zip release.zip ./* -r
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
-          name: angular-app
-          path: TrelloApp/dist/trello-app
+          name: node-app
+          path: release.zip
 
   deploy:
     runs-on: ubuntu-latest
@@ -49,15 +52,17 @@ jobs:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
-          name: angular-app
-          path: ./dist
+          name: node-app
+
+      - name: Unzip artifact for deployment
+        run: unzip release.zip
       
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_1E0C2329E42D482E8FE9699FB88A972B }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_99F6859D79504C1DAD4A40C608B9D138 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_57C0F93415A74A9880D6BC1E3BD8BF20 }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_1373214C4375461E80BD4D9D83B156EE }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_BB1827F0C2C34760BC10F297CD976B20 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_B3814A8E83014B6896D4AB24AFB212DE }}
 
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
@@ -65,5 +70,5 @@ jobs:
         with:
           app-name: 'TrelloFrontend'
           slot-name: 'Production'
-          package: ./dist
+          package: .
           
