@@ -30,7 +30,7 @@ jobs:
           # Para más información, visita: https://aka.ms/swaworkflowconfig
           app_location: "TrelloApp"       # Ruta de la carpeta que contiene el código de la aplicación
           api_location: ""                # Si no tienes API, déjalo vacío
-          output_location: "dist/trello-app" # Ruta donde se generan los archivos build (relativa a TrelloApp)
+          output_location: "dist/trello-app/browser" # Ruta donde se generan los archivos build (relativa a TrelloApp)
           ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
