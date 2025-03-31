@@ -19,20 +19,34 @@ jobs:
         with:
           submodules: true
           lfs: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22.x'
+
+      - name: Install dependencies and build app
+        working-directory: TrelloApp
+        run: |
+          npm install
+          npm run build --configuration=production
+
+      - name: List build output
+        run: ls -R TrelloApp/dist/trello-app
+
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_KIND_HILL_0ECDB0B0F }}
-          repo_token: ${{ secrets.GITHUB_TOKEN }} # Used for Github integrations (i.e. PR comments)
+          repo_token: ${{ secrets.GITHUB_TOKEN }}  # Used for GitHub integrations (e.g., PR comments)
           action: "upload"
-          ###### Repository/Build Configurations - These values can be configured to match your app requirements. ######
-          # For more information regarding Static Web App workflow configurations, please visit: https://aka.ms/swaworkflowconfig
-          app_location: "TrelloApp" # App source code path
-          api_location: "" # Api source code path - optional
-          app_artifact_location: "dist/trello-app"
+          # Como ya tienes el build, dejamos app_location vacío
+          app_location: ""
+          api_location: ""
+          # Especificamos la carpeta donde se encuentra el artefacto preconstruido
+          app_artifact_location: "TrelloApp/dist/trello-app"
           skip_app_build: true
-          ###### End of Repository/Build Configurations ######
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
