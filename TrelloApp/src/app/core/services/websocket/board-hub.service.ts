@@ -16,7 +16,6 @@ import {Comment} from '../../models/comment';
 import {CardLabel} from '../../models/card-label';
 import {UserCard} from '../../models/user-card';
 import {UserBoard} from '../../models/user-board';
-import {User} from '../../models/user';
 
 @Injectable({
   providedIn: 'root'
@@ -37,12 +36,12 @@ export class BoardHubService {
   connectToBoard(boardId: number): void {
     this.hubConnection = new signalR.HubConnectionBuilder()
       .withUrl("https://trellobackend-d7d3h2dxhwecf7az.brazilsouth-01.azurewebsites.net/boardHub")
-      // .withUrl("http://localhost:5182/boardHub")
       .build();
 
     this.hubConnection
       .start()
       .then(() => {
+        console.log("conecta", boardId)
         this.joinBoardGroup(boardId);
       })
       .catch((err) => console.error("Error en la conexión", err));
@@ -65,6 +64,7 @@ export class BoardHubService {
     this.hubConnection.invoke("LeaveBoardGroup", boardId.toString()).catch(err => console.error(err));
     this.hubConnection.stop();
   }
+  // .withUrl("http://localhost:5182/boardHub")
 
   private addBoardListeners(): void {
     this.hubConnection.on("BoardUpdated", (board: Board) => {
@@ -106,6 +106,7 @@ export class BoardHubService {
 
   private addListListeners(): void {
     this.hubConnection.on("ListCreated", (list: List) => {
+      console.log(list)
       this.listCommunicationService.setAddList(list);
     });
 

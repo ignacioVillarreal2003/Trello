@@ -33,6 +33,7 @@ export class ListListComponent {
   ngOnInit(): void {
     this.getLists();
     this.listCommunicationService.addList$.subscribe((list: List | null): void => {
+      console.log("lee", list)
       if (list !== null) {
         this.lists.push(list);
         this.lists.sort((a, b) => a.position - b.position);
